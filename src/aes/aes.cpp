@@ -30,67 +30,76 @@ AES::AES(std::string key) {
 }
 
 void AES::encryptBlock(std::vector<unsigned char>& input, size_t blockIndex) {
+    unsigned char state[4][4];
     // Copy input into state
-    for (size_t i = 0; i < Nb; ++i) {
-        std::memcpy(state[i].data(), input.data() + blockIndex + i * Nb, Nb);
+    for (size_t j = 0; j < 4; j++) {
+        for (size_t i = 0; i < 4; i++) {
+            state[i][j] = input[blockIndex + i + 4 * j];
+        }
     }
 
-
-    addRoundKey(roundKey);
+    addRoundKey(state, roundKey);
 
     size_t round = 1;
     while (round < Nr) {
-        subByte();
-        shiftRows();
-        mixColumns();
-        addRoundKey(roundKey + round * Nb);
+        subByte(state);
+        shiftRows(state);
+        mixColumns(state);
+        addRoundKey(state, roundKey + round * Nb);
         round++;
     }
 
-    subByte();
-    shiftRows();
-    addRoundKey(roundKey + Nr * Nb);
+    subByte(state);
+    shiftRows(state);
+    addRoundKey(state, roundKey + Nr * Nb);
 
     // Copy state back to input
-    for (size_t i = 0; i < Nb; ++i) {
-        std::memcpy(input.data() + blockIndex + i * Nb, state[i].data(), Nb * sizeof(unsigned char));
+    for (size_t j = 0; j < Nb; j++) {
+        for (size_t i = 0; i < Nb; i++) {
+            input[blockIndex + i + 4 * j] = state[i][j];
+        }
     }
 }
 
 void AES::decryptBlock(std::vector<unsigned char>& input, size_t blockIndex) {
+    unsigned char state[4][4];
     // Copy input into state
-    for (size_t i = 0; i < Nb; ++i) {
-        std::memcpy(state[i].data(), input.data() + blockIndex + i * Nb, Nb);
+    for (size_t j = 0; j < 4; j++) {
+        for (size_t i = 0; i < 4; i++) {
+            state[i][j] = input[blockIndex + i + 4 * j];
+        }
     }
 
-    addRoundKey(roundKey + Nr * Nb);
+    addRoundKey(state, roundKey + Nr * Nb);
 
     size_t round = Nr - 1;
     while (round > 0) {
-        invShiftRows();
-        invSubByte();
-        addRoundKey(roundKey + round * Nb);
-        invMixColumns();
+        invShiftRows(state);
+        invSubByte(state);
+        addRoundKey(state, roundKey + round * Nb);
+        invMixColumns(state);
         round--;
     }
 
-    invShiftRows();
-    invSubByte();
-    addRoundKey(roundKey);
+    invShiftRows(state);
+    invSubByte(state);
+    addRoundKey(state, roundKey);
 
     // Copy state back to input
-    for (size_t i = 0; i < Nb; ++i) {
-        std::memcpy(input.data() + blockIndex + i * Nb, state[i].data(), Nb * sizeof(unsigned char));
+    for (size_t j = 0; j < Nb; j++) {
+        for (size_t i = 0; i < Nb; i++) {
+            input[blockIndex + i + 4 * j] = state[i][j];
+        }
     }
 }
 
-void AES::subByte() {
+void AES::subByte(unsigned char state[Nb][Nb]) {
     for (size_t i = 0; i < Nb; i++) {
         state[i / Nb][i % Nb] = SBOX[state[i / Nb][i % Nb]];
     }
 }
 
-void AES::shiftRows()
+void AES::shiftRows(unsigned char state[Nb][Nb])
 {
     for (size_t i = 1; i < Nb; i++) {
         for (size_t j = 0; j < i; j++) {
@@ -103,7 +112,8 @@ void AES::shiftRows()
     }
 }
 
-void AES::mixColumns() {
+void AES::mixColumns(unsigned char state[Nb][Nb])
+{
     unsigned char tmp[Nb][Nb];
 
     for (int col = 0; col < Nb; col++) {
@@ -120,7 +130,7 @@ void AES::mixColumns() {
     }
 }
 
-void AES::addRoundKey(unsigned char* roundKey) {
+void AES::addRoundKey(unsigned char state[Nb][Nb], unsigned char* roundKey) {
     for (size_t i = 0; i < Nb; i++) {
         for (size_t j = 0; j < Nb; j++) {
             state[i][j] ^= roundKey[i * Nb + j];
@@ -149,13 +159,13 @@ void AES::addRoundKey(unsigned char* roundKey) {
     input[blockIndex + 15] ^= roundKey[round * Nb * 4 + 15];
 }*/
 
-void AES::invSubByte() {
+void AES::invSubByte(unsigned char state[Nb][Nb]) {
     for (size_t i = 0; i < Nb; i++) {
         state[i / Nb][i % Nb] = INVSBOX[state[i / Nb][i % Nb]];
     }
 }
 
-void AES::invShiftRows()
+void AES::invShiftRows(unsigned char state[Nb][Nb])
 {
     for (size_t i = 1; i < Nb; i++) {
         for (size_t j = 0; j < i; j++) {
@@ -168,7 +178,7 @@ void AES::invShiftRows()
     }
 }
 
-void AES::invMixColumns() {
+void AES::invMixColumns(unsigned char state[Nb][Nb]) {
     unsigned char tmp[Nb][Nb];
 
     for (int col = 0; col < Nb; col++) {
@@ -184,7 +194,6 @@ void AES::invMixColumns() {
         }
     }
 }
-
 
 void AES::keyExpansion(std::string key, unsigned char* roundKey) {
     unsigned char temp[4] = { 0x00, 0x00, 0x00, 0x00 };

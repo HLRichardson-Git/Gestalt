@@ -12,25 +12,24 @@ private:
 	unsigned int Nw = 0; // Number of words in a state
 	unsigned int Nr = 0; // Number of rounds
 
-	std::array<std::array<unsigned char, Nb>, Nb> state;
 	unsigned char* roundKey; // Expanded Key
 
 public:
 
 	AES(std::string key);
-	//~AES() {delete[] roundKey;}
+	~AES() {delete[] roundKey;}
 
 	void encryptBlock(std::vector<unsigned char>& input, size_t blockIndex);
 	void decryptBlock(std::vector<unsigned char>& input, size_t blockIndex);
 
-	void subByte();
-	void shiftRows();
-	void mixColumns();
-	void addRoundKey(unsigned char* roundKey);
+	void subByte(unsigned char state[Nb][Nb]);
+	void shiftRows(unsigned char state[Nb][Nb]);
+	void mixColumns(unsigned char state[Nb][Nb]);
+	void addRoundKey(unsigned char state[Nb][Nb], unsigned char* roundKey);
 
-	void invSubByte();
-	void invShiftRows();
-	void invMixColumns();
+	void invSubByte(unsigned char state[Nb][Nb]);
+	void invShiftRows(unsigned char state[Nb][Nb]);
+	void invMixColumns(unsigned char state[Nb][Nb]);
 
 	void keyExpansion(std::string key, unsigned char* roundKey);
 	void rotWord(unsigned char temp[4]);
