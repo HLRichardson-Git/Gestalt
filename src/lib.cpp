@@ -4,13 +4,9 @@
 
 void Message::aes_encrypt_ecb(std::string key)
 {
-	//std::vector<unsigned char> keyVec = hexStringToBytesVec(key);
-
 	applyPCKS7Padding(msg);
 
 	AES aesObject(key);
-	//std::vector<unsigned char> roundKey = aesObject.getRoundKey();
-	//unsigned char roundKey = aesObject.getRoundKey;
 	for (size_t blockIndex = 0; blockIndex < msg.size(); blockIndex += 16) {
 		aesObject.encryptBlock(msg, blockIndex);
 	}
@@ -18,8 +14,6 @@ void Message::aes_encrypt_ecb(std::string key)
 
 void Message::aes_decrypt_ecb(std::string key)
 {
-	//std::vector<unsigned char> keyVec = hexStringToBytesVec(key);
-
 	AES aesObject(key);
 	for (size_t blockIndex = 0; blockIndex < msg.size(); blockIndex += 16) {
 		aesObject.decryptBlock(msg, blockIndex);
@@ -30,7 +24,6 @@ void Message::aes_decrypt_ecb(std::string key)
 
 void Message::aes_encrypt_cbc(std::string key)
 {
-	//std::vector<unsigned char> keyVec = hexStringToBytesVec(key);
 	std::vector<unsigned char> iv = nonce;
 
 	applyPCKS7Padding(msg);
@@ -45,7 +38,6 @@ void Message::aes_encrypt_cbc(std::string key)
 
 void Message::aes_decrypt_cbc(std::string key)
 {
-	//std::vector<unsigned char> keyVec = hexStringToBytesVec(key);
 	std::vector<unsigned char> iv = nonce;
 	std::vector<unsigned char> temp;
 

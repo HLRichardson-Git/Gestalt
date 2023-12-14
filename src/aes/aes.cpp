@@ -31,7 +31,10 @@ AES::AES(std::string key) {
 
 void AES::encryptBlock(std::vector<unsigned char>& input, size_t blockIndex) {
     // Copy input into state
-    memcpy(state.data(), input.data() + blockIndex, sizeof(unsigned char) * Nb);
+    for (size_t i = 0; i < Nb; ++i) {
+        std::memcpy(state[i].data(), input.data() + blockIndex + i * Nb, Nb);
+    }
+
 
     addRoundKey(roundKey);
 
@@ -49,20 +52,24 @@ void AES::encryptBlock(std::vector<unsigned char>& input, size_t blockIndex) {
     addRoundKey(roundKey + Nr * Nb);
 
     // Copy state back to input
-    memcpy(input.data() + blockIndex, state.data(), sizeof(unsigned char) * Nb);
+    for (size_t i = 0; i < Nb; ++i) {
+        std::memcpy(input.data() + blockIndex + i * Nb, state[i].data(), Nb * sizeof(unsigned char));
+    }
 }
 
 void AES::decryptBlock(std::vector<unsigned char>& input, size_t blockIndex) {
     // Copy input into state
-    memcpy(state.data(), input.data() + blockIndex, sizeof(unsigned char) * Nb);
+    for (size_t i = 0; i < Nb; ++i) {
+        std::memcpy(state[i].data(), input.data() + blockIndex + i * Nb, Nb);
+    }
 
-    addRoundKey(roundKey + Nr * 4 * Nb);
+    addRoundKey(roundKey + Nr * Nb);
 
     size_t round = Nr - 1;
     while (round > 0) {
         invShiftRows();
         invSubByte();
-        addRoundKey(roundKey + round * 4 * Nb);
+        addRoundKey(roundKey + round * Nb);
         invMixColumns();
         round--;
     }
@@ -72,81 +79,55 @@ void AES::decryptBlock(std::vector<unsigned char>& input, size_t blockIndex) {
     addRoundKey(roundKey);
 
     // Copy state back to input
-    memcpy(input.data() + blockIndex, state.data(), sizeof(unsigned char) * Nb);
+    for (size_t i = 0; i < Nb; ++i) {
+        std::memcpy(input.data() + blockIndex + i * Nb, state[i].data(), Nb * sizeof(unsigned char));
+    }
 }
 
 void AES::subByte() {
     for (size_t i = 0; i < Nb; i++) {
-        state[i] = SBOX[state[i]];
+        state[i / Nb][i % Nb] = SBOX[state[i / Nb][i % Nb]];
     }
 }
 
-void AES::shiftRows() {
-	unsigned char tmp[16];
-
-	/* Column 1 */
-	tmp[0] = state[0];
-	tmp[1] = state[5];
-	tmp[2] = state[10];
-	tmp[3] = state[15];
-	
-	/* Column 2 */
-	tmp[4] = state[4];
-	tmp[5] = state[9];
-	tmp[6] = state[14];
-	tmp[7] = state[3];
-
-	/* Column 3 */
-	tmp[8] = state[8];
-	tmp[9] = state[13];
-	tmp[10] = state[2];
-	tmp[11] = state[7];
-	
-	/* Column 4 */
-	tmp[12] = state[12];
-	tmp[13] = state[1];
-	tmp[14] = state[6];
-	tmp[15] = state[11];
-
-	for (int i = 0; i < 16; i++) {
-		state[i] = tmp[i];
-	}
+void AES::shiftRows()
+{
+    for (size_t i = 1; i < Nb; i++) {
+        for (size_t j = 0; j < i; j++) {
+            unsigned char first = state[i][0];
+            for (size_t k = 0; k < 3; k++) {
+                state[i][k] = state[i][k + 1];
+            }
+            state[i][3] = first;
+        }
+    }
 }
 
-
 void AES::mixColumns() {
-    unsigned char tmp[Nb];
+    unsigned char tmp[Nb][Nb];
 
-    tmp[0] = (unsigned char)GF_MUL_TABLE[2][state[0]] ^ GF_MUL_TABLE[3][state[1]] ^ state[2] ^ state[3];
-    tmp[1] = (unsigned char)state[0] ^ GF_MUL_TABLE[2][state[1]] ^ GF_MUL_TABLE[3][state[2]] ^ state[3];
-    tmp[2] = (unsigned char)state[0] ^ state[1] ^ GF_MUL_TABLE[2][state[2]] ^ GF_MUL_TABLE[3][state[3]];
-    tmp[3] = (unsigned char)GF_MUL_TABLE[3][state[0]] ^ state[1] ^ state[2] ^ GF_MUL_TABLE[2][state[3]];
-
-    tmp[4] = (unsigned char)GF_MUL_TABLE[2][state[4]] ^ GF_MUL_TABLE[3][state[5]] ^ state[6] ^ state[7];
-    tmp[5] = (unsigned char)state[4] ^ GF_MUL_TABLE[2][state[5]] ^ GF_MUL_TABLE[3][state[6]] ^ state[7];
-    tmp[6] = (unsigned char)state[4] ^ state[5] ^ GF_MUL_TABLE[2][state[6]] ^ GF_MUL_TABLE[3][state[7]];
-    tmp[7] = (unsigned char)GF_MUL_TABLE[3][state[4]] ^ state[5] ^ state[6] ^ GF_MUL_TABLE[2][state[7]];
-
-    tmp[8] = (unsigned char)GF_MUL_TABLE[2][state[8]] ^ GF_MUL_TABLE[3][state[9]] ^ state[10] ^ state[11];
-    tmp[9] = (unsigned char)state[8] ^ GF_MUL_TABLE[2][state[9]] ^ GF_MUL_TABLE[3][state[10]] ^ state[11];
-    tmp[10] = (unsigned char)state[8] ^ state[9] ^ GF_MUL_TABLE[2][state[10]] ^ GF_MUL_TABLE[3][state[11]];
-    tmp[11] = (unsigned char)GF_MUL_TABLE[3][state[8]] ^ state[9] ^ state[10] ^ GF_MUL_TABLE[2][state[11]];
-
-    tmp[12] = (unsigned char)GF_MUL_TABLE[2][state[12]] ^ GF_MUL_TABLE[3][state[13]] ^ state[14] ^ state[15];
-    tmp[13] = (unsigned char)state[12] ^ GF_MUL_TABLE[2][state[13]] ^ GF_MUL_TABLE[3][state[14]] ^ state[15];
-    tmp[14] = (unsigned char)state[12] ^ state[13] ^ GF_MUL_TABLE[2][state[14]] ^ GF_MUL_TABLE[3][state[15]];
-    tmp[15] = (unsigned char)GF_MUL_TABLE[3][state[12]] ^ state[13] ^ state[14] ^ GF_MUL_TABLE[2][state[15]];
+    for (int col = 0; col < Nb; col++) {
+        tmp[0][col] = GF_MUL_TABLE[2][state[0][col]] ^ GF_MUL_TABLE[3][state[1][col]] ^ state[2][col] ^ state[3][col];
+        tmp[1][col] = state[0][col] ^ GF_MUL_TABLE[2][state[1][col]] ^ GF_MUL_TABLE[3][state[2][col]] ^ state[3][col];
+        tmp[2][col] = state[0][col] ^ state[1][col] ^ GF_MUL_TABLE[2][state[2][col]] ^ GF_MUL_TABLE[3][state[3][col]];
+        tmp[3][col] = GF_MUL_TABLE[3][state[0][col]] ^ state[1][col] ^ state[2][col] ^ GF_MUL_TABLE[2][state[3][col]];
+    }
 
     for (int i = 0; i < Nb; i++) {
-        state[i] = tmp[i];
+        for (int j = 0; j < Nb; j++) {
+            state[i][j] = tmp[i][j];
+        }
     }
 }
 
 void AES::addRoundKey(unsigned char* roundKey) {
     for (size_t i = 0; i < Nb; i++) {
-        state[i] ^= roundKey[i];
+        for (size_t j = 0; j < Nb; j++) {
+            state[i][j] ^= roundKey[i * Nb + j];
+        }
     }
 }
+
 
 /*void AES::addRoundKey(std::vector<unsigned char>& input, const std::vector<unsigned char> roundKey, size_t blockIndex, size_t round)
 {
@@ -170,70 +151,40 @@ void AES::addRoundKey(unsigned char* roundKey) {
 
 void AES::invSubByte() {
     for (size_t i = 0; i < Nb; i++) {
-        state[i] = INVSBOX[state[i]];
+        state[i / Nb][i % Nb] = INVSBOX[state[i / Nb][i % Nb]];
     }
 }
 
-void AES::invShiftRows() {
-    unsigned char tmp[16];
-
-	/* Column 1 */
-	tmp[0] = state[0];
-	tmp[1] = state[13];
-	tmp[2] = state[10];
-	tmp[3] = state[7];
-
-	/* Column 2 */
-	tmp[4] = state[4];
-	tmp[5] = state[1];
-	tmp[6] = state[14];
-	tmp[7] = state[11];
-
-	/* Column 3 */
-	tmp[8] = state[8];
-	tmp[9] = state[5];
-	tmp[10] = state[2];
-	tmp[11] = state[15];
-
-	/* Column 4 */
-	tmp[12] = state[12];
-	tmp[13] = state[9];
-	tmp[14] = state[6];
-	tmp[15] = state[3];
-
-	for (int i = 0; i < 16; i++) {
-		state[i] = tmp[i];
-	}
+void AES::invShiftRows()
+{
+    for (size_t i = 1; i < Nb; i++) {
+        for (size_t j = 0; j < i; j++) {
+            unsigned char last = state[i][3];
+            for (size_t k = 3; k > 0; k--) {
+                state[i][k] = state[i][k - 1];
+            }
+            state[i][0] = last;
+        }
+    }
 }
-
 
 void AES::invMixColumns() {
-    unsigned char tmp[Nb];
+    unsigned char tmp[Nb][Nb];
 
-    tmp[0] = (unsigned char)GF_MUL_TABLE[14][state[0]] ^ GF_MUL_TABLE[11][state[1]] ^ GF_MUL_TABLE[13][state[2]] ^ GF_MUL_TABLE[9][state[3]];
-    tmp[1] = (unsigned char)GF_MUL_TABLE[9][state[0]] ^ GF_MUL_TABLE[14][state[1]] ^ GF_MUL_TABLE[11][state[2]] ^ GF_MUL_TABLE[13][state[3]];
-    tmp[2] = (unsigned char)GF_MUL_TABLE[13][state[0]] ^ GF_MUL_TABLE[9][state[1]] ^ GF_MUL_TABLE[14][state[2]] ^ GF_MUL_TABLE[11][state[3]];
-    tmp[3] = (unsigned char)GF_MUL_TABLE[11][state[0]] ^ GF_MUL_TABLE[13][state[1]] ^ GF_MUL_TABLE[9][state[2]] ^ GF_MUL_TABLE[14][state[3]];
-
-    tmp[4] = (unsigned char)GF_MUL_TABLE[14][state[4]] ^ GF_MUL_TABLE[11][state[5]] ^ GF_MUL_TABLE[13][state[6]] ^ GF_MUL_TABLE[9][state[7]];
-    tmp[5] = (unsigned char)GF_MUL_TABLE[9][state[4]] ^ GF_MUL_TABLE[14][state[5]] ^ GF_MUL_TABLE[11][state[6]] ^ GF_MUL_TABLE[13][state[7]];
-    tmp[6] = (unsigned char)GF_MUL_TABLE[13][state[4]] ^ GF_MUL_TABLE[9][state[5]] ^ GF_MUL_TABLE[14][state[6]] ^ GF_MUL_TABLE[11][state[7]];
-    tmp[7] = (unsigned char)GF_MUL_TABLE[11][state[4]] ^ GF_MUL_TABLE[13][state[5]] ^ GF_MUL_TABLE[9][state[6]] ^ GF_MUL_TABLE[14][state[7]];
-
-    tmp[8] = (unsigned char)GF_MUL_TABLE[14][state[8]] ^ GF_MUL_TABLE[11][state[9]] ^ GF_MUL_TABLE[13][state[10]] ^ GF_MUL_TABLE[9][state[11]];
-    tmp[9] = (unsigned char)GF_MUL_TABLE[9][state[8]] ^ GF_MUL_TABLE[14][state[9]] ^ GF_MUL_TABLE[11][state[10]] ^ GF_MUL_TABLE[13][state[11]];
-    tmp[10] = (unsigned char)GF_MUL_TABLE[13][state[8]] ^ GF_MUL_TABLE[9][state[9]] ^ GF_MUL_TABLE[14][state[10]] ^ GF_MUL_TABLE[11][state[11]];
-    tmp[11] = (unsigned char)GF_MUL_TABLE[11][state[8]] ^ GF_MUL_TABLE[13][state[9]] ^ GF_MUL_TABLE[9][state[10]] ^ GF_MUL_TABLE[14][state[11]];
-
-    tmp[12] = (unsigned char)GF_MUL_TABLE[14][state[12]] ^ GF_MUL_TABLE[11][state[13]] ^ GF_MUL_TABLE[13][state[14]] ^ GF_MUL_TABLE[9][state[15]];
-    tmp[13] = (unsigned char)GF_MUL_TABLE[9][state[12]] ^ GF_MUL_TABLE[14][state[13]] ^ GF_MUL_TABLE[11][state[14]] ^ GF_MUL_TABLE[13][state[15]];
-    tmp[14] = (unsigned char)GF_MUL_TABLE[13][state[12]] ^ GF_MUL_TABLE[9][state[13]] ^ GF_MUL_TABLE[14][state[14]] ^ GF_MUL_TABLE[11][state[15]];
-    tmp[15] = (unsigned char)GF_MUL_TABLE[11][state[12]] ^ GF_MUL_TABLE[13][state[13]] ^ GF_MUL_TABLE[9][state[14]] ^ GF_MUL_TABLE[14][state[15]];
+    for (int col = 0; col < Nb; col++) {
+        tmp[0][col] = GF_MUL_TABLE[14][state[0][col]] ^ GF_MUL_TABLE[11][state[1][col]] ^ GF_MUL_TABLE[13][state[2][col]] ^ GF_MUL_TABLE[9][state[3][col]];
+        tmp[1][col] = GF_MUL_TABLE[9][state[0][col]] ^ GF_MUL_TABLE[14][state[1][col]] ^ GF_MUL_TABLE[11][state[2][col]] ^ GF_MUL_TABLE[13][state[3][col]];
+        tmp[2][col] = GF_MUL_TABLE[13][state[0][col]] ^ GF_MUL_TABLE[9][state[1][col]] ^ GF_MUL_TABLE[14][state[2][col]] ^ GF_MUL_TABLE[11][state[3][col]];
+        tmp[3][col] = GF_MUL_TABLE[11][state[0][col]] ^ GF_MUL_TABLE[13][state[1][col]] ^ GF_MUL_TABLE[9][state[2][col]] ^ GF_MUL_TABLE[14][state[3][col]];
+    }
 
     for (int i = 0; i < Nb; i++) {
-        state[i] = tmp[i];
+        for (int j = 0; j < Nb; j++) {
+            state[i][j] = tmp[i][j];
+        }
     }
 }
+
 
 void AES::keyExpansion(std::string key, unsigned char* roundKey) {
     unsigned char temp[4] = { 0x00, 0x00, 0x00, 0x00 };

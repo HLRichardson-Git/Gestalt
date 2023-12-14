@@ -8,16 +8,17 @@
 
 class AES {
 private:
-	static const unsigned int Nb = 16; // Block size
+	static const unsigned int Nb = 4; // Block size
 	unsigned int Nw = 0; // Number of words in a state
 	unsigned int Nr = 0; // Number of rounds
 
-	std::array<unsigned char, Nb> state;
+	std::array<std::array<unsigned char, Nb>, Nb> state;
 	unsigned char* roundKey; // Expanded Key
 
 public:
 
 	AES(std::string key);
+	//~AES() {delete[] roundKey;}
 
 	void encryptBlock(std::vector<unsigned char>& input, size_t blockIndex);
 	void decryptBlock(std::vector<unsigned char>& input, size_t blockIndex);

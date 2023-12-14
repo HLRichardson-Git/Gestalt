@@ -15,6 +15,37 @@ TEST(TestAesECB, RoundtripWith128BitKey) {
 
 	EXPECT_EQ(message.msg, inputData);
 }
+/*TEST(TestAesECB, RoundtripWith128BitKey) {
+    std::vector<unsigned char> inputData = generateRandomHexData(16);
+    Message message(inputData);
+
+    std::string key = "10a58869d74be5a374cf867cfb473859";
+
+    std::cout << "Input data: ";
+    for (const auto& byte : inputData) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::endl;
+
+    message.aes_encrypt_ecb(key);
+
+    std::cout << "Encrypted data: ";
+    for (const auto& byte : message.msg) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::endl;
+
+    message.aes_decrypt_ecb(key);
+
+    std::cout << "Decrypted data: ";
+    for (const auto& byte : message.msg) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::endl;
+
+    EXPECT_EQ(message.msg, inputData);
+}*/
+
 
 TEST(TestAesECB, RoundtripWith192BitKey) {
 	std::vector<unsigned char> inputData = generateRandomData(1);
