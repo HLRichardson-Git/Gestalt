@@ -76,33 +76,38 @@ TEST(TestAesCBC, RoundtripWith256BitKey) {
 	EXPECT_EQ(message.msg, inputData);
 }
 
-/*TEST(TestAesKeyExpansion, KeyExpansion) {
-	std::vector<unsigned char> key = hexStringToBytesVec("10a58869d74be5a374cf867cfb473859");
+TEST(TestAesKeyExpansion, KeyExpansion) {
+	std::string key = "10a58869d74be5a374cf867cfb473859";
 
 	AES Key(key);
+	unsigned char* roundKey = Key.getRoundKey();
 
-	std::vector<unsigned char> roundKey = Key.getRoundKey();
+	std::string expectedStr = "10a58869d74be5a374cf867cfb473859b1a2436666e9a6c5122620b9e96118e05c0fa2783ae604bd28c02404c1a13ce46ae4cb005002cfbd78c2ebb9b963d75d99ea8756c9e848ebb12aa3520849740fb278f1667b90b98dcaba1adfc2f36ed09fe78143e47738ce2ecd2211ec3e4cc16dcef98d89b9c143a774e3524b4aaf933bb7253eb20ee47d157a072f5e30a8bc24754066967ba41b8301a334dd310b88d55e84a7432520bcc02483881d158800";
+	size_t arraySize = expectedStr.length() / 2;
+    unsigned char* expectedByteArray = new unsigned char[arraySize];
+    hexStringToBytes(expectedStr, expectedByteArray);
 
-	std::vector<unsigned char> expectedVec = hexStringToBytesVec("10a58869d74be5a374cf867cfb473859b1a2436666e9a6c5122620b9e96118e05c0fa2783ae604bd28c02404c1a13ce46ae4cb005002cfbd78c2ebb9b963d75d99ea8756c9e848ebb12aa3520849740fb278f1667b90b98dcaba1adfc2f36ed09fe78143e47738ce2ecd2211ec3e4cc16dcef98d89b9c143a774e3524b4aaf933bb7253eb20ee47d157a072f5e30a8bc24754066967ba41b8301a334dd310b88d55e84a7432520bcc02483881d158800");
+	bool arraysEqual = true;
+	for (size_t i = 0; i < arraySize; ++i) {
+		if (roundKey[i] != expectedByteArray[i]) {
+			arraysEqual = false;
+			break;
+		}
+	}
 
-	EXPECT_EQ(roundKey, expectedVec);
+	EXPECT_TRUE(arraysEqual);
+	delete[] expectedByteArray;
 }
 
-TEST(TestAesFunctions, SubByte) {
-	AES aesObject(hexStringToBytesVec("10a58869d74be5a374cf867cfb473859"));
+/*TEST(TestAesFunctions, SubByte) {
+	AES aesObject("10a58869d74be5a374cf867cfb473859");
 
-	std::vector<unsigned char> inputData = generateRandomData(1);
-	// Prepare input data
-	std::vector<unsigned char> state = inputData;
+	unsigned char state[16] = {0x10, 0xa5, 0x88, 0x69, 0xd7, 0x4b, 0xe5, 0xa3, 0x74, 0xcf, 0x86, 0x7c, 0xfb, 0x47, 0x38, 0x59};
+
+	aesObject.subByte(state);
 
 	// Expected output after SubByte transformation
 	std::vector<unsigned char> expectedOutput = hexStringToBytesVec("ca06c4f90eb3d90a928a44100fa007cb");
-
-	// Call the SubByte function and test
-	for (size_t blockIndex = 0; blockIndex < state.size(); blockIndex += 16) {
-		aesObject.subByte(state, blockIndex);
-	}
-	//aesObject.subByte(state, 0);
 
 	// Check if the output matches the expected output
 	EXPECT_EQ(true, true);

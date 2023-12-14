@@ -12,6 +12,21 @@ std::vector<unsigned char> hexStringToBytesVec(const std::string& hexStr)
     return result;
 }
 
+// Function to convert a hex string to an unsigned char array
+void hexStringToBytes(const std::string& hexString, unsigned char* output) {
+    size_t len = hexString.length();
+    if (len % 2 != 0) {
+        std::cout << "Hex string length should be even." << std::endl;
+        return;
+    }
+
+    for (size_t i = 0; i < len; i += 2) {
+        std::string byteString = hexString.substr(i, 2);
+        unsigned char byte = static_cast<unsigned char>(std::stoul(byteString, nullptr, 16));
+        output[i / 2] = byte;
+    }
+}
+
 std::vector<unsigned char> generateRandomHexData(size_t numBytes) {
     std::random_device rd;
     std::mt19937 gen(rd());
