@@ -18,4 +18,4 @@ Gestalt 0.1
 
 ### Changes between 0.0.0 and 0.1.0 [8 Feb 2024]
 
- * Gestalt was released with AES-ECB/CBC.
+ * Gestalt entered pre-release with AES-ECB/CBC.
