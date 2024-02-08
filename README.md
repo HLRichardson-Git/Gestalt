@@ -1,7 +1,7 @@
 Welcome to the Gestalt Project
 ==============================
 
-Gestalt aims to be a robust cryptographic library in C++.
+Gestalt is an educational project first, and a robust production cryptographic library second.
 
 All FIPS approved algorithms are based on available standards, and
 tested using KAT or roundtrip validation.
@@ -31,7 +31,7 @@ Download
 For Production Use
 ------------------
 
-Gestalt is not considered to be production ready, until our 1.0 release.
+Gestalt is not considered to be production ready.
 
 For Testing and Development
 ---------------------------
