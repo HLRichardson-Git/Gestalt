@@ -76,7 +76,7 @@ Contributing
 ============
 
 If you are interested and willing to contribute to the Gestalt project,
-please take a look at the (WIP) file.
+please take a look at the [CONTRIBUTING](CONTRIBUTING.md) file.
 
 Legalities
 ==========
