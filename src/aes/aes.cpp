@@ -34,54 +34,24 @@ void AES::encryptBlock(unsigned char* input) {
     // Copy input into state
     memcpy(state, input, 16);
 
-    auto start = std::chrono::high_resolution_clock::now();
     addRoundKey(state, roundKey);
-    auto end = std::chrono::high_resolution_clock::now();
-    addRoundKeyTime += end - start;
 
     size_t round = 1;
     while (round < Nr) {
-        start = std::chrono::high_resolution_clock::now();
         subByte(state);
-        end = std::chrono::high_resolution_clock::now();
-        subByteTime += end - start;
-
-        start = std::chrono::high_resolution_clock::now();
         shiftRows(state);
-        end = std::chrono::high_resolution_clock::now();
-        shiftRowsTime += end - start;
-
-        start = std::chrono::high_resolution_clock::now();
         mixColumns(state);
-        end = std::chrono::high_resolution_clock::now();
-        mixColumnsTime += end - start;
-
-        start = std::chrono::high_resolution_clock::now();
         addRoundKey(state, roundKey + (16 * round));
-        end = std::chrono::high_resolution_clock::now();
-        addRoundKeyTime += end - start;
-
         round++;
     }
 
-    start = std::chrono::high_resolution_clock::now();
     subByte(state);
-    end = std::chrono::high_resolution_clock::now();
-    subByteTime += end - start;
-
-    start = std::chrono::high_resolution_clock::now();
     shiftRows(state);
-    end = std::chrono::high_resolution_clock::now();
-    shiftRowsTime += end - start;
-
-    start = std::chrono::high_resolution_clock::now();
     addRoundKey(state, roundKey + Nr * (Nb*Nb));
-    end = std::chrono::high_resolution_clock::now();
-    addRoundKeyTime += end - start;
 
-    // Copy state back to input
     memcpy(input, state, 16);
 }
+
 
 void AES::decryptBlock(unsigned char* input) {
     unsigned char state[16];

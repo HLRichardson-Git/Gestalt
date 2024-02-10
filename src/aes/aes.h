@@ -15,12 +15,7 @@ private:
 	unsigned int Nr = 0; // Number of rounds
 
 	unsigned char* roundKey; // Expanded Key
-
-	std::chrono::duration<double> subByteTime;
-    std::chrono::duration<double> shiftRowsTime;
-    std::chrono::duration<double> mixColumnsTime;
-    std::chrono::duration<double> addRoundKeyTime;
-
+	
 public:
 
 	AES(std::string key);
@@ -44,11 +39,6 @@ public:
 	void rcon(unsigned char temp[4], int round);
 
 	unsigned char* getRoundKey();
-
-	double getSubByteTime() const { return subByteTime.count(); }
-    double getShiftRowsTime() const { return shiftRowsTime.count(); }
-    double getMixColumnsTime() const { return mixColumnsTime.count(); }
-    double getAddRoundKeyTime() const { return addRoundKeyTime.count(); }
 };
 
 void applyPCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);

@@ -16,10 +16,10 @@ TEST(TestAesECB, RoundtripWith128BitKey) {
 	message.aes_encrypt_ecb(key);
 	message.aes_decrypt_ecb(key);
 
-	EXPECT_EQ(1, 1);
+	EXPECT_EQ(message.msg, inputData);
 }
 
-/*TEST(TestAesECB, RoundtripWith192BitKey) {
+TEST(TestAesECB, RoundtripWith192BitKey) {
 	std::string inputData = generateRandomData(1);
 	Message message(inputData);
 
@@ -41,7 +41,7 @@ TEST(TestAesECB, RoundtripWith256BitKey) {
 	message.aes_decrypt_ecb(key);
 
 	EXPECT_EQ(message.msg, inputData);
-}*/
+}
 
 /*TEST(TestAesCBC, RoundtripWith128BitKey) {
 	unsigned char* inputData = generateRandomData(1);
@@ -83,21 +83,12 @@ TEST(TestAesCBC, RoundtripWith256BitKey) {
 }*/
 
 TEST(TestAesKAT, KATWith128BitKey) {
-	//std::string asciiString = "Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle...and wonder if we'll ever get the chance to kill him.";
-	std::string asciiString = "Hello, World!";
-	//unsigned char* inputData = new unsigned char[asciiString.length() + 1];
-	//std::memcpy(inputData, asciiString.c_str(), asciiString.length() + 1);
-	//unsigned char pt[] = "Hello, World!";
-	//unsigned char pt[] = "Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle...and wonder if we'll ever get the chance to kill him.";
-	//unsigned char nonce[] = "00000000000000000000000000000000";
+	std::string asciiString = "Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle...and wonder if we'll ever get the chance to kill him.";
 	Message message(asciiString);
 	std::string key = "10a58869d74be5a374cf867cfb473859";
 
 	message.aes_encrypt_ecb(key);
-	std::cout << "CT: " << message.msg << std::endl;
-
 	message.aes_decrypt_ecb(key);
-	std::cout << "DPT: " << message.msg << std::endl;
 	
 	EXPECT_EQ(asciiString, message.msg);
 }
