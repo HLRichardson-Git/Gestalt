@@ -6,6 +6,8 @@
 #include <vector>
 #include <array>
 
+#include <chrono>
+
 class AES {
 private:
 	static const unsigned int Nb = 4; // Block size
@@ -14,22 +16,27 @@ private:
 
 	unsigned char* roundKey; // Expanded Key
 
+	std::chrono::duration<double> subByteTime;
+    std::chrono::duration<double> shiftRowsTime;
+    std::chrono::duration<double> mixColumnsTime;
+    std::chrono::duration<double> addRoundKeyTime;
+
 public:
 
 	AES(std::string key);
 	~AES() {delete[] roundKey;}
 
-	void encryptBlock(std::vector<unsigned char>& input, size_t blockIndex);
-	void decryptBlock(std::vector<unsigned char>& input, size_t blockIndex);
+	void encryptBlock(unsigned char* input);
+	void decryptBlock(unsigned char* input);
 
-	void subByte(unsigned char state[Nb][Nb]);
-	void shiftRows(unsigned char state[Nb][Nb]);
-	void mixColumns(unsigned char state[Nb][Nb]);
-	void addRoundKey(unsigned char state[Nb][Nb], unsigned char* roundKey);
+	void subByte(unsigned char state[Nb*Nb]);
+	void shiftRows(unsigned char state[Nb*Nb]);
+	void mixColumns(unsigned char state[Nb*Nb]);
+	void addRoundKey(unsigned char state[Nb*Nb], unsigned char* roundKey);
 
-	void invSubByte(unsigned char state[Nb][Nb]);
-	void invShiftRows(unsigned char state[Nb][Nb]);
-	void invMixColumns(unsigned char state[Nb][Nb]);
+	void invSubByte(unsigned char state[Nb*Nb]);
+	void invShiftRows(unsigned char state[Nb*Nb]);
+	void invMixColumns(unsigned char state[Nb*Nb]);
 
 	void keyExpansion(std::string key, unsigned char* roundKey);
 	void rotWord(unsigned char temp[4]);
@@ -37,7 +44,12 @@ public:
 	void rcon(unsigned char temp[4], int round);
 
 	unsigned char* getRoundKey();
+
+	double getSubByteTime() const { return subByteTime.count(); }
+    double getShiftRowsTime() const { return shiftRowsTime.count(); }
+    double getMixColumnsTime() const { return mixColumnsTime.count(); }
+    double getAddRoundKeyTime() const { return addRoundKeyTime.count(); }
 };
 
-void applyPCKS7Padding(std::vector<unsigned char>& input);
-void removePCKS7Padding(std::vector<unsigned char>& input);
+void applyPCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);
+void removePCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);

@@ -54,32 +54,32 @@ std::vector<unsigned char> generateRandomHexData(size_t numBytes) {
 
     return data;
 }*/
-std::vector<unsigned char> generateRandomData(size_t sizeInMB) {
+std::string generateRandomData(size_t sizeInMB) {
     size_t sizeInBytes = sizeInMB * 1024 * 1024; // Convert MB to bytes
-    std::vector<unsigned char> data(sizeInBytes);
+    std::string data(sizeInBytes, '\0'); // Initialize string with required size
 
     // Use the number of available threads for parallelization
     unsigned int numThreads = std::thread::hardware_concurrency();
     size_t chunkSize = sizeInBytes / numThreads;
 
-    // Define a lambda function to generate random data for a portion of the vector
+    // Define a lambda function to generate random data for a portion of the array
     auto fillRandomData = [&](size_t start, size_t end) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> distrib(0, 255);
 
         for (size_t i = start; i < end; ++i) {
-            data[i] = static_cast<unsigned char>(distrib(gen));
+            data[i] = static_cast<char>(distrib(gen)); // Access string elements directly
         }
-        };
+    };
 
-    // Create threads to fill the vector concurrently
+    // Create threads to fill the string concurrently
     std::vector<std::thread> threads;
     for (unsigned int i = 0; i < numThreads - 1; ++i) {
         threads.emplace_back(fillRandomData, i * chunkSize, (i + 1) * chunkSize);
     }
 
-    // Fill the last portion of the vector in the main thread
+    // Fill the last portion of the string in the main thread
     fillRandomData((numThreads - 1) * chunkSize, sizeInBytes);
 
     // Join all threads to wait for their completion
@@ -90,8 +90,8 @@ std::vector<unsigned char> generateRandomData(size_t sizeInMB) {
     return data;
 }
 
-void xorBlock(std::vector<unsigned char>& a, std::vector<unsigned char>& b, size_t blockIndex)
+void xorBlock(unsigned char* a, const unsigned char* b, size_t blockIndex)
 {
     for (int i = 0; i < 16; i++)
-        a[i + blockIndex] ^= b[i];
+        a[blockIndex + i] ^= b[i];
 }
