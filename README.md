@@ -65,7 +65,7 @@ Gestalt is licensed under the MIT License, which means that
 you are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software.
 
-See the [LICENSE.txt](LICENSE) file for more details.
+See the [LICENSE](LICENSE) file for more details.
 
 Support
 =======
