@@ -27,33 +27,33 @@ void hexStringToBytes(const std::string& hexString, unsigned char* output) {
     }
 }
 
-std::vector<unsigned char> generateRandomHexData(size_t numBytes) {
+std::string convertToHex(const std::string input) {
+    std::stringstream hexStream;
+    hexStream << std::hex << std::setfill('0');
+    
+    // Iterate over each character in the input string
+    for (char c : input) {
+        // Convert the character to its hexadecimal representation
+        hexStream << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+    }
+    
+    // Return the hexadecimal representation as a string
+    return hexStream.str();
+}
+
+std::string generateRandomHexData(size_t numBytes) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 255);
 
-    std::vector<unsigned char> randomBytes(numBytes);
+    std::ostringstream oss;
     for (size_t i = 0; i < numBytes; ++i) {
-        randomBytes[i] = static_cast<unsigned char>(dis(gen));
+        oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned int>(dis(gen));
     }
 
-    return randomBytes;
+    return oss.str();
 }
 
-/*std::vector<unsigned char> generateRandomData(size_t sizeInMB) {
-    size_t sizeInBytes = sizeInMB * 1024 * 1024; // Convert MB to bytes
-    std::vector<unsigned char> data(sizeInBytes);
-
-    // Use a random device as a source of entropy
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(0, 255);
-
-    // Fill the vector with random data
-    std::generate(data.begin(), data.end(), [&]() { return static_cast<unsigned char>(distrib(gen)); });
-
-    return data;
-}*/
 std::string generateRandomData(size_t sizeInMB) {
     size_t sizeInBytes = sizeInMB * 1024 * 1024; // Convert MB to bytes
     std::string data(sizeInBytes, '\0'); // Initialize string with required size
@@ -90,7 +90,7 @@ std::string generateRandomData(size_t sizeInMB) {
     return data;
 }
 
-void xorBlock(unsigned char* a, const unsigned char* b, size_t blockIndex)
+void xorBlock(unsigned char* a, std::string b, size_t blockIndex)
 {
     for (int i = 0; i < 16; i++)
         a[blockIndex + i] ^= b[i];

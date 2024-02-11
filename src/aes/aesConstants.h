@@ -1,3 +1,20 @@
+/*
+ * aesConstants.cpp
+ *
+ * This file contains the constants and lookup tables used in the AES (Advanced Encryption Standard) algorithm implementation.
+ * AES is a symmetric encryption algorithm used for secure data transmission and storage.
+ *
+ * References:
+ * - The Design of Rijndael: AES - The Advanced Encryption Standard (https://csrc.nist.gov/publications/detail/fips/197/final)
+ * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
+ *
+ * The constants and lookup tables in this file are crucial for the efficient implementation of AES.
+ * They include S-boxes, inverse S-boxes, Rcon (round constant) values, and other necessary components.
+ *
+ * Author: Hunter L, Richardson
+ * Date: 2024-02-11
+ */
+
 #pragma once
 
 const unsigned char SBOX[256] = {
