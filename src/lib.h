@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
+#include <string>
 
 // Internal Dependencies
 //#include "DES Source Files/DES.h"
@@ -14,17 +16,17 @@ enum Algorithm {
 };
 
 struct Message {
-	std::vector<unsigned char> msg;
+	std::string msg;
 	Algorithm algorithm;
-	std::vector<unsigned char> nonce;
-	std::vector<unsigned char> digest;
+	std::string nonce;
+	std::string digest;
 
 	Message() = default;
 
-	Message(const std::vector<unsigned char>& message,
+	Message(std::string message = "",
 		Algorithm algo = Algorithm::NONE,
-		const std::vector<unsigned char>& nonceValue = std::vector<unsigned char>(),
-		const std::vector<unsigned char>& messageDigest = std::vector<unsigned char>())
+		std::string nonceValue = "",
+		const std::string messageDigest = "")
 		: msg(message), algorithm(algo), nonce(nonceValue), digest(messageDigest)
 	{}
 

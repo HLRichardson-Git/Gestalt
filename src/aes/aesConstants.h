@@ -1,3 +1,20 @@
+/*
+ * aesConstants.cpp
+ *
+ * This file contains the constants and lookup tables used in the AES (Advanced Encryption Standard) algorithm implementation.
+ * AES is a symmetric encryption algorithm used for secure data transmission and storage.
+ *
+ * References:
+ * - The Design of Rijndael: AES - The Advanced Encryption Standard (https://csrc.nist.gov/publications/detail/fips/197/final)
+ * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
+ *
+ * The constants and lookup tables in this file are crucial for the efficient implementation of AES.
+ * They include S-boxes, inverse S-boxes, Rcon (round constant) values, and other necessary components.
+ *
+ * Author: Hunter L, Richardson
+ * Date: 2024-02-11
+ */
+
 #pragma once
 
 const unsigned char SBOX[256] = {
@@ -198,11 +215,3 @@ const unsigned char GF_MUL_TABLE[15][256] = {
        0x0f, 0x01, 0x13, 0x1d, 0x47, 0x49, 0x5b, 0x55, 0x7f, 0x71, 0x63, 0x6d,
        0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5,
        0x9f, 0x91, 0x83, 0x8d} };
-
-/// circulant MDS matrix
-const unsigned char CMDS[4][4] = {
-    {2, 3, 1, 1}, {1, 2, 3, 1}, {1, 1, 2, 3}, {3, 1, 1, 2} };
-
-/// Inverse circulant MDS matrix
-const unsigned char INVCMDS[4][4] = {
-    {14, 11, 13, 9}, {9, 14, 11, 13}, {13, 9, 14, 11}, {11, 13, 9, 14} };
