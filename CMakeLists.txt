@@ -16,12 +16,15 @@ set (Headers
     src/lib.h
     src/aes/aes.h
     src/aes/aesConstants.h
+    src/modes/modes.h
     tools/utils.h
 )
 
 set (Sources
     src/lib.cpp
     src/aes/aes.cpp
+    src/modes/ecb.cpp
+    src/modes/cbc.cpp
     tools/utils.cpp
 )
 
