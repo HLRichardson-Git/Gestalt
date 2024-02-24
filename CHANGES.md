@@ -11,7 +11,16 @@ appropriate release branch.
 OpenSSL Releases
 ----------------
 
+ - [Gestalt 0.1.1](#gestalt-v0.1.1)
  - [Gestalt 0.1](#gestalt-v0.1.0)
+
+Gestalt 0.1.1
+-----------
+
+### Changes between 0.1.0 and 0.1.1 [24 Feb 2024]
+
+ * Added generalized block cipher modes of operation functions.
+ * Improved documentation.
 
 Gestalt 0.1
 -----------
