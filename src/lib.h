@@ -1,12 +1,19 @@
+/*
+ * lib.h
+ *
+ * This file contains the definitions of Gestalts security functions, and its central Message structure.
+ * 
+ * Author: Hunter L, Richardson
+ * Date: 2024-02-24
+ */
+
 #pragma once
 
 #include <iostream>
 #include <iomanip>
 #include <string>
 
-// Internal Dependencies
-//#include "DES Source Files/DES.h"
-#include "aes/aes.h"
+#include "modes/modes.h"
 
 enum Algorithm {
 	NONE,

@@ -92,7 +92,7 @@ void AES::encryptBlock(unsigned char* input) {
     // Initialize state with the input block
     unsigned char state[Nb];
     memcpy(state, input, Nb);
-
+    //std::cout << "Encrypting block in AES::encryptBlock!!!" << std::endl;
     // Perform AES encryption rounds
     addRoundKey(state, roundKey);
     size_t round = 1;
