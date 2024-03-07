@@ -1,5 +1,5 @@
 /*
- * aes.h
+ * aesCore.h
  *
  * This file contains an implementation of the Advanced Encryption Standard (AES) algorithm in C++.
  * AES is a symmetric encryption algorithm widely used for securing sensitive data.
@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 class AES {
 private:
 	static const unsigned int Nb = 16; // Block size

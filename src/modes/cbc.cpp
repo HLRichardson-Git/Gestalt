@@ -38,12 +38,12 @@
  */
 
 template<typename BlockCipher>
-void encrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock)
+std::string encrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock)
 {
     size_t msgLen = msg.length();
 	size_t paddedMsgLen = msgLen + 16 - (msgLen % 16);
 	unsigned char* input = new unsigned char[paddedMsgLen];
-	std::memcpy(input, msg.c_str(), msgLen);
+	memcpy(input, msg.c_str(), msgLen);
 
 	applyPCKS7Padding(input, msgLen, paddedMsgLen);
 
@@ -59,6 +59,7 @@ void encrypt_cbc(std::string& msg, std::string key, std::string iv, function<Blo
 	msg.assign(reinterpret_cast<char*>(input), paddedMsgLen);
 
 	delete[] input;
+	return msg;
 }
 
 /*
@@ -85,11 +86,11 @@ void encrypt_cbc(std::string& msg, std::string key, std::string iv, function<Blo
  */
 
 template<typename BlockCipher>
-void decrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock)
+std::string decrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock)
 {
     size_t msgLen = msg.length();
 	unsigned char* input = new unsigned char[msgLen];
-	std::memcpy(input, msg.c_str(), msgLen);
+	memcpy(input, msg.c_str(), msgLen);
 
 	std::string tmp = "";
 
@@ -109,7 +110,8 @@ void decrypt_cbc(std::string& msg, std::string key, std::string iv, function<Blo
 	msg.assign(reinterpret_cast<char*>(input), origMsgLen);
 
 	delete[] input;
+	return msg;
 }
 
-template void encrypt_cbc<AES>(std::string&, std::string, std::string, function<AES>);
-template void decrypt_cbc<AES>(std::string&, std::string, std::string, function<AES>);
+template std::string encrypt_cbc<AES>(std::string&, std::string, std::string, function<AES>);
+template std::string decrypt_cbc<AES>(std::string&, std::string, std::string, function<AES>);

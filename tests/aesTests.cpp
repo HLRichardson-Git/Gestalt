@@ -12,124 +12,117 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <cstring>
-#include <chrono>
 
-#include "../src/aes/aes.h"
+#include <gestalt/aes.h>
+
+#include "../src/aes/aesCore.h"
 #include "../tools/utils.h"
-#include "../src/lib.h"
 
 // Unit tests for AES ECB mode with 128-bit key
 TEST(TestAesECB, RoundtripWith128BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
-	Message message(inputData); // Create message object with input data
 
 	std::string key = "10a58869d74be5a374cf867cfb473859";
 
 	// Encrypt and decrypt the message using AES ECB mode with 128-bit key
-	message.aes_encrypt_ecb(key);
-	message.aes_decrypt_ecb(key);
+	std::string ct = aes_encrypt_ecb(inputData, key);
+	std::string decryptedCt = aes_decrypt_ecb(ct, key);
 
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(message.msg, inputData); 
+	EXPECT_EQ(decryptedCt, inputData); 
 }
 
 // Unit tests for AES ECB mode with 192-bit key
 TEST(TestAesECB, RoundtripWith192BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
-	Message message(inputData); // Create message object with input data
 
 	std::string key = "e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd";
 
 	// Encrypt and decrypt the message using AES ECB mode with 192-bit key
-	message.aes_encrypt_ecb(key);
-	message.aes_decrypt_ecb(key);
+	std::string ct = aes_encrypt_ecb(inputData, key);
+	std::string decryptedCt = aes_decrypt_ecb(ct, key);
 
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(message.msg, inputData);
+	EXPECT_EQ(decryptedCt, inputData);
 }
 
 // Unit tests for AES ECB mode with 256-bit key
 TEST(TestAesECB, RoundtripWith256BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
-	Message message(inputData); // Create message object with input data
 
 	std::string key = "c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558";
 
 	// Encrypt and decrypt the message using AES ECB mode with 256-bit key
-	message.aes_encrypt_ecb(key);
-	message.aes_decrypt_ecb(key);
+	std::string ct = aes_encrypt_ecb(inputData, key);
+	std::string decryptedCt = aes_decrypt_ecb(ct, key);
 
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(message.msg, inputData);
+	EXPECT_EQ(decryptedCt, inputData);
 }
 
 // Unit tests for AES CBC mode with 128-bit key
 TEST(TestAesCBC, RoundtripWith128BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 	std::string nonce = generateRandomHexData(16); // Generate random 16-byte (128-bit) nonce
-	Message message(inputData, AES_CBC, nonce); // Create message object with input data
 
 	std::string key = "10a58869d74be5a374cf867cfb473850";
 
 	// Encrypt and decrypt the message using AES CBC mode with 128-bit key
-	message.aes_encrypt_cbc(key);
-	message.aes_decrypt_cbc(key);
+	std::string ct = aes_encrypt_cbc(inputData, nonce, key);
+	std::string decryptedCt = aes_decrypt_cbc(ct, nonce, key);
 
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(message.msg, inputData);
+	EXPECT_EQ(decryptedCt, inputData);
 }
 
 // Unit tests for AES CBC mode with 192-bit key
 TEST(TestAesCBC, RoundtripWith192BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 	std::string nonce = generateRandomHexData(16); // Generate random 16-byte (128-bit) nonce
-	Message message(inputData, AES_CBC, nonce); // Create message object with input data
 
 	std::string key = "e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd";
 
 	// Encrypt and decrypt the message using AES CBC mode with 192-bit key
-	message.aes_encrypt_cbc(key);
-	message.aes_decrypt_cbc(key);
+	std::string ct = aes_encrypt_cbc(inputData, nonce, key);
+	std::string decryptedCt = aes_decrypt_cbc(ct, nonce, key);
 
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(message.msg, inputData);
+	EXPECT_EQ(decryptedCt, inputData);
 }
 
 // Unit tests for AES CBC mode with 256-bit key
 TEST(TestAesCBC, RoundtripWith256BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 	std::string nonce = generateRandomHexData(16); // Generate random 16-byte (128-bit) nonce
-	Message message(inputData, AES_CBC, nonce); // Create message object with input data
 
 	std::string key = "c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558";
 
 	// Encrypt and decrypt the message using AES CBC mode with 256-bit key
-	message.aes_encrypt_cbc(key);
-	message.aes_decrypt_cbc(key);
+	std::string ct = aes_encrypt_cbc(inputData, nonce, key);
+	std::string decryptedCt = aes_decrypt_cbc(ct, nonce, key);
 
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(message.msg, inputData);
+	EXPECT_EQ(decryptedCt, inputData);
 }
 
 // Unit tests for AES ECB mode Known Answer Test with 128-bit key
 TEST(TestAesKAT, KATWith128BitKey) {
 	// Use known plaintext
 	std::string inputData = "Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle...and wonder if we'll ever get the chance to kill him.";
-	Message message(inputData); // Create message object with input data
 
 	std::string key = "10a58869d74be5a374cf867cfb473859";
 
 	// Encrypt and decrypt the message using AES ECB mode with 128-bit key
-	message.aes_encrypt_ecb(key);
+	std::string ct = aes_encrypt_ecb(inputData, key);
 	std::string expectedStr = "948084c7c03487d76e58b1d9747103578c93790463a680009fc74fcbf59e63a39a044953a4a6e11f99257ab4068ccea583a60daa41fe9b9dfa20f5352ce4669c914c41110dbac9e0d0bcf92981fb494e87ce717f2ded9ba4b3fea9be4598e324ba93f50414d0cd9f9131357fccedf8bf0bb64c4bd16a1cda3e9d823d377284bbe53164922969d1d2a7c982b768a131c7223919e377e66fc09a4f7f74899405b49d5f752448595de2f5818fe56b442e5354e517d36ccc44b90f7e5abc8f11b1a593a97f4b8193ee6be5ce850da8d6fca3178c06c39c228591507479750eaf625fd85055c04479824757f7e57e246fb3fc26c3da324c0a30c030dd3848bd705df289a39ebe1cb6e529508c874d2dc2d616f8cfb0ab683d1296ce1d5e22bc0dd048";
-	std::string hexCiphertext = convertToHex(message.msg);
+	std::string hexCiphertext = convertToHex(ct);
 	// Check if encrypted message matches expected ciphertext
 	EXPECT_EQ(hexCiphertext, expectedStr);
 
-	message.aes_decrypt_ecb(key);
+	std::string decryptedCt = aes_decrypt_ecb(ct, key);
 	
 	// Check if decrypted message matches original input data
-	EXPECT_EQ(inputData, message.msg);
+	EXPECT_EQ(inputData, decryptedCt);
 }
 
 // Unit tests for AES key expansion
