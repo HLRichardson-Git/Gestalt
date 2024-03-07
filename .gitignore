@@ -4,9 +4,6 @@
 # Ignore build output
 build/
 
-# Ignore googletest (if it's in the repository)
-googletest/
-
 # Prerequisites
 *.d
 
