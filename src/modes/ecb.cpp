@@ -13,6 +13,9 @@
 
 #include "modes.h"
 
+#include "../../tools/utils.h"
+#include "../aes/aesCore.h"
+
 /*
  * Electronic Codebook (ECB) Encryption In-Place:
  * 
@@ -32,8 +35,7 @@
  * In ECB encryption, multiple forward cipher functions can be computed in parallel.
  */
 template<typename BlockCipher>
-std::string encrypt_ecb(std::string& msg, std::string key, function<BlockCipher> encryptBlock)
-{
+std::string encryptECB(std::string& msg, std::string key, function<BlockCipher> encryptBlock) {
     size_t msgLen = msg.length();
     size_t paddedMsgLen = msgLen + 16 - (msgLen % 16);
     unsigned char* input = new unsigned char[paddedMsgLen];
@@ -75,8 +77,7 @@ std::string encrypt_ecb(std::string& msg, std::string key, function<BlockCipher>
  * In ECB decryption, multiple inverse cipher functions can be computed in parallel.
  */
 template<typename BlockCipher>
-std::string decrypt_ecb(std::string& msg, std::string key, function<BlockCipher> decryptBlock)
-{
+std::string decryptECB(std::string& msg, std::string key, function<BlockCipher> decryptBlock) {
 	size_t msgLen = msg.length();
 	unsigned char* input = new unsigned char[msgLen];
 	memcpy(input, msg.c_str(), msgLen);
@@ -97,5 +98,5 @@ std::string decrypt_ecb(std::string& msg, std::string key, function<BlockCipher>
     return msg;
 }
 
-template std::string encrypt_ecb<AES>(std::string&, std::string, function<AES>);
-template std::string decrypt_ecb<AES>(std::string&, std::string, function<AES>);
+template std::string encryptECB<AES>(std::string&, std::string, function<AES>);
+template std::string decryptECB<AES>(std::string&, std::string, function<AES>);

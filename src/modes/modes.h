@@ -10,9 +10,6 @@
 
 #pragma once
 
-#include "../../tools/utils.h"
-#include "../aes/aesCore.h"
-
 #include <string>
 #include <cstring>
 
@@ -20,11 +17,11 @@ template<typename BlockCipher>
 using function = void (BlockCipher::*)(unsigned char*);
 
 template<typename BlockCipher>
-std::string encrypt_ecb(std::string& msg, std::string key, function<BlockCipher> encryptBlock);
+std::string encryptECB(std::string& msg, std::string key, function<BlockCipher> encryptBlock);
 template<typename BlockCipher>
-std::string decrypt_ecb(std::string& msg, std::string key, function<BlockCipher> decryptBlock);
+std::string decryptECB(std::string& msg, std::string key, function<BlockCipher> decryptBlock);
 
 template<typename BlockCipher>
-std::string encrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock);
+std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock);
 template<typename BlockCipher>
-std::string decrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock);
+std::string decryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock);

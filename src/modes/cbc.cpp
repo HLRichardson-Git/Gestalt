@@ -13,6 +13,9 @@
 
 #include "modes.h"
 
+#include "../../tools/utils.h"
+#include "../aes/aesCore.h"
+
 /*
  * Cipher Block Chaining (CBC) Encryption In-Place:
  * 
@@ -38,8 +41,7 @@
  */
 
 template<typename BlockCipher>
-std::string encrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock)
-{
+std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock) {
     size_t msgLen = msg.length();
 	size_t paddedMsgLen = msgLen + 16 - (msgLen % 16);
 	unsigned char* input = new unsigned char[paddedMsgLen];
@@ -86,8 +88,7 @@ std::string encrypt_cbc(std::string& msg, std::string key, std::string iv, funct
  */
 
 template<typename BlockCipher>
-std::string decrypt_cbc(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock)
-{
+std::string decryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock) {
     size_t msgLen = msg.length();
 	unsigned char* input = new unsigned char[msgLen];
 	memcpy(input, msg.c_str(), msgLen);
@@ -113,5 +114,5 @@ std::string decrypt_cbc(std::string& msg, std::string key, std::string iv, funct
 	return msg;
 }
 
-template std::string encrypt_cbc<AES>(std::string&, std::string, std::string, function<AES>);
-template std::string decrypt_cbc<AES>(std::string&, std::string, std::string, function<AES>);
+template std::string encryptCBC<AES>(std::string&, std::string, std::string, function<AES>);
+template std::string decryptCBC<AES>(std::string&, std::string, std::string, function<AES>);

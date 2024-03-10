@@ -10,10 +10,9 @@
 #pragma once
 
 #include <string>
-#include "../src/modes/modes.h"
 
-std::string aes_encrypt_ecb(std::string msg, std::string key);
-std::string aes_decrypt_ecb(std::string msg, std::string key);
+std::string aesEncryptECB(std::string msg, std::string key);
+std::string aesDecryptECB(std::string msg, std::string key);
 
-std::string aes_encrypt_cbc(std::string msg, std::string iv, std::string key);
-std::string aes_decrypt_cbc(std::string msg, std::string iv, std::string key);
+std::string aesEncryptCBC(std::string msg, std::string iv, std::string key);
+std::string aesDecryptCBC(std::string msg, std::string iv, std::string key);

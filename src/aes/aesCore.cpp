@@ -92,7 +92,7 @@ void AES::encryptBlock(unsigned char* input) {
     // Initialize state with the input block
     unsigned char state[Nb];
     memcpy(state, input, Nb);
-    //std::cout << "Encrypting block in AES::encryptBlock!!!" << std::endl;
+
     // Perform AES encryption rounds
     addRoundKey(state, roundKey);
     size_t round = 1;
@@ -155,8 +155,7 @@ void AES::subByte(unsigned char state[Nb]) {
  *
  * @param state The state array to be transformed.
  */
-void AES::shiftRows(unsigned char state[Nb])
-{
+void AES::shiftRows(unsigned char state[Nb]) {
     unsigned char tmp[Nb];
 
 	/* Column 1 */
@@ -191,8 +190,7 @@ void AES::shiftRows(unsigned char state[Nb])
  *
  * @param state The state array to be transformed.
  */
-void AES::mixColumns(unsigned char state[Nb])
-{
+void AES::mixColumns(unsigned char state[Nb]) {
     unsigned char tmp[Nb];
 
     tmp[0] = GF_MUL_TABLE[2][state[0]] ^ GF_MUL_TABLE[3][state[1]] ^ state[2] ^ state[3];
@@ -246,8 +244,7 @@ void AES::invSubByte(unsigned char state[Nb]) {
  *
  * @param state The state array to be transformed.
  */
-void AES::invShiftRows(unsigned char state[Nb])
-{
+void AES::invShiftRows(unsigned char state[Nb]) {
     unsigned char tmp[Nb];
 
 	/* Column 1 */
@@ -321,8 +318,7 @@ void AES::keyExpansion(std::string key, unsigned char* roundKey) {
     unsigned char temp[4] = { 0x00, 0x00, 0x00, 0x00 };
 
     unsigned int i = 0;
-    for (i = 0; i < 4 * Nw; i++)
-    {
+    for (i = 0; i < 4 * Nw; i++) {
         int index = i * 2;
         // Extract two hexadecimal characters
         std::string hexByte = key.substr(index, 2);
@@ -332,21 +328,18 @@ void AES::keyExpansion(std::string key, unsigned char* roundKey) {
     }
 
     i = 4 * Nw;
-    while (i < Nb * (Nr + 1))
-    {
+    while (i < Nb * (Nr + 1)) {
         temp[0] = roundKey[i - 4 + 0];
         temp[1] = roundKey[i - 4 + 1];
         temp[2] = roundKey[i - 4 + 2];
         temp[3] = roundKey[i - 4 + 3];
 
-        if (i / 4 % Nw == 0)
-        {
+        if (i / 4 % Nw == 0) {
             rotWord(temp);
             subWord(temp);
             rcon(temp, (i / (Nw * 4)) - 1);
         }
-        else if (Nw > 6 && i / 4 % Nw == 4)
-        {
+        else if (Nw > 6 && i / 4 % Nw == 4) {
             subWord(temp);
         }
 
@@ -364,11 +357,9 @@ void AES::keyExpansion(std::string key, unsigned char* roundKey) {
  *
  * @param temp The state array to be transformed.
  */
-void AES::rotWord(unsigned char temp[4])
-{
+void AES::rotWord(unsigned char temp[4]) {
     unsigned char temp2 = temp[0];
-    for (int x = 0; x < 4; x++)
-    {
+    for (int x = 0; x < 4; x++) {
         temp[x] = temp[x + 1];
     }
     temp[3] = temp2;
@@ -379,10 +370,8 @@ void AES::rotWord(unsigned char temp[4])
  *
  * @param temp The state array to be transformed.
  */
-void AES::subWord(unsigned char temp[4])
-{
-    for (int x = 0; x < 4; x++)
-    {
+void AES::subWord(unsigned char temp[4]) {
+    for (int x = 0; x < 4; x++) {
         temp[x] = SBOX[temp[x]];
     }
 }
@@ -392,15 +381,48 @@ void AES::subWord(unsigned char temp[4])
  *
  * @param temp The state array to be transformed.
  */
-void AES::rcon(unsigned char temp[4], int round)
-{
+void AES::rcon(unsigned char temp[4], int round) {
     temp[0] ^= RCON[round];
 }
 
-// Getter function for roundkey
-unsigned char* AES::getRoundKey() 
-{
-    return roundKey;
+// Gets roundKey from testAesFunctions class
+const unsigned char* TestAesFunctions::testKeyExpansion() {
+    return this->roundKey;
+}
+
+// Uses subByte function from AES for testing
+void TestAesFunctions::testSubByte(unsigned char state[Nb]) {
+    this->aesObject.subByte(state);
+}
+
+// Uses shiftRows function from AES for testing
+void TestAesFunctions::testShiftRows(unsigned char state[Nb]) {
+    this->aesObject.shiftRows(state);
+}
+
+// Uses mixColumns function from AES for testing
+void TestAesFunctions::testMixColumns(unsigned char state[Nb]) {
+    this->aesObject.mixColumns(state);
+}
+
+// Uses addRoundKey function from AES for testing
+void TestAesFunctions::testAddRoundKey(unsigned char state[Nb], unsigned char* roundKey) {
+    this->aesObject.addRoundKey(state, roundKey);
+}
+
+// Uses invSubByte function from AES for testing
+void TestAesFunctions::testInvSubByte(unsigned char state[Nb]) {
+    this->aesObject.invSubByte(state);
+}
+
+// Uses invShiftRows function from AES for testing
+void TestAesFunctions::testInvShiftRows(unsigned char state[Nb]) {
+    this->aesObject.invShiftRows(state);
+}
+
+// Uses invMixColumns function from AES for testing
+void TestAesFunctions::testInvMixColumns(unsigned char state[Nb]) {
+    this->aesObject.invMixColumns(state);
 }
 
 /*

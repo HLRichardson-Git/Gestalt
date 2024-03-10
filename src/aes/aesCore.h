@@ -32,14 +32,6 @@ private:
 	unsigned int Nr = 0; // Number of rounds
 
 	unsigned char* roundKey; // Expanded Key
-	
-public:
-
-	AES(std::string key);
-	~AES() {delete[] roundKey;}
-
-	void encryptBlock(unsigned char* input);
-	void decryptBlock(unsigned char* input);
 
 	void subByte(unsigned char state[Nb]);
 	void shiftRows(unsigned char state[Nb]);
@@ -54,8 +46,40 @@ public:
 	void rotWord(unsigned char temp[4]);
 	void subWord(unsigned char temp[4]);
 	void rcon(unsigned char temp[4], int round);
+	
+public:
 
-	unsigned char* getRoundKey();
+	AES(std::string key);
+	~AES() {delete[] roundKey;}
+
+	void encryptBlock(unsigned char* input);
+	void decryptBlock(unsigned char* input);
+
+	friend class TestAesFunctions;
+};
+
+// Declare a separate testing class or functions
+class TestAesFunctions {
+private:
+	static const unsigned int Nb = 16; // Block size
+	AES aesObject;
+	unsigned char roundKey[Nb * 15]; // Array to hold round key
+public:
+
+	TestAesFunctions() : aesObject("10a58869d74be5a374cf867cfb473859") {
+        aesObject.keyExpansion("10a58869d74be5a374cf867cfb473859", roundKey);
+    }
+
+	const unsigned char* testKeyExpansion();
+
+    void testSubByte(unsigned char state[Nb]);
+	void testShiftRows(unsigned char state[Nb]);
+	void testMixColumns(unsigned char state[Nb]);
+	void testAddRoundKey(unsigned char state[Nb], unsigned char* roundKey);
+
+	void testInvSubByte(unsigned char state[Nb]);
+	void testInvShiftRows(unsigned char state[Nb]);
+	void testInvMixColumns(unsigned char state[Nb]);
 };
 
 void applyPCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);

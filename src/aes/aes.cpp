@@ -8,23 +8,25 @@
  */
 
 #include <gestalt/aes.h>
+#include "../aes/aesCore.h"
+#include "../modes/modes.h"
 
-std::string aes_encrypt_ecb(std::string msg, std::string key) 
+std::string aesEncryptECB(std::string msg, std::string key) 
 {
-    return encrypt_ecb<AES>(msg, key, &AES::encryptBlock);
+    return encryptECB<AES>(msg, key, &AES::encryptBlock);
 }
 
-std::string aes_decrypt_ecb(std::string msg, std::string key)
+std::string aesDecryptECB(std::string msg, std::string key)
 {
-    return decrypt_ecb<AES>(msg, key, &AES::decryptBlock);
+    return decryptECB<AES>(msg, key, &AES::decryptBlock);
 }
 
-std::string aes_encrypt_cbc(std::string msg, std::string iv, std::string key)
+std::string aesEncryptCBC(std::string msg, std::string iv, std::string key)
 {
-	return encrypt_cbc<AES>(msg, key, iv, &AES::encryptBlock);
+	return encryptCBC<AES>(msg, key, iv, &AES::encryptBlock);
 }
 
-std::string aes_decrypt_cbc(std::string msg, std::string iv, std::string key)
+std::string aesDecryptCBC(std::string msg, std::string iv, std::string key)
 {
-	return decrypt_cbc<AES>(msg, key, iv, &AES::decryptBlock);
+	return decryptCBC<AES>(msg, key, iv, &AES::decryptBlock);
 }
