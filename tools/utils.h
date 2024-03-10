@@ -1,12 +1,18 @@
+/*
+ * utils.h
+ *
+ * This file contains utility functions used for various purposes such as converting between
+ * hexadecimal strings and byte arrays, generating random data, and performing XOR operations
+ * on byte arrays.
+ * 
+ * Author: Hunter L, Richardson
+ * Date: 2024-03-10
+ */
+
 #pragma once
 
-#include <iostream>
-#include <iomanip>
 #include <vector>
 #include <string>
-#include <sstream>
-#include <random>
-#include <thread>
 
 std::vector<unsigned char> hexStringToBytesVec(const std::string& hexStr);
 void hexStringToBytes(const std::string& hexString, unsigned char* output);

@@ -1,4 +1,21 @@
+/*
+ * utils.cpp
+ *
+ * This file contains the implementation of utility functions declared in utils.h.
+ * These functions include conversions between hexadecimal strings and byte arrays,
+ * generation of random data, and XOR operations on byte arrays.
+ * 
+ * Author: Hunter L, Richardson
+ * Date: 2024-03-10
+ */
+
 #include "utils.h"
+
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <random>
+#include <thread>
 
 std::vector<unsigned char> hexStringToBytesVec(const std::string& hexStr)
 {
@@ -90,8 +107,8 @@ std::string generateRandomData(size_t sizeInMB) {
     return data;
 }
 
-void xorBlock(unsigned char* a, std::string b, size_t blockIndex)
-{
-    for (int i = 0; i < 16; i++)
+void xorBlock(unsigned char* a, std::string b, size_t blockIndex) {
+    for (int i = 0; i < 16; i++) {
         a[blockIndex + i] ^= b[i];
+    }
 }

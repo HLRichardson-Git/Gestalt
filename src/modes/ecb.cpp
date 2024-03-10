@@ -13,6 +13,9 @@
 
 #include "modes.h"
 
+#include "../../tools/utils.h"
+#include "../aes/aesCore.h"
+
 /*
  * Electronic Codebook (ECB) Encryption In-Place:
  * 
@@ -32,12 +35,11 @@
  * In ECB encryption, multiple forward cipher functions can be computed in parallel.
  */
 template<typename BlockCipher>
-void encrypt_ecb(std::string& msg, std::string key, function<BlockCipher> encryptBlock)
-{
+std::string encryptECB(std::string& msg, std::string key, function<BlockCipher> encryptBlock) {
     size_t msgLen = msg.length();
     size_t paddedMsgLen = msgLen + 16 - (msgLen % 16);
     unsigned char* input = new unsigned char[paddedMsgLen];
-    std::memcpy(input, msg.c_str(), msgLen);
+    memcpy(input, msg.c_str(), msgLen);
 
     applyPCKS7Padding(input, msgLen, paddedMsgLen);
 
@@ -53,6 +55,7 @@ void encrypt_ecb(std::string& msg, std::string key, function<BlockCipher> encryp
     msg.assign(reinterpret_cast<char*>(input), paddedMsgLen);
 
     delete[] input;
+    return msg;
 }
 
 /*
@@ -74,12 +77,10 @@ void encrypt_ecb(std::string& msg, std::string key, function<BlockCipher> encryp
  * In ECB decryption, multiple inverse cipher functions can be computed in parallel.
  */
 template<typename BlockCipher>
-void decrypt_ecb(std::string& msg, std::string key, function<BlockCipher> decryptBlock)
-{
+std::string decryptECB(std::string& msg, std::string key, function<BlockCipher> decryptBlock) {
 	size_t msgLen = msg.length();
-	//size_t paddedMsgLen = ((msgLen - 1) / 16 + 1) * 16;
 	unsigned char* input = new unsigned char[msgLen];
-	std::memcpy(input, msg.c_str(), msgLen);
+	memcpy(input, msg.c_str(), msgLen);
 
 	// Create an instance of the block cipher with the provided key
     BlockCipher cipher(key);
@@ -94,7 +95,8 @@ void decrypt_ecb(std::string& msg, std::string key, function<BlockCipher> decryp
 	msg.assign(reinterpret_cast<char*>(input), origMsgLen);
 
 	delete[] input;
+    return msg;
 }
 
-template void encrypt_ecb<AES>(std::string&, std::string, function<AES>);
-template void decrypt_ecb<AES>(std::string&, std::string, function<AES>);
+template std::string encryptECB<AES>(std::string&, std::string, function<AES>);
+template std::string decryptECB<AES>(std::string&, std::string, function<AES>);

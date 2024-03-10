@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.27.2)
+cmake_minimum_required(VERSION 3.16.3)
 
-set (This Gestalt)
-
-project (${This} C CXX)
+set (Project_Name Gestalt)
+project (${Project_Name} VERSION 0.2 LANGUAGES C CXX)
 
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_CXX_STANDARD 11)
@@ -10,24 +9,27 @@ set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 enable_testing ()
 
-add_subdirectory (googletest)
-
-set (Headers
-    src/lib.h
-    src/aes/aes.h
-    src/aes/aesConstants.h
-    src/modes/modes.h
-    tools/utils.h
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 
 set (Sources
-    src/lib.cpp
     src/aes/aes.cpp
+    src/aes/aesCore.cpp
     src/modes/ecb.cpp
     src/modes/cbc.cpp
     tools/utils.cpp
 )
 
-add_library (${This} STATIC ${Sources} ${Headers})
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+add_library (${Project_Name} STATIC ${Sources})
+# Specify the directories where header files are located
+target_include_directories(${Project_Name} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+target_link_libraries(${Project_Name} gtest_main)
 
 add_subdirectory(tests)
