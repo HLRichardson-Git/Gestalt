@@ -7,6 +7,7 @@ set (This tests)
 set (Sources
     aesTests.cpp
     desTests.cpp
+    sha1Tests.cpp
 )
 
 add_executable (${This} ${Sources})
