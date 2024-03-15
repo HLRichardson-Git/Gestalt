@@ -20,17 +20,21 @@ SHA1::SHA1() {
 void SHA1::applySha1Padding(std::string& in) {
     size_t messageLength = in.length() * 8;
 
-    if (messageLength % 512 != 0) {
-        // Pre-processing
-        in += (char)0x80;
-        while ((in.length() % 64) != 56) {
-            in += (char)0x00;
-        }
+    // Add the '1' bit
+    in += (char)0x80;
 
-        // Append original message length in bits
-        for (int i = 7; i >= 0; --i) {
-            in += (char)((messageLength >> (i * 8)) & 0xFF);
-        }
+    // Calculate the number of padding bits needed
+    size_t paddingBits = 512 - ((messageLength + 8) % 512);
+
+    // Append '0' bits for padding
+    //in.append(paddingBits / 8, '\0');
+    while ((in.length() % 64) != 56) {
+        in += (char)0x00;
+    }
+
+    // Append original message length in bits
+    for (int i = 7; i >= 0; --i) {
+        in += (char)((messageLength >> (i * 8)) & 0xFF);
     }
 }
 
