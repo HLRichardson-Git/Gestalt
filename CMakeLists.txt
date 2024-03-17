@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 set (Project_Name Gestalt)
-project (${Project_Name} VERSION 0.2 LANGUAGES C CXX)
+project (${Project_Name} VERSION 0.3 LANGUAGES C CXX)
 
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_CXX_STANDARD 11)

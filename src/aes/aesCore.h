@@ -58,7 +58,7 @@ public:
 	friend class TestAesFunctions;
 };
 
-// Declare a separate testing class or functions
+// Friend class to test components of AES class
 class TestAesFunctions {
 private:
 	static const unsigned int Nb = 16; // Block size

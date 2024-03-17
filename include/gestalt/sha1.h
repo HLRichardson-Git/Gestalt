@@ -9,4 +9,6 @@
 
 #pragma once
 
-bool test();
+#include <string>
+
+std::string hashSHA1(std::string in);

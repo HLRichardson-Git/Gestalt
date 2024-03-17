@@ -10,6 +10,7 @@
 #include <gestalt/sha1.h>
 #include "sha1Core.h"
 
-bool test() {
-    return shaConnectionTest();
+std::string hashSHA1(std::string in) {
+    SHA1 SHA1object;
+    return SHA1object.hash(in);
 }

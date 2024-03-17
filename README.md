@@ -23,6 +23,7 @@ Overview
 Gestalt includes:
 
 - **AES**
+- **SHA1**
 - More to come.
 
 Download
