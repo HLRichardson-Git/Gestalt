@@ -18,6 +18,8 @@
 #include "../src/aes/aesCore.h"
 #include "../tools/utils.h"
 
+TestAesFunctions testFunctions;
+
 // Unit tests for AES ECB mode with 128-bit key
 TEST(TestAesECB, RoundtripWith128BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
@@ -127,7 +129,6 @@ TEST(TestAesKAT, KATWith128BitKey) {
 
 // Unit tests for AES key expansion
 TEST(TestAesKeyExpansion, KeyExpansion) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	const unsigned char* roundKey = testFunctions.testKeyExpansion();
 
 	std::string expectedStr = "10a58869d74be5a374cf867cfb473859b1a2436666e9a6c5122620b9e96118e05c0fa2783ae604bd28c02404c1a13ce46ae4cb005002cfbd78c2ebb9b963d75d99ea8756c9e848ebb12aa3520849740fb278f1667b90b98dcaba1adfc2f36ed09fe78143e47738ce2ecd2211ec3e4cc16dcef98d89b9c143a774e3524b4aaf933bb7253eb20ee47d157a072f5e30a8bc24754066967ba41b8301a334dd310b88d55e84a7432520bcc02483881d158800";
@@ -152,8 +153,7 @@ TEST(TestAesKeyExpansion, KeyExpansion) {
 
 // Unit test for SubBytes operation
 TEST(TestAesFunctions, SubByte) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
-
+	// Prepare input data
 	unsigned char state[16] = {0x58, 0xc0, 0xe4, 0x05, 0xb8, 0x67, 0xc5, 0xf4, 0x1b, 0xbd, 0xea, 0x18, 0xda, 0x44, 0x3b, 0x5a};
 
 	testFunctions.testSubByte(state);
@@ -175,7 +175,6 @@ TEST(TestAesFunctions, SubByte) {
 
 // Unit test for ShiftRows operation
 TEST(TestAesFunctions, shiftRows) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	// Prepare input data
 	unsigned char state[16] = {0x6a, 0xba, 0x69, 0x6b, 0x6c, 0x85, 0xa6, 0xbf, 0xaf, 0x7a, 0x87, 0xad, 0x57, 0x1b, 0xe2, 0xbe};
 
@@ -198,7 +197,6 @@ TEST(TestAesFunctions, shiftRows) {
 
 // Unit test for MixColumns operation
 TEST(TestAesFunctions, mixColumns) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	// Prepare input data
 	unsigned char state[16] = {0x6a, 0x85, 0x87, 0xbe, 0x6c, 0x7a, 0xe2, 0x6b, 0xaf, 0x1b, 0x69, 0xbf, 0x57, 0xba, 0xa6, 0xad};
 
@@ -221,7 +219,6 @@ TEST(TestAesFunctions, mixColumns) {
 
 // Unit test for AddRoundKey operation
 TEST(TestAesFunctions, addRoundKey) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	// Prepare input data
 	unsigned char state[16] = {0x79, 0x57, 0x23, 0xdb, 0xdf, 0xce, 0x74, 0xfa, 0xbe, 0x9d, 0xbc, 0xfd, 0x70, 0x64, 0x56, 0xa4};
 	unsigned char key[16] = {0x58, 0xc0, 0xe4, 0x05, 0xb8, 0x67, 0xc5, 0xf4, 0x1b, 0xbd, 0xea, 0x18, 0xda, 0x44, 0x3b, 0x5a};
@@ -245,7 +242,6 @@ TEST(TestAesFunctions, addRoundKey) {
 
 // Unit test for inverse SubBytes operation
 TEST(TestAesFunctions, invSubByte) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	// Prepare input data
 	unsigned char state[16] = {0xb7, 0xed, 0xc6, 0x1d, 0x5a, 0x4c, 0x25, 0x98, 0x13, 0x4d, 0xb7, 0xfa, 0x93, 0x30, 0x91, 0x69};
 
@@ -268,7 +264,6 @@ TEST(TestAesFunctions, invSubByte) {
 
 // Unit test for inverse ShiftRows operation
 TEST(TestAesFunctions, invShiftRows) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	// Prepare input data
 	unsigned char state[16] = {0xb7, 0x4c, 0xb7, 0x69, 0x5a, 0x4d, 0x91, 0x1d, 0x13, 0x30, 0xc6, 0x98, 0x93, 0xed, 0x25, 0xfa};
 
@@ -291,7 +286,6 @@ TEST(TestAesFunctions, invShiftRows) {
 
 // Unit test for inverse MixColumns operation
 TEST(TestAesFunctions, invMixColumns) {
-	TestAesFunctions testFunctions; // Create an instance of TestAesFunctions
 	// Prepare input data
 	unsigned char state[16] = {0x7f, 0x84, 0x35, 0xeb, 0xef, 0x75, 0x09, 0x08, 0x28, 0xba, 0x07, 0xe8, 0xce, 0xc7, 0x21, 0x89};
 
