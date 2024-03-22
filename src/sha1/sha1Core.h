@@ -34,7 +34,7 @@ private:
 
     std::string digest();
     void reset();
-    void fillBlock(std::string in, uint32_t w[BLOCK_SIZE], size_t index);
+    void fillBlock(std::string in, uint32_t w[BLOCK_SIZE]);
     void applySha1Padding(std::string& in);
 
 public:
@@ -55,6 +55,6 @@ private:
     SHA1 SHA1Object;
 public:
 
-    void testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE], size_t index);
+    void testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE]);
     void testSHA1Padding(std::string& in);
 };

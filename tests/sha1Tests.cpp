@@ -54,11 +54,6 @@ TEST(testSHA1Hash, hashKatSHA1) {
     EXPECT_EQ(emptyStringDigest, expectedEmptyStringKAT);
 }
 
-/*
- * These tests are commented out for your as these tests
- * take a long time to complete. Only run these if you are
- * okay with that.
- *
 // Large Known Answer Test(KAT) for SHA1 from:
 // [1] - https://www.di-mgt.com.au/sha_testvectors.html
 TEST(testLargeSHA1Hash, hashLargeKatSHA1) {
@@ -72,36 +67,31 @@ TEST(testLargeSHA1Hash, hashLargeKatSHA1) {
         std::string largeSeed = "a"; // repeated 1,000,000 times.
         std::string largeKAT = "";
         const size_t largeRepetitions = 1000000;
-        std::cout << "Generating large input" << std::endl;
         for (size_t i = 0; i < largeRepetitions; i++) {
             largeKAT += largeSeed;
         }
         const std::string expectedLargeKAT = "34aa973cd4c4daa4f61eeb2bdbad27316534016f";
-        std::cout << "Beginning Hashing large input" << std::endl;
         std::string largeDigest = hashSHA1(largeKAT);
-        std::cout << "Completed Hashing large input" << std::endl;
+
         EXPECT_EQ(largeDigest, expectedLargeKAT);
 
-        // Gestalt cannot yet hash a string larger than 2^32-1 bits.
-        // See [2] test vector 6.
+        // See [2] test vector 6. 
         // repeated 16,777,216 times
         std::string extremelyLongSeed = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno";
         std::string extremelyLongKAT = "";
         const size_t extremelyLongRepetitions = 16777216;
-        std::cout << "Generating extremely large input" << std::endl;
         for (size_t i = 0; i < extremelyLongRepetitions; i++) {
             extremelyLongKAT += extremelyLongSeed;
         }
         const std::string expectedExtremelyLongKAT = "7789f0c9ef7bfc40d93311143dfbe69e2017f592";
-        std::cout << "Beginning Hashing extremely large input" << std::endl;
         std::string expectedExtremelyLongDigest = hashSHA1(extremelyLongKAT);
-        std::cout << "Completed Hashing extremely large input" << std::endl;
+
         EXPECT_EQ(expectedExtremelyLongDigest, expectedExtremelyLongKAT);
     } else {
         std::cout << "Skipping extremely long test." << std::endl;
     }
 }
-*/
+
 
 // Unit test for fillBlock function.
 TEST(testSHA1Functions, fillBlock) {
@@ -119,7 +109,7 @@ TEST(testSHA1Functions, fillBlock) {
         0xb8599dd6, 0x380a1a26, 0x01e02203, 0xe7cc3456, 0xe6e60b69, 0x00f60a00, 0x5795ef4f, 0x822e0879 };
 
     uint32_t computedW[80]; // Array to store computed values
-    testSHA1Object.testSHA1FillBlock(in, computedW, 0);
+    testSHA1Object.testSHA1FillBlock(in, computedW);
 
     bool arraysEqual = true;
     for (int i = 0; i < 80; i++) {

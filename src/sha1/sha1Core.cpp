@@ -38,7 +38,11 @@ std::string SHA1::hash(std::string in) {
 
     for (size_t i = 0; i < in.length(); i += 64) {
         uint32_t w[BLOCK_SIZE];
-        fillBlock(in, w, i);
+        
+        // Break the input into chunks of 64 bytes
+        std::string chunk = in.substr(i, 64);
+        // Fill SHA-1 block
+        fillBlock(chunk, w);
         
         // Initialize hash value for this chunk
         uint32_t a = h0;
@@ -137,12 +141,12 @@ void SHA1::reset() {
  * @param w The output block array.
  * @param index The starting index in the input string from which data is read.
  */
-void SHA1::fillBlock(std::string in, uint32_t w[BLOCK_SIZE], size_t index) {
+void SHA1::fillBlock(std::string in, uint32_t w[BLOCK_SIZE]) {
     for (int j = 0; j < 16; ++j) {
-        w[j] = ((in[index + j * 4 + 3] & 0xff)) |
-               ((in[index + j * 4 + 2] & 0xff) << 8) |
-               ((in[index + j * 4 + 1] & 0xff) << 16) |
-               ((in[index + j * 4 + 0] & 0xff) << 24);
+        w[j] = ((in[j * 4 + 3] & 0xff)) |
+               ((in[j * 4 + 2] & 0xff) << 8) |
+               ((in[j * 4 + 1] & 0xff) << 16) |
+               ((in[j * 4 + 0] & 0xff) << 24);
     }
     for (int j = 16; j < 80; ++j) {
         uint32_t temp = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
@@ -174,9 +178,9 @@ void SHA1::applySha1Padding(std::string& in) {
     }
 }
 
-void testSHA1Functions::testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE], size_t index) {
+void testSHA1Functions::testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE]) {
     SHA1Object.applySha1Padding(in);
-    this->SHA1Object.fillBlock(in, computedW, 0);
+    this->SHA1Object.fillBlock(in, computedW);
 }
 
 void testSHA1Functions::testSHA1Padding(std::string& in) {
