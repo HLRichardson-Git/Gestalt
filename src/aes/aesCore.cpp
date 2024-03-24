@@ -359,7 +359,7 @@ void AES::keyExpansion(std::string key, unsigned char* roundKey) {
  */
 void AES::rotWord(unsigned char temp[4]) {
     unsigned char temp2 = temp[0];
-    for (int x = 0; x < 4; x++) {
+    for (int x = 0; x < 3; x++) {
         temp[x] = temp[x + 1];
     }
     temp[3] = temp2;
