@@ -21,7 +21,7 @@ Gestalt Releases
 ### Changes between 0.3 and 0.3.1 [xx Mar 2024]
 
  * Fixed bug that caused large inputs for SHA-1 to take longer than expected.
- * Fixed bug in aes that caused subWord function in the key expansion to go
+ * Fixed bug in aes that caused rotWord function in the key expansion to go
       outside an arrays indices.
 
 ### Changes between 0.2 and 0.3 [17 Mar 2024]
