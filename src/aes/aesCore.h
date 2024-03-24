@@ -22,9 +22,6 @@
 
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <cstring>
 class AES {
 private:
 	static const unsigned int Nb = 16; // Block size
@@ -36,21 +33,27 @@ private:
 	void subByte(unsigned char state[Nb]);
 	void shiftRows(unsigned char state[Nb]);
 	void mixColumns(unsigned char state[Nb]);
-	void addRoundKey(unsigned char state[Nb], unsigned char* roundKey);
+	void addRoundKey(unsigned char state[Nb], const unsigned char* roundKey);
 
 	void invSubByte(unsigned char state[Nb]);
 	void invShiftRows(unsigned char state[Nb]);
 	void invMixColumns(unsigned char state[Nb]);
 
-	void keyExpansion(std::string key, unsigned char* roundKey);
+	void keyExpansion(const std::string& key, unsigned char* roundKey);
 	void rotWord(unsigned char temp[4]);
 	void subWord(unsigned char temp[4]);
 	void rcon(unsigned char temp[4], int round);
 	
 public:
 
-	AES(std::string key);
-	~AES() {delete[] roundKey;}
+	explicit AES(const std::string& key);
+	~AES();
+
+	// Copy constructor
+    AES(AES& other);
+
+	// Assignment operator
+    AES& operator=(const AES& other);
 
 	void encryptBlock(unsigned char* input);
 	void decryptBlock(unsigned char* input);
@@ -75,7 +78,7 @@ public:
     void testSubByte(unsigned char state[Nb]);
 	void testShiftRows(unsigned char state[Nb]);
 	void testMixColumns(unsigned char state[Nb]);
-	void testAddRoundKey(unsigned char state[Nb], unsigned char* roundKey);
+	void testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey);
 
 	void testInvSubByte(unsigned char state[Nb]);
 	void testInvShiftRows(unsigned char state[Nb]);

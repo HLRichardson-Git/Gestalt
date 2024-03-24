@@ -92,31 +92,31 @@ std::string SHA1::hash(std::string in) {
  * @return The SHA-1 hash digest as a hexadecimal string.
  */
 std::string SHA1::digest() {
-    uint8_t hash[20];
-    hash[0] = (h0 >> 24) & 0xFF;
-    hash[1] = (h0 >> 16) & 0xFF;
-    hash[2] = (h0 >> 8) & 0xFF;
-    hash[3] = h0 & 0xFF;
-    hash[4] = (h1 >> 24) & 0xFF;
-    hash[5] = (h1 >> 16) & 0xFF;
-    hash[6] = (h1 >> 8) & 0xFF;
-    hash[7] = h1 & 0xFF;
-    hash[8] = (h2 >> 24) & 0xFF;
-    hash[9] = (h2 >> 16) & 0xFF;
-    hash[10] = (h2 >> 8) & 0xFF;
-    hash[11] = h2 & 0xFF;
-    hash[12] = (h3 >> 24) & 0xFF;
-    hash[13] = (h3 >> 16) & 0xFF;
-    hash[14] = (h3 >> 8) & 0xFF;
-    hash[15] = h3 & 0xFF;
-    hash[16] = (h4 >> 24) & 0xFF;
-    hash[17] = (h4 >> 16) & 0xFF;
-    hash[18] = (h4 >> 8) & 0xFF;
-    hash[19] = h4 & 0xFF;
+    uint8_t hashValue[20];
+    hashValue[0] = (h0 >> 24) & 0xFF;
+    hashValue[1] = (h0 >> 16) & 0xFF;
+    hashValue[2] = (h0 >> 8) & 0xFF;
+    hashValue[3] = h0 & 0xFF;
+    hashValue[4] = (h1 >> 24) & 0xFF;
+    hashValue[5] = (h1 >> 16) & 0xFF;
+    hashValue[6] = (h1 >> 8) & 0xFF;
+    hashValue[7] = h1 & 0xFF;
+    hashValue[8] = (h2 >> 24) & 0xFF;
+    hashValue[9] = (h2 >> 16) & 0xFF;
+    hashValue[10] = (h2 >> 8) & 0xFF;
+    hashValue[11] = h2 & 0xFF;
+    hashValue[12] = (h3 >> 24) & 0xFF;
+    hashValue[13] = (h3 >> 16) & 0xFF;
+    hashValue[14] = (h3 >> 8) & 0xFF;
+    hashValue[15] = h3 & 0xFF;
+    hashValue[16] = (h4 >> 24) & 0xFF;
+    hashValue[17] = (h4 >> 16) & 0xFF;
+    hashValue[18] = (h4 >> 8) & 0xFF;
+    hashValue[19] = h4 & 0xFF;
 
     std::ostringstream oss;
     for (int i = 0; i < 20; ++i) {
-        oss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+        oss << std::hex << std::setw(2) << std::setfill('0') << (int)hashValue[i];
     }
     return oss.str();
 }

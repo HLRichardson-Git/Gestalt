@@ -39,6 +39,8 @@
  * Author: Hunter L, Richardson
  * Date: 2024-02-11
  */
+#include <iostream>
+#include <string>
 
 #include "aesCore.h"
 #include "aesConstants.h"
@@ -59,7 +61,7 @@ enum class AESKeySize : int {
  * @param key A string representing the encryption key in hexadecimal format.
  * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
  */
-AES::AES(std::string key) {
+AES::AES(const std::string& key) {
     // // Determine key size and set Nw (number of words in key) and Nr (number of rounds)
     switch (key.size() * 4) {
     case static_cast<int>(AESKeySize::AES_128):
@@ -81,6 +83,31 @@ AES::AES(std::string key) {
     // Allocate memory for round keys and perform key expansion
     roundKey = new unsigned char[Nb * (Nr + 1)];
     keyExpansion(key, roundKey);
+}
+
+// Deconstructor 
+AES::~AES() {
+    delete[] roundKey;
+}
+
+// Copy constructor
+AES::AES(AES& other) {
+    Nw = other.Nw;
+    Nr = other.Nr;
+    roundKey = new unsigned char[Nb * (Nr + 1)];
+    std::copy(other.roundKey, other.roundKey + Nb * (Nr + 1), roundKey);
+}
+
+// Assignment operator
+AES& AES::operator=(const AES& other) {
+    if (this != &other) {
+        delete[] roundKey;
+        Nw = other.Nw;
+        Nr = other.Nr;
+        roundKey = new unsigned char[Nb * (Nr + 1)];
+        std::copy(other.roundKey, other.roundKey + Nb * (Nr + 1), roundKey);
+    }
+    return *this;
 }
 
 /*
@@ -222,7 +249,7 @@ void AES::mixColumns(unsigned char state[Nb]) {
  * @param state The state array to which the round key is added.
  * @param roundKey Pointer to the round key array.
  */
-void AES::addRoundKey(unsigned char state[Nb], unsigned char* roundKey) {
+void AES::addRoundKey(unsigned char state[Nb], const unsigned char* roundKey) {
     for (int i = 0; i < 16; i++) {
 		state[i] ^= roundKey[i];
 	}
@@ -314,7 +341,7 @@ void AES::invMixColumns(unsigned char state[Nb]) {
  * @param key The original encryption key.
  * @param roundKey Pointer to the array where the round keys will be stored.
  */
-void AES::keyExpansion(std::string key, unsigned char* roundKey) {
+void AES::keyExpansion(const std::string& key, unsigned char* roundKey) {
     unsigned char temp[4] = { 0x00, 0x00, 0x00, 0x00 };
 
     unsigned int i = 0;
@@ -406,7 +433,7 @@ void TestAesFunctions::testMixColumns(unsigned char state[Nb]) {
 }
 
 // Uses addRoundKey function from AES for testing
-void TestAesFunctions::testAddRoundKey(unsigned char state[Nb], unsigned char* roundKey) {
+void TestAesFunctions::testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey) {
     this->aesObject.addRoundKey(state, roundKey);
 }
 
