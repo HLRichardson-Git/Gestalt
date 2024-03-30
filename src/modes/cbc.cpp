@@ -1,4 +1,10 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * cbc.cpp
  *
  * This file contains the implementation of cbc (Cipher Block Chaining) mode encryption and decryption functions.
@@ -6,9 +12,6 @@
  * 
  * References:
  * - NIST Special Publication SP800-38A: "Recommendation for Block Cipher Modes of Operation" (https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf)
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-02-24
  */
 
 #include "modes.h"

@@ -1,10 +1,13 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * sha1Tests.cpp
  *
  * This file contains the unit tests for the SHA1 (Secure Hashing Algorithm 1) algorithm implementation.
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-03-17
  */
 
 #include "gtest/gtest.h"

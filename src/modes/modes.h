@@ -1,11 +1,14 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * modes.h
  *
  * This header file defines functions for various block cipher modes such as ECB and CBC.
  * It includes function templates for encryption and decryption functions for these modes.
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-02-24
  */
 
 #pragma once

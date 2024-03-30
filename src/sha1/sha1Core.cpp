@@ -1,4 +1,10 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * sha1Core.cpp
  *
  * This file contains the implementation of the SHA-1 (Secure Hash Algorithm 1) hashing function.
@@ -10,9 +16,6 @@
  * - [1] "Secure Hash Standard (SHS)" by the National Institute of Standards and Technology (NIST)
  * - RFC 3174: US Secure Hash Algorithm 1 (SHA1) (https://nvlpubs.nist.gov/nistpubs/Legacy/FIPS/fipspub180-1.pdf)
  * - [2] "Understanding Cryptography" by Christof Paar and Jan Pelzl
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-03-17
  */
 
 #include "sha1Core.h"

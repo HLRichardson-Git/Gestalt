@@ -1,4 +1,10 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * aesCore.cpp
  *
  * This file contains the implementation of the AES (Advanced Encryption Standard) algorithm.
@@ -35,10 +41,8 @@
  * This linear representation simplifies the implementation of AES operations, 
  * making it more efficient and easier to work with while preserving the structure
  * defined in the AES standard.
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-02-11
  */
+
 #include <iostream>
 #include <string>
 

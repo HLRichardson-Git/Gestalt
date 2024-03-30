@@ -1,4 +1,10 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * aesCore.h
  *
  * This file contains an implementation of the Advanced Encryption Standard (AES) algorithm in C++.
@@ -15,9 +21,6 @@
  *
  * This implementation is designed to be portable and easy to use, providing a straightforward
  * interface for encrypting and decrypting data using AES.
- *
- * Author: Hunter L, Richardson
- * Date: 2024-02-11
  */
 
 #pragma once

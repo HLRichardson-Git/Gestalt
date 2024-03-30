@@ -1,12 +1,15 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * utils.cpp
  *
  * This file contains the implementation of utility functions declared in utils.h.
  * These functions include conversions between hexadecimal strings and byte arrays,
  * generation of random data, and XOR operations on byte arrays.
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-03-10
  */
 
 #include "utils.h"
@@ -44,7 +47,7 @@ void hexStringToBytes(const std::string& hexString, unsigned char* output) {
     }
 }
 
-std::string convertToHex(const std::string input) {
+std::string convertToHex(const std::string& input) {
     std::stringstream hexStream;
     hexStream << std::hex << std::setfill('0');
     
@@ -107,7 +110,7 @@ std::string generateRandomData(size_t sizeInMB) {
     return data;
 }
 
-void xorBlock(unsigned char* a, std::string b, size_t blockIndex) {
+void xorBlock(unsigned char* a, const std::string& b, size_t blockIndex) {
     for (int i = 0; i < 16; i++) {
         a[blockIndex + i] ^= b[i];
     }

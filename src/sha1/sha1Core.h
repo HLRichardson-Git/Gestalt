@@ -1,4 +1,10 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * sha1Core.h
  *
  * This file contains the declaration of the SHA-1 (Secure Hash Algorithm 1) hashing function in C++.
@@ -11,9 +17,6 @@
  *
  * This header provides the declaration of the SHA1 class, which encapsulates the functionality to generate SHA-1
  * hashes from input strings.
- *
- * Author: Hunter L, Richardson
- * Date: 2024-03-17
  */
 
 #pragma once
