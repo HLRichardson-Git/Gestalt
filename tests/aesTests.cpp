@@ -1,12 +1,15 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * aesTests.cpp
  *
  * This file contains the unit tests for the AES (Advanced Encryption Standard) algorithm implementation.
  * The tests cover various scenarios including roundtrip encryption and decryption with different key sizes,
  * key expansion, AES block operations (SubBytes, ShiftRows, MixColumns), and AES inverse block operations.
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-02-11
  */
 
 #include "gtest/gtest.h"
@@ -24,7 +27,7 @@ TestAesFunctions testFunctions;
 TEST(TestAesECB, RoundtripWith128BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 
-	std::string key = "10a58869d74be5a374cf867cfb473859";
+	const std::string key = "10a58869d74be5a374cf867cfb473859";
 	
 	// Encrypt and decrypt the message using AES ECB mode with 128-bit key
 	std::string ct = aesEncryptECB(inputData, key);
@@ -38,7 +41,7 @@ TEST(TestAesECB, RoundtripWith128BitKey) {
 TEST(TestAesECB, RoundtripWith192BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 
-	std::string key = "e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd";
+	const std::string key = "e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd";
 
 	// Encrypt and decrypt the message using AES ECB mode with 192-bit key
 	std::string ct = aesEncryptECB(inputData, key);
@@ -52,7 +55,7 @@ TEST(TestAesECB, RoundtripWith192BitKey) {
 TEST(TestAesECB, RoundtripWith256BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 
-	std::string key = "c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558";
+	const std::string key = "c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558";
 
 	// Encrypt and decrypt the message using AES ECB mode with 256-bit key
 	std::string ct = aesEncryptECB(inputData, key);
@@ -67,7 +70,7 @@ TEST(TestAesCBC, RoundtripWith128BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 	std::string nonce = generateRandomHexData(16); // Generate random 16-byte (128-bit) nonce
 
-	std::string key = "10a58869d74be5a374cf867cfb473850";
+	const std::string key = "10a58869d74be5a374cf867cfb473850";
 
 	// Encrypt and decrypt the message using AES CBC mode with 128-bit key
 	std::string ct = aesEncryptCBC(inputData, nonce, key);
@@ -82,7 +85,7 @@ TEST(TestAesCBC, RoundtripWith192BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 	std::string nonce = generateRandomHexData(16); // Generate random 16-byte (128-bit) nonce
 
-	std::string key = "e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd";
+	const std::string key = "e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd";
 
 	// Encrypt and decrypt the message using AES CBC mode with 192-bit key
 	std::string ct = aesEncryptCBC(inputData, nonce, key);
@@ -97,7 +100,7 @@ TEST(TestAesCBC, RoundtripWith256BitKey) {
 	std::string inputData = generateRandomData(1); // Generate random input data (1MB)
 	std::string nonce = generateRandomHexData(16); // Generate random 16-byte (128-bit) nonce
 
-	std::string key = "c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558";
+	const std::string key = "c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558";
 
 	// Encrypt and decrypt the message using AES CBC mode with 256-bit key
 	std::string ct = aesEncryptCBC(inputData, nonce, key);
@@ -110,13 +113,13 @@ TEST(TestAesCBC, RoundtripWith256BitKey) {
 // Unit tests for AES ECB mode Known Answer Test with 128-bit key
 TEST(TestAesKAT, KATWith128BitKey) {
 	// Use known plaintext
-	std::string inputData = "Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle...and wonder if we'll ever get the chance to kill him.";
+	const std::string inputData = "Everything that lives is designed to end. We are perpetually trapped in a never-ending spiral of life and death. Is this a curse? Or some kind of punishment? I often think about the god who blessed us with this cryptic puzzle...and wonder if we'll ever get the chance to kill him.";
 
-	std::string key = "10a58869d74be5a374cf867cfb473859";
+	const std::string key = "10a58869d74be5a374cf867cfb473859";
 
 	// Encrypt and decrypt the message using AES ECB mode with 128-bit key
 	std::string ct = aesEncryptECB(inputData, key);
-	std::string expectedStr = "948084c7c03487d76e58b1d9747103578c93790463a680009fc74fcbf59e63a39a044953a4a6e11f99257ab4068ccea583a60daa41fe9b9dfa20f5352ce4669c914c41110dbac9e0d0bcf92981fb494e87ce717f2ded9ba4b3fea9be4598e324ba93f50414d0cd9f9131357fccedf8bf0bb64c4bd16a1cda3e9d823d377284bbe53164922969d1d2a7c982b768a131c7223919e377e66fc09a4f7f74899405b49d5f752448595de2f5818fe56b442e5354e517d36ccc44b90f7e5abc8f11b1a593a97f4b8193ee6be5ce850da8d6fca3178c06c39c228591507479750eaf625fd85055c04479824757f7e57e246fb3fc26c3da324c0a30c030dd3848bd705df289a39ebe1cb6e529508c874d2dc2d616f8cfb0ab683d1296ce1d5e22bc0dd048";
+	const std::string expectedStr = "948084c7c03487d76e58b1d9747103578c93790463a680009fc74fcbf59e63a39a044953a4a6e11f99257ab4068ccea583a60daa41fe9b9dfa20f5352ce4669c914c41110dbac9e0d0bcf92981fb494e87ce717f2ded9ba4b3fea9be4598e324ba93f50414d0cd9f9131357fccedf8bf0bb64c4bd16a1cda3e9d823d377284bbe53164922969d1d2a7c982b768a131c7223919e377e66fc09a4f7f74899405b49d5f752448595de2f5818fe56b442e5354e517d36ccc44b90f7e5abc8f11b1a593a97f4b8193ee6be5ce850da8d6fca3178c06c39c228591507479750eaf625fd85055c04479824757f7e57e246fb3fc26c3da324c0a30c030dd3848bd705df289a39ebe1cb6e529508c874d2dc2d616f8cfb0ab683d1296ce1d5e22bc0dd048";
 	std::string hexCiphertext = convertToHex(ct);
 	// Check if encrypted message matches expected ciphertext
 	EXPECT_EQ(hexCiphertext, expectedStr);
@@ -131,7 +134,7 @@ TEST(TestAesKAT, KATWith128BitKey) {
 TEST(TestAesKeyExpansion, KeyExpansion) {
 	const unsigned char* roundKey = testFunctions.testKeyExpansion();
 
-	std::string expectedStr = "10a58869d74be5a374cf867cfb473859b1a2436666e9a6c5122620b9e96118e05c0fa2783ae604bd28c02404c1a13ce46ae4cb005002cfbd78c2ebb9b963d75d99ea8756c9e848ebb12aa3520849740fb278f1667b90b98dcaba1adfc2f36ed09fe78143e47738ce2ecd2211ec3e4cc16dcef98d89b9c143a774e3524b4aaf933bb7253eb20ee47d157a072f5e30a8bc24754066967ba41b8301a334dd310b88d55e84a7432520bcc02483881d158800";
+	const std::string expectedStr = "10a58869d74be5a374cf867cfb473859b1a2436666e9a6c5122620b9e96118e05c0fa2783ae604bd28c02404c1a13ce46ae4cb005002cfbd78c2ebb9b963d75d99ea8756c9e848ebb12aa3520849740fb278f1667b90b98dcaba1adfc2f36ed09fe78143e47738ce2ecd2211ec3e4cc16dcef98d89b9c143a774e3524b4aaf933bb7253eb20ee47d157a072f5e30a8bc24754066967ba41b8301a334dd310b88d55e84a7432520bcc02483881d158800";
 	size_t arraySize = expectedStr.length() / 2;
     unsigned char* expectedByteArray = new unsigned char[arraySize];
     hexStringToBytes(expectedStr, expectedByteArray);
@@ -159,7 +162,7 @@ TEST(TestAesFunctions, SubByte) {
 	testFunctions.testSubByte(state);
 
 	// Expected output after SubByte transformation
-	unsigned char expected[16] = {0x6a, 0xba, 0x69, 0x6b, 0x6c, 0x85, 0xa6, 0xbf, 0xaf, 0x7a, 0x87, 0xad, 0x57, 0x1b, 0xe2, 0xbe};
+	const unsigned char expected[16] = {0x6a, 0xba, 0x69, 0x6b, 0x6c, 0x85, 0xa6, 0xbf, 0xaf, 0x7a, 0x87, 0xad, 0x57, 0x1b, 0xe2, 0xbe};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {
@@ -181,7 +184,7 @@ TEST(TestAesFunctions, shiftRows) {
 	// Call the shiftRows function and test
 	testFunctions.testShiftRows(state);
 
-	unsigned char expected[16] = {0x6a, 0x85, 0x87, 0xbe, 0x6c, 0x7a, 0xe2, 0x6b, 0xaf, 0x1b, 0x69, 0xbf, 0x57, 0xba, 0xa6, 0xad};
+	const unsigned char expected[16] = {0x6a, 0x85, 0x87, 0xbe, 0x6c, 0x7a, 0xe2, 0x6b, 0xaf, 0x1b, 0x69, 0xbf, 0x57, 0xba, 0xa6, 0xad};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {
@@ -203,7 +206,7 @@ TEST(TestAesFunctions, mixColumns) {
 	// Call the mixColumns function and test
 	testFunctions.testMixColumns(state);
 
-	unsigned char expected[16] = {0x79, 0x57, 0x23, 0xdb, 0xdf, 0xce, 0x74, 0xfa, 0xbe, 0x9d, 0xbc, 0xfd, 0x70, 0x64, 0x56, 0xa4};
+	const unsigned char expected[16] = {0x79, 0x57, 0x23, 0xdb, 0xdf, 0xce, 0x74, 0xfa, 0xbe, 0x9d, 0xbc, 0xfd, 0x70, 0x64, 0x56, 0xa4};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {
@@ -221,12 +224,12 @@ TEST(TestAesFunctions, mixColumns) {
 TEST(TestAesFunctions, addRoundKey) {
 	// Prepare input data
 	unsigned char state[16] = {0x79, 0x57, 0x23, 0xdb, 0xdf, 0xce, 0x74, 0xfa, 0xbe, 0x9d, 0xbc, 0xfd, 0x70, 0x64, 0x56, 0xa4};
-	unsigned char key[16] = {0x58, 0xc0, 0xe4, 0x05, 0xb8, 0x67, 0xc5, 0xf4, 0x1b, 0xbd, 0xea, 0x18, 0xda, 0x44, 0x3b, 0x5a};
+	const unsigned char key[16] = {0x58, 0xc0, 0xe4, 0x05, 0xb8, 0x67, 0xc5, 0xf4, 0x1b, 0xbd, 0xea, 0x18, 0xda, 0x44, 0x3b, 0x5a};
 
 	// Call the addRoundKey function and test
 	testFunctions.testAddRoundKey(state, key);
 
-	unsigned char expected[16] = {0x21, 0x97, 0xc7, 0xde, 0x67, 0xa9, 0xb1, 0x0e, 0xa5, 0x20, 0x56, 0xe5, 0xaa, 0x20, 0x6d, 0xfe};
+	const unsigned char expected[16] = {0x21, 0x97, 0xc7, 0xde, 0x67, 0xa9, 0xb1, 0x0e, 0xa5, 0x20, 0x56, 0xe5, 0xaa, 0x20, 0x6d, 0xfe};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {
@@ -248,7 +251,7 @@ TEST(TestAesFunctions, invSubByte) {
 	// Call the invSubByte function and test
 	testFunctions.testInvSubByte(state);
 
-	unsigned char expected[16] = {0x20, 0x53, 0xc7, 0xde, 0x46, 0x5d, 0xc2, 0xe2, 0x82, 0x65, 0x20, 0x14, 0x22, 0x08, 0xac, 0xe4};
+	const unsigned char expected[16] = {0x20, 0x53, 0xc7, 0xde, 0x46, 0x5d, 0xc2, 0xe2, 0x82, 0x65, 0x20, 0x14, 0x22, 0x08, 0xac, 0xe4};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {
@@ -270,7 +273,7 @@ TEST(TestAesFunctions, invShiftRows) {
 	// Call the invSubByte function and test
 	testFunctions.testInvShiftRows(state);
 
-	unsigned char expected[16] = {0xb7, 0xed, 0xc6, 0x1d, 0x5a, 0x4c, 0x25, 0x98, 0x13, 0x4d, 0xb7, 0xfa, 0x93, 0x30, 0x91, 0x69};
+	const unsigned char expected[16] = {0xb7, 0xed, 0xc6, 0x1d, 0x5a, 0x4c, 0x25, 0x98, 0x13, 0x4d, 0xb7, 0xfa, 0x93, 0x30, 0x91, 0x69};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {
@@ -292,7 +295,7 @@ TEST(TestAesFunctions, invMixColumns) {
 	// Call the invSubByte function and test
 	testFunctions.testInvMixColumns(state);
 
-	unsigned char expected[16] = {0xb7, 0x4c, 0xb7, 0x69, 0x5a, 0x4d, 0x91, 0x1d, 0x13, 0x30, 0xc6, 0x98, 0x93, 0xed, 0x25, 0xfa};
+	const unsigned char expected[16] = {0xb7, 0x4c, 0xb7, 0x69, 0x5a, 0x4d, 0x91, 0x1d, 0x13, 0x30, 0xc6, 0x98, 0x93, 0xed, 0x25, 0xfa};
 
 	bool arraysEqaul = true;
 	for (size_t i = 0; i < 16; ++i) {

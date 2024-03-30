@@ -1,10 +1,13 @@
 /*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
  * aes.cpp
  *
  * This file contains the implementation of Gestalts AES security functions.
- * 
- * Author: Hunter L, Richardson
- * Date: 2024-03-07
  */
 
 #include <gestalt/aes.h>

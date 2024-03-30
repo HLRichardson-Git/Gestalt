@@ -11,13 +11,20 @@ appropriate release branch.
 Gestalt Releases
 ----------------
 
- - [Gestalt 0.3](#gestalt-0.3)
- - [Gestalt 0.2](#gestalt-0.2)
- - [Gestalt 0.1.1](#gestalt-0.1.1)
- - [Gestalt 0.1](#gestalt-0.1)
+ - [Gestalt 0.3](#gestalt-03)
+ - [Gestalt 0.2](#gestalt-02)
+ - [Gestalt 0.1](#gestalt-01)
 
  Gestalt 0.3
 -----------
+
+### Changes between 0.3 and 0.3.1 [30 Mar 2024]
+
+ * Fixed bug that caused large inputs for SHA-1 to take longer than expected.
+ * Fixed bug in aes that caused rotWord function in the key expansion to go
+      outside an arrays indices.
+ * Addressed cppcheck static analyzer suggestions in Gestalt.
+ * Improved Gestalts copyright and license, introducing an AUTHORS file. 
 
 ### Changes between 0.2 and 0.3 [17 Mar 2024]
 
@@ -45,16 +52,13 @@ Gestalt 0.2
        need a local copy of GoogleTest.
  * Improved documentation.
 
-Gestalt 0.1.1
+Gestalt 0.1
 -----------
 
 ### Changes between 0.1.0 and 0.1.1 [24 Feb 2024]
 
  * Added generalized block cipher modes of operation functions.
  * Improved documentation.
-
-Gestalt 0.1
------------
 
 ### Changes between 0.0.0 and 0.1.0 [8 Feb 2024]
 

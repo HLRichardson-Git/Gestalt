@@ -89,6 +89,6 @@ attempting to develop or distribute cryptographic code.
 Copyright
 =========
 
-Copyright (c) 2023-2024 Hunter L. Richardson
+Copyright (c) 2023-2024 The Gestalt Project Authors.
 
 All rights reserved.
