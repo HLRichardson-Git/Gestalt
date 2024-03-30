@@ -18,7 +18,7 @@ Gestalt Releases
  Gestalt 0.3
 -----------
 
-### Changes between 0.3 and 0.3.1 [xx Mar 2024]
+### Changes between 0.3 and 0.3.1 [30 Mar 2024]
 
  * Fixed bug that caused large inputs for SHA-1 to take longer than expected.
  * Fixed bug in aes that caused rotWord function in the key expansion to go
