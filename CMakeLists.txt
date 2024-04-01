@@ -22,6 +22,7 @@ set (Sources
     src/modes/cbc.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
+    src/ecc/ecdsa/ecdsa.cpp
     tools/utils.cpp
 )
 
@@ -31,7 +32,11 @@ FetchContent_MakeAvailable(googletest)
 add_library (${Project_Name} STATIC ${Sources})
 # Specify the directories where header files are located
 target_include_directories(${Project_Name} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/external)
 
-target_link_libraries(${Project_Name} gtest_main)
+add_subdirectory(external/infint)
+
+target_link_libraries(${Project_Name} PRIVATE gtest_main)
+target_link_libraries(${Project_Name} PRIVATE infint)
 
 add_subdirectory(tests)

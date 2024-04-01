@@ -61,6 +61,36 @@ std::string convertToHex(const std::string& input) {
     return hexStream.str();
 }
 
+std::string DecimalToBinary(int num)
+{
+    std::string str;
+      while(num){
+      if(num & 1) // 1
+        str+='1';
+      else // 0
+        str+='0';
+      num>>=1; // Right Shift by 1  
+    }    
+      return str;
+}
+
+int hexStringToInt(const std::string& hexString) {
+    // Initialize an output stream
+    std::stringstream ss;
+    
+    // Convert the hex string to an integer using stringstream
+    ss << std::hex << hexString;
+    
+    // Initialize an integer to store the result
+    int result;
+    
+    // Read the integer value from the stringstream
+    ss >> result;
+    
+    // Return the integer value
+    return result;
+}
+
 std::string generateRandomHexData(size_t numBytes) {
     std::random_device rd;
     std::mt19937 gen(rd());
