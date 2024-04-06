@@ -7,14 +7,14 @@
 /*
  * ecdsa.h
  *
- * This file contains the definitions of Gestalts AES security functions.
+ * This file contains the definitions of Gestalts ECDSA security functions.
  */
 
 #pragma once
 
 #include <string>
 
-#include "../../src/ecc/eccRecources.h"
+#include "../src/ecc/ecc.h"
 
 struct Signature {
     int r;
@@ -24,22 +24,15 @@ struct Signature {
 class ECDSA {
 private:
 
-     Point addPoints(Point P, Point Q);
-     Point doublePoint(Point P);
-     Point scalarMultiplyPoints(int k, Point P);
-
-    int getRandomNumber(int min, int max);
+    ECC ecc;
 public:
 
-    ECDSA();
+    ECDSA(StandardCurve curve = StandardCurve::test) : ecc(curve) {
+        // Initialize ECDSA with the selected standard curve
+    }
 	~ECDSA() {}
 
-    ECDSA_KeyPair keyPair;
-
-    ECDSA_KeyPair generateKeyPair();
-    Signature signMessage(const std::string& message, const ECDSA_KeyPair& keyPair);
+    KeyPair generateKeyPair();
+    Signature signMessage(const std::string& message, const KeyPair& keyPair);
     bool verifySignature(const std::string& message, const Signature signature, const Point& publicKey);
 };
-
-std::tuple<int, int, int> extendedEuclidean(int a, int b);
-int modInverse(int a, int m);
