@@ -61,17 +61,16 @@ std::string convertToHex(const std::string& input) {
     return hexStream.str();
 }
 
-std::string DecimalToBinary(int num)
+std::string decimalToBinary(int num)
 {
+    if (num == 0) return "0"; // Special case: 0
+
     std::string str;
-      while(num){
-      if(num & 1) // 1
-        str+='1';
-      else // 0
-        str+='0';
-      num>>=1; // Right Shift by 1  
-    }    
-      return str;
+    while (num > 0) {
+        str = (num % 2 == 0 ? "0" : "1") + str; // Append the least significant bit to the left
+        num /= 2; // Divide by 2 to move to the next bit
+    }
+    return str;
 }
 
 int hexStringToInt(const std::string& hexString) {

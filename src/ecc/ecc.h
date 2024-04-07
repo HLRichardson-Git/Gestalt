@@ -71,5 +71,6 @@ public:
     Point scalarMultiplyPoints(int k, Point P);
 
     int getRandomNumber(int min, int max);
+    int mod(int a, int n);
     int modInverse(int a, int m);
 };

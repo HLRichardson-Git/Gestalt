@@ -8,6 +8,7 @@ set (Sources
     aesTests.cpp
     desTests.cpp
     sha1Tests.cpp
+    eccTests.cpp
     ecdsaTests.cpp
 )
 
