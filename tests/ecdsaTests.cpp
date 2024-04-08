@@ -18,7 +18,7 @@ TEST(TestECDSAsignature, testSignautre)
     ECDSA sign;
     KeyPair keyPair = sign.generateKeyPair();
 
-    std::string message = "Hello, ECDSA!";
+    std::string message = "1AC5";
 
     Signature signature = sign.signMessage(message, keyPair);
     bool verify = sign.verifySignature(message, signature, keyPair.publicKey);
@@ -31,11 +31,11 @@ TEST(TestECDSAsignature, testInducedFailureVerification)
     ECDSA sign;
     KeyPair keyPair = sign.generateKeyPair();
 
-    std::string message = "Hello, ECDSA!";
+    std::string message = "1AC5";
 
     Signature signature = sign.signMessage(message, keyPair);
 
-    message= "NOT Hello, ECDSA!";
+    message= "1AC5FFF";
     bool verify = sign.verifySignature(message, signature, keyPair.publicKey);
 
     EXPECT_EQ(verify, 0);

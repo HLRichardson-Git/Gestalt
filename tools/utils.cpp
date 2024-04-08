@@ -90,6 +90,85 @@ int hexStringToInt(const std::string& hexString) {
     return result;
 }
 
+// Function to convert hexadecimal string to binary string
+std::string hexToBinary(const std::string& hexStr) {
+    std::string binStr;
+    for (char c : hexStr) {
+        switch (c) {
+        case '0':
+            binStr += "0000";
+            break;
+        case '1':
+            binStr += "0001";
+            break;
+        case '2':
+            binStr += "0010";
+            break;
+        case '3':
+            binStr += "0011";
+            break;
+        case '4':
+            binStr += "0100";
+            break;
+        case '5':
+            binStr += "0101";
+            break;
+        case '6':
+            binStr += "0110";
+            break;
+        case '7':
+            binStr += "0111";
+            break;
+        case '8':
+            binStr += "1000";
+            break;
+        case '9':
+            binStr += "1001";
+            break;
+        case 'A':
+        case 'a':
+            binStr += "1010";
+            break;
+        case 'B':
+        case 'b':
+            binStr += "1011";
+            break;
+        case 'C':
+        case 'c':
+            binStr += "1100";
+            break;
+        case 'D':
+        case 'd':
+            binStr += "1101";
+            break;
+        case 'E':
+        case 'e':
+            binStr += "1110";
+            break;
+        case 'F':
+        case 'f':
+            binStr += "1111";
+            break;
+        case '.':
+            binStr += ".";
+            break;
+        default:
+                std::cerr << "Invalid hexadecimal character: " << c << std::endl;
+                return "";
+        }
+    }
+    return binStr;
+}
+
+// Function to convert binary string to integer
+int binaryToInt(const std::string& binStr) {
+    int result = 0;
+    for (char c : binStr) {
+        result = result * 2 + (c - '0');
+    }
+    return result;
+}
+
 std::string generateRandomHexData(size_t numBytes) {
     std::random_device rd;
     std::mt19937 gen(rd());
