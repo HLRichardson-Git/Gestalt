@@ -21,9 +21,9 @@
 // Function to add two points
 Point ECC::addPoints(Point P, Point Q) {
     Point T = {-1, -1}; // Initialize T to an invalid point
-    int deltaX = mod(Q.x - P.x, curve.p);
-    int deltaY = mod(Q.y - P.y, curve.p);
-    int invDeltaX = modInverse(deltaX, curve.p);
+    InfInt deltaX = mod(Q.x - P.x, curve.p);
+    InfInt deltaY = mod(Q.y - P.y, curve.p);
+    InfInt invDeltaX = modInverse(deltaX, curve.p);
 
     if (invDeltaX == -1) {
         // Handle case where modular inverse doesn't exist
@@ -31,9 +31,9 @@ Point ECC::addPoints(Point P, Point Q) {
         return T;
     }
 
-    int slope = mod(deltaY * invDeltaX, curve.p);
-    int x3 = mod(slope * slope - P.x - Q.x, curve.p);
-    int y3 = mod(slope * (P.x - x3) - P.y, curve.p);
+    InfInt slope = mod(deltaY * invDeltaX, curve.p);
+    InfInt x3 = mod(slope * slope - P.x - Q.x, curve.p);
+    InfInt y3 = mod(slope * (P.x - x3) - P.y, curve.p);
 
     T.x = x3;
     T.y = y3;
@@ -44,47 +44,74 @@ Point ECC::addPoints(Point P, Point Q) {
 // Function to double a point
 Point ECC::doublePoint(Point P) {
     Point T;
- 
-    int s = (3 * P.x * P.x + curve.a) * mod(modInverse(2 * P.y, curve.p), curve.p);
+    
+    //InfInt top = mod(3 * (P.x * P.x)+ curve.a, curve.p);
 
-    T.x = mod(((int)pow(s, 2) - P.x - P.x), curve.p);
+    InfInt s = mod((InfInt)3 * P.x * P.x + curve.a, curve.p) * mod(modInverse((InfInt)2 * P.y, curve.p), curve.p);
+
+    T.x = mod(((s * s) - P.x - P.x), curve.p);
     T.y = mod((s * (P.x - T.x) - P.y), curve.p);
 
     return T;
 }
 
 // Implementation of the double-and-add algoirthm
-Point ECC::scalarMultiplyPoints(int k, Point P) {
+Point ECC::scalarMultiplyPoints(InfInt k, Point P, InfInt m) {
     if (k == 0)
         return {0, 0};
-    else if (k == 1)
+    else if (k == 1) {
+        P.x = mod(P.x, m);
+        P.y = mod(P.y, m);
         return P;
+    }
     else if (k % 2 == 1)
-        return addPoints(P, scalarMultiplyPoints(k - 1, P));
+        return addPoints(P, scalarMultiplyPoints(k - 1, P, m));
     else
-        return scalarMultiplyPoints(k / 2, doublePoint(P));
+        return scalarMultiplyPoints(k / 2, doublePoint(P), m);
 }
 
 // Function to generate random numbers
-int ECC::getRandomNumber(int min, int max) {
+InfInt ECC::getRandomNumber(const InfInt min, const InfInt max) {
+    InfInt range = max - min + 1;
+    if (range <= 0) {
+        throw std::invalid_argument("Invalid range: min must be less than or equal to max.");
+    }
+
+    // Determine the number of digits needed to represent the range
+    size_t numDigits = range.numberOfDigits();
+
+    // Generate random digits
+    std::string randomString;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(min, max);
-    return dis(gen);
+    std::uniform_int_distribution<int> digitDistribution(0, 9);
+    for (size_t i = 0; i < numDigits; ++i) {
+        int digit = digitDistribution(gen);
+        randomString += std::to_string(digit);
+    }
+
+    // Convert the random digits string to an InfInt value
+    InfInt result(randomString);
+
+    // Ensure the result is within the specified range [min, max]
+    result %= range;
+    result += min;
+
+    return result;
 }
 
 // Function to complete the extended euclidean algorithm
-std::tuple<int, int, int> ECC::extendedEuclidean(int a, int b) {
-    int x0 = 1, y0 = 0, x1 = 0, y1 = 1;
+std::tuple<InfInt, InfInt, InfInt> ECC::extendedEuclidean(InfInt a, InfInt b) {
+    InfInt x0 = 1, y0 = 0, x1 = 0, y1 = 1;
 
     while (b != 0) {
-        int q = a / b;
-        int temp = b;
+        InfInt q = a / b;
+        InfInt temp = b;
         b = a % b;
         a = temp;
 
-        int x2 = x0 - q * x1;
-        int y2 = y0 - q * y1;
+        InfInt x2 = x0 - q * x1;
+        InfInt y2 = y0 - q * y1;
 
         x0 = x1;
         y0 = y1;
@@ -96,13 +123,13 @@ std::tuple<int, int, int> ECC::extendedEuclidean(int a, int b) {
 }
 
 // Function to compute the floored division
-int ECC::mod(int a, int n) {
+InfInt ECC::mod(InfInt a, InfInt n) {
     return ((a % n) + n) % n;
 }
 
 // Function to compute the modular multiplicative inverse
-int ECC::modInverse(int a, int m) {
-    int gcd, x, y;
+InfInt ECC::modInverse(InfInt a, InfInt m) {
+    InfInt gcd, x, y;
     std::tie(gcd, x, y) = extendedEuclidean(a, m);
 
     if (gcd != 1) {
@@ -110,5 +137,6 @@ int ECC::modInverse(int a, int m) {
         return -1; // Modular inverse does not exist
     }
 
-    return (x % m + m) % m; // Ensure positive result
+    //return (x % m + m) % m; // Ensure positive result
+    return mod(x, m);
 }

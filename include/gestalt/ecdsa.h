@@ -15,10 +15,11 @@
 #include <string>
 
 #include "../src/ecc/ecc.h"
+#include "../../external/infint/InfInt.h"
 
 struct Signature {
-    int r;
-    int s;
+    InfInt r;
+    InfInt s;
 };
 
 class ECDSA {
@@ -27,12 +28,13 @@ private:
     ECC ecc;
 public:
 
-    ECDSA(StandardCurve curve = StandardCurve::test) : ecc(curve) {
+    ECDSA(StandardCurve curve = StandardCurve::secp256k1) : ecc(curve) {
         // Initialize ECDSA with the selected standard curve
     }
 	~ECDSA() {}
 
     KeyPair generateKeyPair();
+    KeyPair setKeyPair(const InfInt& privateKey);
     Signature signMessage(const std::string& message, const KeyPair& keyPair);
     bool verifySignature(const std::string& message, const Signature signature, const Point& publicKey);
 };

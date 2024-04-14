@@ -25,12 +25,14 @@ enum class StandardCurve {
     Curve25519,
     Curve383187,
     Curve41417,
+    P256,
+    secp256k1,
     // Add more standard curves as needed
 };
 
 struct KeyPair {
     Point publicKey;
-    int privateKey;
+    InfInt privateKey;
 };
 
 class CurveManager {
@@ -46,6 +48,10 @@ public:
                 return Curve383187;
             case StandardCurve::Curve41417:
                 return Curve41417;
+            case StandardCurve::P256:
+                return P256;
+            case StandardCurve::secp256k1:
+                return secp256k1;
             // Add more cases for additional standard curves
             default:
                 throw std::invalid_argument("Invalid standard curve");
@@ -55,8 +61,6 @@ public:
 
 class ECC {
 private:
-
-    std::tuple<int, int, int> extendedEuclidean(int a, int b);
 
 public:
     KeyPair keyPair;
@@ -68,9 +72,11 @@ public:
 
     Point addPoints(Point P, Point Q);
     Point doublePoint(Point P);
-    Point scalarMultiplyPoints(int k, Point P);
+    Point scalarMultiplyPoints(InfInt k, Point P, InfInt m);
 
-    int getRandomNumber(int min, int max);
-    int mod(int a, int n);
-    int modInverse(int a, int m);
+    InfInt getRandomNumber(const InfInt min, const InfInt max);
+
+    std::tuple<InfInt, InfInt, InfInt> extendedEuclidean(InfInt a, InfInt b);
+    InfInt mod(InfInt a, InfInt n);
+    InfInt modInverse(InfInt a, InfInt m);
 };
