@@ -70,9 +70,11 @@ public:
         keyPair = {{0,0}, 0};
     }
 
+    InfInt hexStringToInteger(const std::string& hexString);
+
     Point addPoints(Point P, Point Q);
     Point doublePoint(Point P);
-    Point scalarMultiplyPoints(InfInt k, Point P, InfInt m);
+    Point scalarMultiplyPoints(InfInt k, Point P);
 
     InfInt getRandomNumber(const InfInt min, const InfInt max);
 

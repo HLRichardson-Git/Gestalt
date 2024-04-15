@@ -14,9 +14,29 @@
 #include <random>
 #include <tuple>
 #include <iostream>
+#include <string>
+#include <sstream>
 
 #include "ecc.h"
 #include "../../tools/utils.h"
+
+InfInt ECC::hexStringToInteger(const std::string& hexString) {
+    InfInt result;
+    for (char c : hexString) {
+        result *= 16;
+        if (c >= '0' && c <= '9') {
+            result += (c - '0');
+        } else if (c >= 'a' && c <= 'f') {
+            result += (c - 'a' + 10);
+        } else if (c >= 'A' && c <= 'F') {
+            result += (c - 'A' + 10);
+        } else {
+            // Invalid character in hex string
+            throw std::invalid_argument("Invalid hexadecimal character");
+        }
+    }
+    return result;
+}
 
 // Function to add two points
 Point ECC::addPoints(Point P, Point Q) {
@@ -44,8 +64,6 @@ Point ECC::addPoints(Point P, Point Q) {
 // Function to double a point
 Point ECC::doublePoint(Point P) {
     Point T;
-    
-    //InfInt top = mod(3 * (P.x * P.x)+ curve.a, curve.p);
 
     InfInt s = mod((InfInt)3 * P.x * P.x + curve.a, curve.p) * mod(modInverse((InfInt)2 * P.y, curve.p), curve.p);
 
@@ -56,18 +74,16 @@ Point ECC::doublePoint(Point P) {
 }
 
 // Implementation of the double-and-add algoirthm
-Point ECC::scalarMultiplyPoints(InfInt k, Point P, InfInt m) {
+Point ECC::scalarMultiplyPoints(InfInt k, Point P) {
     if (k == 0)
         return {0, 0};
     else if (k == 1) {
-        P.x = mod(P.x, m);
-        P.y = mod(P.y, m);
         return P;
     }
     else if (k % 2 == 1)
-        return addPoints(P, scalarMultiplyPoints(k - 1, P, m));
+        return addPoints(P, scalarMultiplyPoints(k - 1, P));
     else
-        return scalarMultiplyPoints(k / 2, doublePoint(P), m);
+        return scalarMultiplyPoints(k / 2, doublePoint(P));
 }
 
 // Function to generate random numbers

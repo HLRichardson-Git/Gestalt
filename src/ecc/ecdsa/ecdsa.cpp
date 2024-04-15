@@ -18,96 +18,76 @@
 
 KeyPair ECDSA::generateKeyPair() {
     InfInt privateKey = ecc.getRandomNumber(1, ecc.curve.n - 1);
-    Point publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint, ecc.curve.n);
+    Point publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
     return {publicKey, privateKey};
 }
 
 KeyPair ECDSA::setKeyPair(const InfInt& privateKey) {
     InfInt priv = privateKey;
-    Point publicKey = ecc.scalarMultiplyPoints(priv, ecc.curve.basePoint, ecc.curve.n);
+    Point publicKey = ecc.scalarMultiplyPoints(priv, ecc.curve.basePoint);
     return {publicKey, priv};
 }
 
-Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair) {
-    InfInt hashLen = message.length() * 4;
-    size_t orderBitLength = 256;
+InfInt ECDSA::prepareMessage(const std::string& message) {
+    InfInt hashByteLen = message.length() * 4;
     std::string E;
-    std::string binaryHash = hexToBinary(message);
 
-    if (hashLen >= orderBitLength) {
-        E = binaryHash;
+    if (hashByteLen >= ecc.curve.bitLength) {
+        E = message.substr(0, ecc.curve.bitLength);
     } else {
-        E = binaryHash.substr(0, orderBitLength);
+        E = message;
     }
 
-    InfInt e = binaryToInt(E);
-    InfInt expectedHashToInt = "31062874186025896864030657271587873305428623785552478574175996069861246889046";
-    if (e != expectedHashToInt) {
-        std::cout << "e != expectedHashToInt" << std::endl;
-        std::cout << "e = " << e << std::endl;
-        std::cout << "expectedHashToInt = " << expectedHashToInt << std::endl;
+    return ecc.hexStringToInteger(E);
+}
+
+InfInt ECDSA::fieldElementToInteger(const InfInt& fieldElement, const InfInt& modulus) {
+    // If the modulus is an odd prime, no conversion is needed
+    if (modulus % 2 == 1) {
+        return fieldElement;
     }
+    // If the modulus is a power of 2, convert the field element to an integer
+    // by evaluating the binary polynomial at x = 2
+    else {
+        InfInt result = 0;
+        InfInt temp = 1;
+        InfInt element = fieldElement;
+        while (element > 0) {
+            if (element % 2 == 1) {
+                result += temp;
+            }
+            temp *= 2;
+            element /= 2;
+        }
+        return result;
+    }
+}
 
-    //e = expectedHashToInt;
-    e = "aaa";
+Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair) {
+    InfInt e = prepareMessage(message);
+    InfInt k = ecc.getRandomNumber(0, ecc.curve.n);
+    return generateSignature(e, keyPair, k);
+}
 
+Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair, const InfInt& k) {
+    InfInt e = prepareMessage(message);
+    return generateSignature(e, keyPair, k);
+}
+
+Signature ECDSA::generateSignature(const InfInt& e, const KeyPair& keyPair, const InfInt& k) {
     Signature S;
-    //InfInt k = ecc.getRandomNumber(0, ecc.curve.n);
-    InfInt k = "67228059374187986264907871817984995299114694677537144137068659840319595636958";
-    Point R = ecc.scalarMultiplyPoints(k, ecc.curve.basePoint, ecc.curve.n);
-    Point expectedR = {"47760720287736789683069083573948166072371263571273732180050208132677181355037", 
-                       "100466561428796168350696032557296348669319250048870008168627029577169891763614"};
-    
-    if(R.x != expectedR.x) {
-        std::cout << "R.x != expectedR.x" << std::endl;
-        std::cout << "R.x = " << R.x << std::endl;
-        std::cout << "expectedR.x = " << expectedR.x << std::endl;
-    }
-    if(R.y != expectedR.y) {
-        std::cout << "R.y != expectedR.y" << std::endl;
-        std::cout << "R.y = " << R.y << std::endl;
-        std::cout << "expectedR.y = " << expectedR.y << std::endl;
-    }
-
-    S.r = ecc.mod(R.x, ecc.curve.n);
-    InfInt expectedSr = "47760720287736789683069083573948166072371263571273732180050208132677181355037";
-    if (S.r != expectedSr) {
-        std::cout << "S.r != expectedSr" << std::endl;
-        std::cout << "S.r = " << S.r << std::endl;
-        std::cout << "expectedSr = " << expectedSr << std::endl;
-    }
-    
+    Point R = ecc.scalarMultiplyPoints(k, ecc.curve.basePoint);
+    S.r = ecc.mod(fieldElementToInteger(R.x, ecc.curve.n), ecc.curve.n);
     InfInt kInverse = ecc.modInverse(k, ecc.curve.n); 
-    InfInt expectedKInverse = "3986726756471655249437155726316333562479149966873125054448806045147008571426";
-    if (kInverse != expectedKInverse) {
-        std::cout << "kInverse != expectedKInverse" << std::endl;
-        std::cout << "kInverse = " << kInverse << std::endl;
-        std::cout << "expectedKInverse = " << expectedKInverse << std::endl;
-    }
-
-    {
-        //InfInt privPlusSr = keyPair.privateKey * S.r;
-        //InfInt expectedPrivPlusSr = "";
-    }
-
     S.s = ecc.mod(((e + (keyPair.privateKey * S.r)) * kInverse), ecc.curve.n);
-    std::cout << "S.s = " << S.s << std::endl;
     return S;
 }
 
 bool ECDSA::verifySignature(const std::string& message, const Signature signature, const Point& publicKey) {
+    InfInt e = prepareMessage(message);
     InfInt sInverse = ecc.modInverse(signature.s, ecc.curve.n);
-    //InfInt w = ecc.mod(sInverse, ecc.curve.n);
-    InfInt e = hexStringToInt(message);
-    std::cout << "e after hexStringToInt : " << e << std::endl;
-    e = "21389652466847203915883536631875066917527356942852403593369130071306944748985";
-    std::cout << "e after setting it : " << e << std::endl;
     InfInt u1 = ecc.mod(sInverse * e, ecc.curve.n);
     InfInt u2 = ecc.mod(sInverse * signature.r, ecc.curve.n);
-    Point P = ecc.addPoints(ecc.scalarMultiplyPoints(u1, ecc.curve.basePoint, ecc.curve.n), ecc.scalarMultiplyPoints(u2, publicKey, ecc.curve.n));
-    std::cout << "P.x : " << P.x << std::endl;
-    std::cout << "P.y : " << P.y << std::endl;
-    std::cout << "P.x mod n : " << ecc.mod(P.x, ecc.curve.n) << std::endl;
-    std::cout << "P.y mod n : " << ecc.mod(P.y, ecc.curve.n) << std::endl;
+    Point P = ecc.addPoints(ecc.scalarMultiplyPoints(u1, ecc.curve.basePoint), ecc.scalarMultiplyPoints(u2, publicKey));
     return signature.r == ecc.mod(P.x, ecc.curve.n);
 }

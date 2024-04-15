@@ -29,11 +29,9 @@ TEST(TestECC_Arithmetic, testPointAddition)
 
     Point expected = {"16247106453250244225622460159038600432635777869376973139750787284798796257055",
                       "84741935852476448650405200364169101653520738128916381383119006842903426464819"};
-    bool pointsEqual = true;
-    if (R.x != expected.x || R.y != expected.y)
-        pointsEqual = false;
-
-    EXPECT_EQ(pointsEqual, 1);
+    
+    EXPECT_EQ(R.x, expected.x);
+    EXPECT_EQ(R.y, expected.y);
 }
 
 TEST(TestECC_Arithmetic, testPointDoulbe)
@@ -47,28 +45,26 @@ TEST(TestECC_Arithmetic, testPointDoulbe)
 
     Point expected = {"94661065609916795805170830853666726936855561355503933991787557860394254628829",
                       "22871027890686529937969966456841486853953364797665548725333072814274627436453"};
-    bool pointsEqual = true;
-    if (R.x != expected.x || R.y != expected.y)
-        pointsEqual = false;
-
-    EXPECT_EQ(pointsEqual, 1);
+    
+    EXPECT_EQ(R.x, expected.x);
+    EXPECT_EQ(R.y, expected.y);
 }
 
 TEST(TestECC_Arithmetic, testPointMultiplication)
 {
-    ECC ecc;
+    ECC ecc(StandardCurve::secp256k1);
 
-    Point P = {9, 1};
-    int n = 14;
+    Point P = {"88764801008590816877766665490322569426078893736160224298871996999069541569081",
+               "64549562702257555313735637722402300165514114834696882062669884644749455809738"};
+    int n = 20;
 
-    Point R = ecc.scalarMultiplyPoints(n, P, ecc.curve.n);
+    Point R = ecc.scalarMultiplyPoints(n, P);
     
-    Point expected = {16, 13};
-    bool pointsEqual = true;
-    if (R.x != expected.x || R.y != expected.y)
-        pointsEqual = false;
-
-    EXPECT_EQ(pointsEqual, 1);
+    Point expected = {"580578379796884640291629975597379928185276275272807587279982663300338316316",
+                      "36453294428164904118977036101609216276810108334259481990292799215351578729756"};
+    
+    EXPECT_EQ(R.x, expected.x);
+    EXPECT_EQ(R.y, expected.y);
 }
 
 TEST(TestECC_Arithmetic, testExtendedEuclideanAlgorithm)
@@ -77,12 +73,12 @@ TEST(TestECC_Arithmetic, testExtendedEuclideanAlgorithm)
 
     InfInt a = "74137112295098844335251337610803238244776982320014880532548593813303018932166";
     const InfInt m = "115792089210356248762697446949407573529996955224135760342422259061068512044369";
+
     std::tuple<InfInt, InfInt, InfInt> result = ecc.extendedEuclidean(a, m);
     std::tuple<InfInt, InfInt, InfInt> expected;
     expected = std::make_tuple(1, 
                           "23565630754992692729219419855554292010885827551965781088758971789715527090584",
                           "-15088144842208025732070556293866869663563346026362057237435181386682119668447");
-
     EXPECT_EQ(result, expected);
 }
 
@@ -95,19 +91,16 @@ TEST(TestECC_Arithmetic, testFlooredMod)
     InfInt a = "23565630754992692729219419855554292010885827551965781088758971789715527090584";
     InfInt result = ecc.mod(a, m);
     InfInt expected = "23565630754992692729219419855554292010885827551965781088758971789715527090584";
-    
     EXPECT_EQ(result, expected);
 
     a = "231584178420712497525394893898815147059993910448271520684844518122137024499999";
     result = ecc.mod(a, m);
-    expected = "411261";
-    
+    expected = "411261"; 
     EXPECT_EQ(result, expected);
 
     a = "231584178420712497525394893898815147059993910448271520684844518122137024088738";
     result = ecc.mod(a, m);
     expected = "0";
-    
     EXPECT_EQ(result, expected);
 }
 
@@ -120,13 +113,11 @@ TEST(TestECC_Arithmetic, testModInverse)
     InfInt s = "74137112295098844335251337610803238244776982320014880532548593813303018932166";
     InfInt result = ecc.modInverse(s, m);
     InfInt expected = "23565630754992692729219419855554292010885827551965781088758971789715527090584";
-    
     EXPECT_EQ(result, expected);
 
     s = "231584178420712497525394893898815147059993910448271520684844518122137024499999";
     result = ecc.modInverse(s, m);
     expected = "48626871829401322682084402277836295240230034308639192709688995407242801157102";
-    
     EXPECT_EQ(result, expected);
 
     s = "231584178420712497525394893898815147059993910448271520684844518122137024088738";
@@ -135,7 +126,6 @@ TEST(TestECC_Arithmetic, testModInverse)
     result = ecc.modInverse(s, m);
     std::cerr.rdbuf(old);
     std::string output = buffer.str();
-    
     EXPECT_TRUE(output.find("Modular inverse does not exist.") != std::string::npos);
     
     expected = "-1";

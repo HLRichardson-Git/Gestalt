@@ -172,9 +172,6 @@ public:
     bool operator>(const InfInt& rhs) const;
     bool operator>=(const InfInt& rhs) const;
 
-    /* Ger random InfInt between range */
-    InfInt randomInRange(const InfInt& min, const InfInt& max) const;
-
     /* integer square root */
     InfInt intSqrt() const; // throw
 
@@ -946,36 +943,6 @@ inline void InfInt::optimizeSqrtSearchBounds(InfInt& lo, InfInt& hi) const
         hi = hdn;
     }
 }
-
-/*InfInt InfInt::randomInRange(const InfInt& min, const InfInt& max) const {
-    // Calculate the range and adjust if min is greater than max
-    InfInt range = max - min + 1;
-    if (range <= 0) {
-        throw std::invalid_argument("Invalid range: min must be less than or equal to max.");
-    }
-
-    // Determine the number of digits needed to represent the range
-    size_t numDigits = range.numberOfDigits();
-
-    // Generate random digits
-    std::string randomString;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> digitDistribution(0, 9);
-    for (size_t i = 0; i < numDigits; ++i) {
-        int digit = digitDistribution(gen);
-        randomString += std::to_string(digit);
-    }
-
-    // Convert the random digits string to an InfInt value
-    InfInt result(randomString);
-
-    // Ensure the result is within the specified range [min, max]
-    result %= range;
-    result += min;
-
-    return result;
-}*/
 
 inline InfInt InfInt::intSqrt() const
 {

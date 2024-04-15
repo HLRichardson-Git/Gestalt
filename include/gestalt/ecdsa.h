@@ -26,6 +26,11 @@ class ECDSA {
 private:
 
     ECC ecc;
+
+    InfInt prepareMessage(const std::string& message);
+    InfInt fieldElementToInteger(const InfInt& fieldElement, const InfInt& modulus);
+
+    Signature generateSignature(const InfInt& e, const KeyPair& keyPair, const InfInt& k);
 public:
 
     ECDSA(StandardCurve curve = StandardCurve::secp256k1) : ecc(curve) {
@@ -36,5 +41,6 @@ public:
     KeyPair generateKeyPair();
     KeyPair setKeyPair(const InfInt& privateKey);
     Signature signMessage(const std::string& message, const KeyPair& keyPair);
+    Signature signMessage(const std::string& message, const KeyPair& keyPair, const InfInt& k);
     bool verifySignature(const std::string& message, const Signature signature, const Point& publicKey);
 };
