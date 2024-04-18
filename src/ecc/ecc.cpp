@@ -10,6 +10,8 @@
  * This file contains the implementation of Gestalts ECC security functions.
  */
 
+#include <tracy/public/tracy/Tracy.hpp>
+
 #include <math.h>
 #include <random>
 #include <tuple>
@@ -21,6 +23,7 @@
 #include "../../tools/utils.h"
 
 InfInt ECC::hexStringToInteger(const std::string& hexString) {
+    ZoneScoped;
     InfInt result;
     for (char c : hexString) {
         result *= 16;
@@ -40,6 +43,7 @@ InfInt ECC::hexStringToInteger(const std::string& hexString) {
 
 // Function to add two points
 Point ECC::addPoints(Point P, Point Q) {
+    ZoneScoped;
     Point T = {-1, -1}; // Initialize T to an invalid point
     InfInt deltaX = mod(Q.x - P.x, curve.p);
     InfInt deltaY = mod(Q.y - P.y, curve.p);
@@ -50,10 +54,15 @@ Point ECC::addPoints(Point P, Point Q) {
         std::cerr << "Modular inverse does not exist." << std::endl;
         return T;
     }
-
+    
     InfInt slope = mod(deltaY * invDeltaX, curve.p);
     InfInt x3 = mod(slope * slope - P.x - Q.x, curve.p);
     InfInt y3 = mod(slope * (P.x - x3) - P.y, curve.p);
+    
+    //InfInt slope = mod(deltaY / deltaX, curve.p);
+
+    //T.x = mod(slope * slope - P.x - Q.x, curve.p);
+    //T.y = mod(slope * (P.x - T.x) - P.y, curve.p);
 
     T.x = x3;
     T.y = y3;
@@ -63,6 +72,7 @@ Point ECC::addPoints(Point P, Point Q) {
 
 // Function to double a point
 Point ECC::doublePoint(Point P) {
+    ZoneScoped;
     Point T;
 
     InfInt s = mod((InfInt)3 * P.x * P.x + curve.a, curve.p) * mod(modInverse((InfInt)2 * P.y, curve.p), curve.p);
@@ -75,6 +85,7 @@ Point ECC::doublePoint(Point P) {
 
 // Implementation of the double-and-add algoirthm
 Point ECC::scalarMultiplyPoints(InfInt k, Point P) {
+    ZoneScoped;
     if (k == 0)
         return {0, 0};
     else if (k == 1) {
@@ -88,6 +99,7 @@ Point ECC::scalarMultiplyPoints(InfInt k, Point P) {
 
 // Function to generate random numbers
 InfInt ECC::getRandomNumber(const InfInt min, const InfInt max) {
+    ZoneScoped;
     InfInt range = max - min + 1;
     if (range <= 0) {
         throw std::invalid_argument("Invalid range: min must be less than or equal to max.");
@@ -118,6 +130,7 @@ InfInt ECC::getRandomNumber(const InfInt min, const InfInt max) {
 
 // Function to complete the extended euclidean algorithm
 std::tuple<InfInt, InfInt, InfInt> ECC::extendedEuclidean(InfInt a, InfInt b) {
+    ZoneScoped;
     InfInt x0 = 1, y0 = 0, x1 = 0, y1 = 1;
 
     while (b != 0) {
@@ -140,11 +153,13 @@ std::tuple<InfInt, InfInt, InfInt> ECC::extendedEuclidean(InfInt a, InfInt b) {
 
 // Function to compute the floored division
 InfInt ECC::mod(InfInt a, InfInt n) {
+    ZoneScoped;
     return ((a % n) + n) % n;
 }
 
 // Function to compute the modular multiplicative inverse
 InfInt ECC::modInverse(InfInt a, InfInt m) {
+    ZoneScoped;
     InfInt gcd, x, y;
     std::tie(gcd, x, y) = extendedEuclidean(a, m);
 

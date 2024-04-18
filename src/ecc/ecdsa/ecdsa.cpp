@@ -10,6 +10,8 @@
  * This file contains the implementation of Gestalts ECDSA security functions.
  */
 
+#include <tracy/public/tracy/Tracy.hpp>
+
 #include <cmath>
 
 #include <gestalt/ecdsa.h>
@@ -17,18 +19,21 @@
 #include "utils.h"
 
 KeyPair ECDSA::generateKeyPair() {
+    ZoneScoped;
     InfInt privateKey = ecc.getRandomNumber(1, ecc.curve.n - 1);
     Point publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
     return {publicKey, privateKey};
 }
 
 KeyPair ECDSA::setKeyPair(const InfInt& privateKey) {
+    ZoneScoped;
     InfInt priv = privateKey;
     Point publicKey = ecc.scalarMultiplyPoints(priv, ecc.curve.basePoint);
     return {publicKey, priv};
 }
 
 InfInt ECDSA::prepareMessage(const std::string& message) {
+    ZoneScoped;
     InfInt hashByteLen = message.length() * 4;
     std::string E;
 
@@ -42,6 +47,7 @@ InfInt ECDSA::prepareMessage(const std::string& message) {
 }
 
 InfInt ECDSA::fieldElementToInteger(const InfInt& fieldElement, const InfInt& modulus) {
+    ZoneScoped;
     // If the modulus is an odd prime, no conversion is needed
     if (modulus % 2 == 1) {
         return fieldElement;
@@ -64,17 +70,20 @@ InfInt ECDSA::fieldElementToInteger(const InfInt& fieldElement, const InfInt& mo
 }
 
 Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair) {
+    ZoneScoped;
     InfInt e = prepareMessage(message);
     InfInt k = ecc.getRandomNumber(0, ecc.curve.n);
     return generateSignature(e, keyPair, k);
 }
 
 Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair, const InfInt& k) {
+    ZoneScoped;
     InfInt e = prepareMessage(message);
     return generateSignature(e, keyPair, k);
 }
 
 Signature ECDSA::generateSignature(const InfInt& e, const KeyPair& keyPair, const InfInt& k) {
+    ZoneScoped;
     Signature S;
     Point R = ecc.scalarMultiplyPoints(k, ecc.curve.basePoint);
     S.r = ecc.mod(fieldElementToInteger(R.x, ecc.curve.n), ecc.curve.n);
@@ -84,6 +93,7 @@ Signature ECDSA::generateSignature(const InfInt& e, const KeyPair& keyPair, cons
 }
 
 bool ECDSA::verifySignature(const std::string& message, const Signature signature, const Point& publicKey) {
+    ZoneScoped;
     InfInt e = prepareMessage(message);
     InfInt sInverse = ecc.modInverse(signature.s, ecc.curve.n);
     InfInt u1 = ecc.mod(sInverse * e, ecc.curve.n);

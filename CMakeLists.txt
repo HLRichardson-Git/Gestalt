@@ -36,9 +36,14 @@ target_include_directories(${Project_Name} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/external)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/tools)
 
+add_subdirectory(external/tracy/public)
+#target_compile_definitions(${This} PRIVATE TRACY_ENABLE)
+
 add_subdirectory(external/infint)
 
 target_link_libraries(${Project_Name} PRIVATE gtest_main)
 target_link_libraries(${Project_Name} PRIVATE infint)
+target_link_libraries(${Project_Name} PRIVATE tracy)
 
 add_subdirectory(tests)
+
