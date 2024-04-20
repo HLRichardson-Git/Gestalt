@@ -117,8 +117,8 @@ InfInt ECC::getRandomNumber(const InfInt min, const InfInt max) {
 }
 
 // Function to complete the extended euclidean algorithm
-std::tuple<InfInt, InfInt, InfInt> ECC::extendedEuclidean(InfInt a, InfInt b) {
-    InfInt x0 = 1, y0 = 0, x1 = 0, y1 = 1;
+InfInt ECC::extendedEuclidean(InfInt num, InfInt n) {
+    /*InfInt x0 = 1, y0 = 0, x1 = 0, y1 = 1;
 
     while (b != 0) {
         InfInt q = a / b;
@@ -135,7 +135,28 @@ std::tuple<InfInt, InfInt, InfInt> ECC::extendedEuclidean(InfInt a, InfInt b) {
         y1 = y2;
     }
 
-    return std::make_tuple(a, x0, y0);
+    return std::make_tuple(a, x0, y0);*/
+    InfInt a = mod(num, n);
+    InfInt b = n;
+    InfInt x = 0, y = 1, u = 1, v = 0;
+
+    while (a != 0) {
+        InfInt q = b / a;
+        InfInt r = b % a;
+        InfInt m = x - u * q;
+        InfInt n = y - v * q;
+        b = a; a = r;
+        x = u; y = v;
+        u = m; v = n;
+    }
+    const InfInt gcd = b;
+
+    if (gcd != 1) {
+        std::cerr << "Modular inverse does not exist." << std::endl;
+        return -1; // Modular inverse does not exist
+    }
+
+    return mod(x, n);
 }
 
 // Function to compute the floored division
@@ -145,14 +166,15 @@ InfInt ECC::mod(InfInt a, InfInt n) {
 
 // Function to compute the modular multiplicative inverse
 InfInt ECC::modInverse(InfInt a, InfInt m) {
-    InfInt gcd, x, y;
-    std::tie(gcd, x, y) = extendedEuclidean(a, m);
+    //InfInt gcd, x, y;
+    //std::tie(gcd, x, y) = extendedEuclidean(a, m);
 
-    if (gcd != 1) {
+   /*if (gcd != 1) {
         std::cerr << "Modular inverse does not exist." << std::endl;
         return -1; // Modular inverse does not exist
-    }
+    }*/ 
 
     //return (x % m + m) % m; // Ensure positive result
-    return mod(x, m);
+    //return mod(x, m);
+    return extendedEuclidean(a, m);
 }

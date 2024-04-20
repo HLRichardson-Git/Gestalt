@@ -74,11 +74,14 @@ TEST(TestECC_Arithmetic, testExtendedEuclideanAlgorithm)
     InfInt a = "74137112295098844335251337610803238244776982320014880532548593813303018932166";
     const InfInt m = "115792089210356248762697446949407573529996955224135760342422259061068512044369";
 
-    std::tuple<InfInt, InfInt, InfInt> result = ecc.extendedEuclidean(a, m);
-    std::tuple<InfInt, InfInt, InfInt> expected;
+    //std::tuple<InfInt, InfInt, InfInt> result = ecc.extendedEuclidean(a, m);
+    InfInt result = ecc.extendedEuclidean(a, m);
+    /*std::tuple<InfInt, InfInt, InfInt> expected;
     expected = std::make_tuple(1, 
                           "23565630754992692729219419855554292010885827551965781088758971789715527090584",
-                          "-15088144842208025732070556293866869663563346026362057237435181386682119668447");
+                          "-15088144842208025732070556293866869663563346026362057237435181386682119668447");*/
+    InfInt expected = "23565630754992692729219419855554292010885827551965781088758971789715527090584";
+
     EXPECT_EQ(result, expected);
 }
 

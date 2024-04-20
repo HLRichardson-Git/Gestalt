@@ -78,7 +78,7 @@ public:
 
     InfInt getRandomNumber(const InfInt min, const InfInt max);
 
-    std::tuple<InfInt, InfInt, InfInt> extendedEuclidean(InfInt a, InfInt b);
+    InfInt extendedEuclidean(InfInt num, InfInt n);
     InfInt mod(InfInt a, InfInt n);
     InfInt modInverse(InfInt a, InfInt m);
 };
