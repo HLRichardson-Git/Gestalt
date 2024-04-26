@@ -15,6 +15,27 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 
+# Include MPIR library
+include(ExternalProject)
+
+set(prefix "${CMAKE_BINARY_DIR}/deps")
+set(MPIR_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mpir${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(MPIR_INCLUDE_DIR "${prefix}/include")
+
+ExternalProject_Add(mpir
+    PREFIX "${prefix}"
+    DOWNLOAD_NAME mpir-cmake.tar.gz
+    DOWNLOAD_NO_PROGRESS TRUE
+    URL https://github.com/chfast/mpir/archive/cmake.tar.gz
+    URL_HASH SHA256=d32ea73cb2d8115a8e59b244f96f29bad7ff03367162b660bae6495826811e06
+    CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DCMAKE_BUILD_TYPE=Release
+        -DMPIR_GMP=On
+    BUILD_BYPRODUCTS "${MPIR_LIBRARY}"
+)
+
 set (Sources
     src/aes/aes.cpp
     src/aes/aesCore.cpp
@@ -35,6 +56,11 @@ add_library (${Project_Name} STATIC ${Sources})
 target_include_directories(${Project_Name} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/external)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/tools)
+target_include_directories(${Project_Name} PRIVATE ${MPIR_INCLUDE_DIR})
+
+# Link MPIR library
+add_dependencies(${Project_Name} mpir)
+target_link_libraries(${Project_Name} PRIVATE ${MPIR_LIBRARY})
 
 add_subdirectory(external/infint)
 

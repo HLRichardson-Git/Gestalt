@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <gmp.h>
 
 #include "ecc.h"
 #include "../../tools/utils.h"
