@@ -11,12 +11,35 @@
  */
 
 #include <cmath>
+#include <gmp.h>
 
 #include <gestalt/ecdsa.h>
 #include "infint/InfInt.h"
 #include "utils.h"
 
 KeyPair ECDSA::generateKeyPair() {
+    // Initialize two mpz integers
+    mpz_t a, b;
+    mpz_init(a);
+    mpz_init(b);
+
+    // Assign values to the mpz integers
+    mpz_set_str(a, "123456789012345678901234567890", 10); // Base 10
+    mpz_set_str(b, "987654321098765432109876543210", 10);
+
+    // Perform addition
+    mpz_t sum;
+    mpz_init(sum);
+    mpz_add(sum, a, b);
+
+    // Print the result
+    std::cout << "Sum: " << mpz_get_str(nullptr, 10, sum) << std::endl;
+
+    // Clear memory
+    mpz_clear(a);
+    mpz_clear(b);
+    mpz_clear(sum);
+
     InfInt privateKey = ecc.getRandomNumber(1, ecc.curve.n - 1);
     Point publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
     return {publicKey, privateKey};
