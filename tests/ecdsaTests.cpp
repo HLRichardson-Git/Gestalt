@@ -67,7 +67,7 @@ TEST(TestECDSAsignature, sigVer)
     EXPECT_EQ(verify, true);
 }
 
-TEST(TestECDSAsignature, testSignatureRoundTrip_WithP256) {
+TEST(TestECDSAsignature, PWCT) {
     ECDSA ecdsa(StandardCurve::P256);
     
     KeyPair keyPair = {{"13025038577035367868028521755794722443625521375819261296867266283988044595075",
@@ -91,7 +91,7 @@ TEST(TestECDSAsignature, testSignatureRoundTrip_WithP256) {
     EXPECT_EQ(verify, true);
 }
 
-TEST(TestECDSAsignature, testInducedFailureVerification)
+TEST(TestECDSAsignature, inducedFailureVerification)
 {
     ECDSA ecdsa;
     KeyPair keyPair = ecdsa.generateKeyPair();
