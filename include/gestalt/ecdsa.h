@@ -15,7 +15,6 @@
 #include <string>
 
 #include "../src/ecc/ecc.h"
-#include "../../external/infint/InfInt.h"
 
 struct Signature {
     mpz_t r;

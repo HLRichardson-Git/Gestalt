@@ -19,7 +19,6 @@
 #include <gmp.h>
 
 #include "ecc.h"
-#include "../../tools/utils.h"
 
 /*InfInt ECC::hexStringToInteger(const std::string& hexString) {
     InfInt result;
@@ -362,23 +361,48 @@ Point ECC::scalarMultiplyPoints(const mpz_t scalar, Point P) {
 // Implementation of the double-and-add algoirthm
 Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
     Point T = P;
-    std::cout << "mpz_sizeinbase(k, 2) - 1 = " << mpz_sizeinbase(k, 2) << std::endl;
+
+    /*std::cout << "P.x = ";
+    mpz_out_str(stdout, 16, P.x);
+    std::cout << std::endl;
+    std::cout << "P.y = ";
+    mpz_out_str(stdout, 16, P.y);
+    std::cout << std::endl;
+
+    std::cout << "Scalar k in binary: ";
+    mpz_out_str(stdout, 2, k);
+    std::cout << std::endl;*/
+
+    //std::cout << "mpz_sizeinbase(k, 2) - 1 = " << mpz_sizeinbase(k, 2) - 2 << std::endl;
     // Perform scalar multiplication using the double-and-add algorithm
-    for (int i = mpz_sizeinbase(k, 2) - 1; i >= 0; --i) {
+    for (int i = mpz_sizeinbase(k, 2) - 2; i >= 0; --i) {
         // Double the point
-        doublePoint(T);
+        //std::cout << "Doubling T:" << std::endl;
+
+        T = doublePoint(T);
+
+        /*std::cout << "  Result T after doubling:" << std::endl;
+        std::cout << "    x = ";
+        mpz_out_str(stdout, 16, T.x);
+        std::cout << std::endl;
+        std::cout << "    y = ";
+        mpz_out_str(stdout, 16, T.y);
+        std::cout << std::endl;*/
 
         // If the current bit of the scalar is 1, add the base point
         if (mpz_tstbit(k, i)) {
-            T = addPoints(T, P);
-        }
+            //std::cout << "Adding base point P at bit " << i << ":" << std::endl;
 
-        std::cout << "iteration: " << i << "  bit value = " << mpz_tstbit(k, i) << "  Computed T.x value = ";
-        mpz_out_str(stdout, 10, T.x);
-        std::cout << std::endl;
-        std::cout << "iteration: " << i << "  bit value = " << mpz_tstbit(k, i) << "  Computed T.y value = ";
-        mpz_out_str(stdout, 10, T.y);
-        std::cout << std::endl;
+            T = addPoints(T, P);
+
+            /*std::cout << "  Result T after addition:" << std::endl;
+            std::cout << "    x = ";
+            mpz_out_str(stdout, 16, T.x);
+            std::cout << std::endl;
+            std::cout << "    y = ";
+            mpz_out_str(stdout, 16, T.y);
+            std::cout << std::endl;*/
+        }
     }
 
     return T;
@@ -464,7 +488,7 @@ Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
 }
 
 // Function to generate random numbers
-void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t result) {
+void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
     // Initialize GMP random state
     gmp_randstate_t state;
     gmp_randinit_default(state);

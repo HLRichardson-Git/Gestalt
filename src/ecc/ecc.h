@@ -99,7 +99,7 @@ public:
     Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P);
 
     //InfInt getRandomNumber(const InfInt min, const InfInt max);
-    void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t result);
+    void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
 
     //InfInt extendedEuclidean(InfInt num, InfInt n);
     //InfInt mod(InfInt a, InfInt n);

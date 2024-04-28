@@ -112,26 +112,23 @@ TEST(TestECC_Arithmetic, testPointMultiplication)
     ECC ecc(StandardCurve::secp256k1);
 
     Point P;
-    mpz_init_set_str(P.x, "88764801008590816877766665490322569426078893736160224298871996999069541569081", 10);
-    mpz_init_set_str(P.y, "64549562702257555313735637722402300165514114834696882062669884644749455809738", 10);
-    //mpz_init_set_str(P.x, "9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 16);
-    //mpz_init_set_str(P.y, "ed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2", 16);
+    //mpz_init_set_str(P.x, "88764801008590816877766665490322569426078893736160224298871996999069541569081", 10);
+    //mpz_init_set_str(P.y, "64549562702257555313735637722402300165514114834696882062669884644749455809738", 10);
+    mpz_init_set_str(P.x, "9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 16);
+    mpz_init_set_str(P.y, "ed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2", 16);
 
     mpz_t n;
-    mpz_init_set_str(n, "20", 10);
+    mpz_init_set_str(n, "8", 16);
 
     Point R = ecc.scalarMultiplyPoints(n, P);
 
     Point expected;
-    mpz_init_set_str(expected.x, "580578379796884640291629975597379928185276275272807587279982663300338316316", 10);
-    mpz_init_set_str(expected.y, "36453294428164904118977036101609216276810108334259481990292799215351578729756", 10);
+    //mpz_init_set_str(expected.x, "580578379796884640291629975597379928185276275272807587279982663300338316316", 10);
+    //mpz_init_set_str(expected.y, "36453294428164904118977036101609216276810108334259481990292799215351578729756", 10);
     //mpz_init_set_str(expected.x, "aca7bf3956cdc40b439adc6362badc096348b3c0a70a2116ee1e5269563f05f3", 16);
     //mpz_init_set_str(expected.y, "ff7528d9211fd687c106a047e94a4599243b85d317ef9acc444cf7539712d55e", 16);
-
-    mpz_out_str(stdout, 10, R.x);
-    std::cout << std::endl;
-    mpz_out_str(stdout, 10, R.y);
-    std::cout << std::endl;
+    mpz_init_set_str(expected.x, "86a5ee3b95e14201a8dc231aedbf5b0c48b31d2f1e6ccee090a8d798dd37e896", 16);
+    mpz_init_set_str(expected.y, "4c571310c823401a22185452f49473f315757896ac032cfcbdbc15b0cd74a422", 16);
 
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);

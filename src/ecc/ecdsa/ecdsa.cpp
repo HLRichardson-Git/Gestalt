@@ -14,8 +14,6 @@
 #include <gmp.h>
 
 #include <gestalt/ecdsa.h>
-#include "infint/InfInt.h"
-#include "utils.h"
 
 KeyPair ECDSA::generateKeyPair() {
     // Initialize GMP random state
@@ -31,6 +29,8 @@ KeyPair ECDSA::generateKeyPair() {
     // Calculate the public key
     KeyPair keyPair;
     mpz_init_set(keyPair.privateKey, privateKey);
+    mpz_init(keyPair.publicKey.x);
+    mpz_init(keyPair.publicKey.y);
     keyPair.publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
 
     // Clean up
@@ -139,9 +139,10 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair)
     prepareMessage(message, e);
 
     // Generate a random number k
-    mpz_t k;
+    mpz_t k, min;
     mpz_init(k);
-    ecc.getRandomNumber(0, ecc.curve.n, k);
+    mpz_init_set_ui(min, 1);
+    ecc.getRandomNumber(min, ecc.curve.n - 1, k);
 
     // Generate the signature
     Signature signature;
@@ -152,6 +153,7 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair)
     // Clear temporary variables
     mpz_clear(k);
     mpz_clear(e);
+    mpz_clear(min);
 
     return signature;
 
@@ -170,6 +172,7 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair,
     Signature signature;
     mpz_init(signature.r);
     mpz_init(signature.s);
+
     signature = generateSignature(e, keyPair, k);
 
     // Clear temporary variables
@@ -191,6 +194,8 @@ Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t
     fieldElementToInteger(R.x, ecc.curve.n, R_integer);
 
     Signature signature;
+    mpz_init(signature.r);
+    mpz_init(signature.s);
     // Calculate r = R_integer mod n
     mpz_mod(signature.r, R_integer, ecc.curve.n);
 
