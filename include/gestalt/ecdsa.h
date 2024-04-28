@@ -18,8 +18,8 @@
 #include "../../external/infint/InfInt.h"
 
 struct Signature {
-    InfInt r;
-    InfInt s;
+    mpz_t r;
+    mpz_t s;
 };
 
 class ECDSA {
@@ -27,10 +27,10 @@ private:
 
     ECC ecc;
 
-    InfInt prepareMessage(const std::string& message);
-    InfInt fieldElementToInteger(const InfInt& fieldElement, const InfInt& modulus);
+    void prepareMessage(const std::string& message, mpz_t& result);
+    void fieldElementToInteger(const mpz_t& fieldElement, const mpz_t& modulus, mpz_t result);
 
-    Signature generateSignature(const InfInt& e, const KeyPair& keyPair, const InfInt& k);
+    Signature generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t& k);
 public:
 
     ECDSA(StandardCurve curve = StandardCurve::secp256k1) : ecc(curve) {
@@ -39,8 +39,8 @@ public:
 	~ECDSA() {}
 
     KeyPair generateKeyPair();
-    KeyPair setKeyPair(const InfInt& privateKey);
+    KeyPair setKeyPair(mpz_t& privateKey);
     Signature signMessage(const std::string& message, const KeyPair& keyPair);
-    Signature signMessage(const std::string& message, const KeyPair& keyPair, const InfInt& k);
+    Signature signMessage(const std::string& message, const KeyPair& keyPair, mpz_t& k);
     bool verifySignature(const std::string& message, const Signature signature, const Point& publicKey);
 };

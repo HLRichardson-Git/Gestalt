@@ -22,9 +22,9 @@
 // Enumerate the available standard curves
 enum class StandardCurve {
     test,
-    Curve25519,
-    Curve383187,
-    Curve41417,
+    //Curve25519,
+    //Curve383187,
+    //Curve41417,
     P256,
     secp256k1,
     // Add more standard curves as needed
@@ -32,7 +32,7 @@ enum class StandardCurve {
 
 struct KeyPair {
     Point publicKey;
-    InfInt privateKey;
+    mpz_t privateKey;
 };
 
 class CurveManager {
@@ -41,17 +41,17 @@ public:
     static Curve getCurveParams(StandardCurve curve) {
         switch (curve) {
             case StandardCurve::test:
-                return test;
-            case StandardCurve::Curve25519:
-                return Curve25519;
-            case StandardCurve::Curve383187:
-                return Curve383187;
-            case StandardCurve::Curve41417:
-                return Curve41417;
+                return init_test();
+            //case StandardCurve::Curve25519:
+            //    return Curve25519;
+            //case StandardCurve::Curve383187:
+            //    return Curve383187;
+            //case StandardCurve::Curve41417:
+            //    return Curve41417;
             case StandardCurve::P256:
-                return P256;
+                return init_p256();
             case StandardCurve::secp256k1:
-                return secp256k1;
+                return init_secp256k1();
             // Add more cases for additional standard curves
             default:
                 throw std::invalid_argument("Invalid standard curve");
@@ -61,6 +61,13 @@ public:
 
 class ECC {
 private:
+    //void clear_point(Point point);
+    //void cswap(Point &a, Point &b, int swap);
+    //void ladder_step(Point &x2y2, Point &x3y3, const mpz_t a24, const mpz_t x1);
+
+    void clearCurve(Curve &curve) {
+        mpz_clears(curve.a, curve.b, curve.p, curve.basePoint.x, curve.basePoint.y, curve.n, NULL);
+    }
 
 public:
     KeyPair keyPair;
@@ -70,15 +77,31 @@ public:
         keyPair = {{0,0}, 0};
     }
 
-    InfInt hexStringToInteger(const std::string& hexString);
+    // Destructor
+    ~ECC() {
+        clearCurve(curve);
+    }
+
+    // Method to set the curve to a new standard curve
+    void setCurve(StandardCurve curveType) {
+        // Clear the memory allocated for the current curve
+        if (curve.n != 0) clearCurve(curve);
+
+        // Initialize the new curve
+        curve = CurveManager::getCurveParams(curveType);
+    }
+
+    //InfInt hexStringToInteger(const std::string& hexString);
 
     Point addPoints(Point P, Point Q);
     Point doublePoint(Point P);
-    Point scalarMultiplyPoints(InfInt k, Point P);
+    //Point scalarMultiplyPoints(const mpz_t scalar, Point P);
+    Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P);
 
-    InfInt getRandomNumber(const InfInt min, const InfInt max);
+    //InfInt getRandomNumber(const InfInt min, const InfInt max);
+    void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t result);
 
-    InfInt extendedEuclidean(InfInt num, InfInt n);
-    InfInt mod(InfInt a, InfInt n);
-    InfInt modInverse(InfInt a, InfInt m);
+    //InfInt extendedEuclidean(InfInt num, InfInt n);
+    //InfInt mod(InfInt a, InfInt n);
+    //InfInt modInverse(InfInt a, InfInt m);
 };
