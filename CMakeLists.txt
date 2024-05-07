@@ -51,6 +51,7 @@ set (Sources
     src/modes/cbc.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
+    src/ecc/eccObjects.cpp
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
     tools/utils.cpp
@@ -60,6 +61,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_library (${Project_Name} STATIC ${Sources})
+
 # Specify the directories where header files are located
 target_include_directories(${Project_Name} PUBLIC  ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/src)
@@ -70,8 +72,6 @@ target_include_directories(${Project_Name} PRIVATE ${MPIR_INCLUDE_DIR})
 # Link MPIR library
 add_dependencies(${Project_Name} mpir)
 target_link_libraries(${Project_Name} PRIVATE ${MPIR_LIBRARY})
-
-add_subdirectory(external/infint)
 
 target_link_libraries(${Project_Name} PRIVATE gtest_main)
 add_subdirectory(tests)

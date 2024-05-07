@@ -17,44 +17,35 @@
 
 KeyPair ECDSA::generateKeyPair() {
     // Initialize GMP random state
-    mpz_t privateKey;
-    mpz_init(privateKey);
+    mpz_t temp;
+    mpz_init(temp);
 
     // Generate a random private key between 1 and curve order - 1
     mpz_t min;
     mpz_init(min);
     mpz_set_ui(min, 1);
-    ecc.getRandomNumber(min, ecc.curve.n - 1, privateKey);
+    ecc.getRandomNumber(min, ecc.curve.n - 1, temp);
 
     // Calculate the public key
-    KeyPair keyPair;
-    mpz_init_set(keyPair.privateKey, privateKey);
-    mpz_init(keyPair.publicKey.x);
-    mpz_init(keyPair.publicKey.y);
-    keyPair.publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
+    Point pubKeyPoint = ecc.scalarMultiplyPoints(temp, ecc.curve.basePoint);
+    KeyPair T(temp, pubKeyPoint);
 
     // Clean up
     mpz_clear(min);
+    mpz_clear(temp);
 
-    return keyPair; // privateKey is not cleared here
-
-    /*InfInt privateKey = ecc.getRandomNumber(1, ecc.curve.n - 1);
-    Point publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
-    return {publicKey, privateKey};*/
+    return T;
 }
 
-KeyPair ECDSA::setKeyPair(mpz_t& privateKey) {
+KeyPair ECDSA::setKeyPair(const std::string& strKey) {
+    mpz_t n;
+    mpz_init(n);
+    stringToGMP(strKey, n);
 
-    // Calculate the public key
-    KeyPair keyPair;
-    mpz_init_set(keyPair.privateKey, privateKey);
-    keyPair.publicKey = ecc.scalarMultiplyPoints(privateKey, ecc.curve.basePoint);
+    KeyPair T(n, ecc.scalarMultiplyPoints(n, ecc.curve.basePoint));
 
-    return keyPair;
-
-    /*InfInt priv = privateKey;
-    Point publicKey = ecc.scalarMultiplyPoints(priv, ecc.curve.basePoint);
-    return {publicKey, priv};*/
+    mpz_clear(n);
+    return T;
 }
 
 void ECDSA::prepareMessage(const std::string& message, mpz_t& result) {
@@ -71,17 +62,6 @@ void ECDSA::prepareMessage(const std::string& message, mpz_t& result) {
         // Convert the entire hash from hexadecimal string to mpz_t integer
         mpz_init_set_str(result, message.c_str(), 16);
     }
-
-    /*InfInt hashByteLen = message.length() * 4;
-    std::string E;
-
-    if (hashByteLen >= ecc.curve.bitLength) {
-        E = message.substr(0, ecc.curve.bitLength);
-    } else {
-        E = message;
-    }
-
-    return ecc.hexStringToInteger(E);*/
 }
 
 void ECDSA::fieldElementToInteger(const mpz_t& fieldElement, const mpz_t& modulus, mpz_t result) {
@@ -110,26 +90,6 @@ void ECDSA::fieldElementToInteger(const mpz_t& fieldElement, const mpz_t& modulu
 
     // Clear GMP variables
     mpz_clears(temp, element, NULL);
-    
-    /*// If the modulus is an odd prime, no conversion is needed
-    if (modulus % 2 == 1) {
-        return fieldElement;
-    }
-    // If the modulus is a power of 2, convert the field element to an integer
-    // by evaluating the binary polynomial at x = 2
-    else {
-        InfInt result = 0;
-        InfInt temp = 1;
-        InfInt element = fieldElement;
-        while (element > 0) {
-            if (element % 2 == 1) {
-                result += temp;
-            }
-            temp *= 2;
-            element /= 2;
-        }
-        return result;
-    }*/
 }
 
 Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair) {
@@ -145,10 +105,7 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair)
     ecc.getRandomNumber(min, ecc.curve.n - 1, k);
 
     // Generate the signature
-    Signature signature;
-    mpz_init(signature.r);
-    mpz_init(signature.s);
-    signature = generateSignature(e, keyPair, k);
+    Signature signature = generateSignature(e, keyPair, k);
 
     // Clear temporary variables
     mpz_clear(k);
@@ -156,10 +113,6 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair)
     mpz_clear(min);
 
     return signature;
-
-    /*InfInt e = prepareMessage(message);
-    InfInt k = ecc.getRandomNumber(0, ecc.curve.n);
-    return generateSignature(e, keyPair, k);*/
 }
 
 Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair, mpz_t& k) {
@@ -169,19 +122,12 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair,
     prepareMessage(message, e);
 
     // Generate the signature
-    Signature signature;
-    mpz_init(signature.r);
-    mpz_init(signature.s);
-
-    signature = generateSignature(e, keyPair, k);
+    Signature signature = generateSignature(e, keyPair, k);
 
     // Clear temporary variables
     mpz_clear(e);
 
     return signature;
-
-    /*InfInt e = prepareMessage(message);
-    return generateSignature(e, keyPair, k);*/
 }
 
 Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t& k) {
@@ -194,9 +140,6 @@ Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t
     fieldElementToInteger(R.x, ecc.curve.n, R_integer);
 
     Signature signature;
-    mpz_init(signature.r);
-    mpz_init(signature.s);
-    // Calculate r = R_integer mod n
     mpz_mod(signature.r, R_integer, ecc.curve.n);
 
     // Calculate kInverse
@@ -218,13 +161,6 @@ Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t
     mpz_clear(temp);
 
     return signature;
-
-    /*Signature S;
-    Point R = ecc.scalarMultiplyPoints(k, ecc.curve.basePoint);
-    S.r = ecc.mod(fieldElementToInteger(R.x, ecc.curve.n), ecc.curve.n);
-    InfInt kInverse = ecc.modInverse(k, ecc.curve.n); 
-    S.s = ecc.mod(((e + (keyPair.privateKey * S.r)) * kInverse), ecc.curve.n);
-    return S;*/
 }
 
 bool ECDSA::verifySignature(const std::string& message, const Signature signature, const Point& publicKey) {
@@ -276,11 +212,4 @@ bool ECDSA::verifySignature(const std::string& message, const Signature signatur
     mpz_clear(P_mod_n);
 
     return verified;
-
-    /*InfInt e = prepareMessage(message);
-    InfInt sInverse = ecc.modInverse(signature.s, ecc.curve.n);
-    InfInt u1 = ecc.mod(sInverse * e, ecc.curve.n);
-    InfInt u2 = ecc.mod(sInverse * signature.r, ecc.curve.n);
-    Point P = ecc.addPoints(ecc.scalarMultiplyPoints(u1, ecc.curve.basePoint), ecc.scalarMultiplyPoints(u2, publicKey));
-    return signature.r == ecc.mod(P.x, ecc.curve.n);*/
 }

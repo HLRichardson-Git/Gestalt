@@ -16,11 +16,6 @@
 
 #include "../src/ecc/ecc.h"
 
-struct Signature {
-    mpz_t r;
-    mpz_t s;
-};
-
 class ECDSA {
 private:
 
@@ -31,14 +26,16 @@ private:
 
     Signature generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t& k);
 public:
+    KeyPair keyPair;
 
     ECDSA(StandardCurve curve = StandardCurve::secp256k1) : ecc(curve) {
         // Initialize ECDSA with the selected standard curve
+        this->keyPair = generateKeyPair();
     }
 	~ECDSA() {}
 
     KeyPair generateKeyPair();
-    KeyPair setKeyPair(mpz_t& privateKey);
+    KeyPair setKeyPair(const std::string& strKey);
     Signature signMessage(const std::string& message, const KeyPair& keyPair);
     Signature signMessage(const std::string& message, const KeyPair& keyPair, mpz_t& k);
     bool verifySignature(const std::string& message, const Signature signature, const Point& publicKey);

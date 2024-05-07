@@ -11,210 +11,126 @@
 #include <gestalt/ecdsa.h>
 
 #include "gtest/gtest.h"
-#include <string>
-#include <iostream>
+//#include <string>
 
 TEST(TestECDSAkeyGen, keyGen)
 {
+
     ECDSA ecdsa;
 
-    // Set private key using GMP
-    mpz_t privateKey;
-    mpz_init(privateKey);
-    mpz_set_str(privateKey, "36911659202040455512047859400253132650624032136469391266733306307680092206180", 10);
+    std::string privateKey = "0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464";
 
     // Generate key pair
     KeyPair keyPair = ecdsa.setKeyPair(privateKey);
 
     // Expected key pair
-    KeyPair expected;
-    mpz_init_set_str(expected.privateKey, "36911659202040455512047859400253132650624032136469391266733306307680092206180", 10);
-    mpz_init_set_str(expected.publicKey.x, "5844747745739988917638281854633664105197999881451444700670129218777985873582", 10);
-    mpz_init_set_str(expected.publicKey.y, "108534668176366933332951134464297919708693135604831156472843095507119755132861", 10);
+    Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+                    "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
+    KeyPair expected("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
 
     // Compare the key pair components
     EXPECT_TRUE(mpz_cmp(keyPair.privateKey, expected.privateKey) == 0);
     EXPECT_TRUE(mpz_cmp(keyPair.publicKey.x, expected.publicKey.x) == 0);
     EXPECT_TRUE(mpz_cmp(keyPair.publicKey.y, expected.publicKey.y) == 0);
-
-    // Clear memory
-    mpz_clear(privateKey);
-    mpz_clear(expected.privateKey);
-    mpz_clear(expected.publicKey.x);
-    mpz_clear(expected.publicKey.y);
-
-    /*ECDSA ecdsa;
-
-    InfInt privatKey = "36911659202040455512047859400253132650624032136469391266733306307680092206180";
-    KeyPair keyPair = ecdsa.setKeyPair(privatKey);
-
-    KeyPair expected = {{"5844747745739988917638281854633664105197999881451444700670129218777985873582",
-                         "108534668176366933332951134464297919708693135604831156472843095507119755132861"},
-                         "36911659202040455512047859400253132650624032136469391266733306307680092206180"};
-
-    EXPECT_EQ(keyPair.publicKey.x, expected.publicKey.x);
-    EXPECT_EQ(keyPair.publicKey.y, expected.publicKey.y);
-    EXPECT_EQ(keyPair.privateKey, expected.privateKey);*/
 }
 
 TEST(TestECDSAsignature, sigGen)
 {
     ECDSA ecdsa;
 
-    // Expected key pair
-    KeyPair keyPair;
-    mpz_init_set_str(keyPair.privateKey,  "36911659202040455512047859400253132650624032136469391266733306307680092206180", 10);
-    mpz_init_set_str(keyPair.publicKey.x, "5844747745739988917638281854633664105197999881451444700670129218777985873582", 10);
-    mpz_init_set_str(keyPair.publicKey.y, "108534668176366933332951134464297919708693135604831156472843095507119755132861", 10);
+    // Set key pair
+    Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+                    "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
+    KeyPair keyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
 
+    // Set known random value k
     mpz_t k;
-    //mpz_init(k);
-    mpz_init_set_str(k, "67228059374187986264907871817984995299114694677537144137068659840319595636958", 10);
-    std::string message = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
+    mpz_init_set_str(k, "94A1BBB14B906A61A280F245F9E93C7F3B4A6247824F5D33B9670787642A68DE", 16);
 
-    Signature signature = ecdsa.signMessage(message, keyPair, k);
+    // Set known digest
+    std::string digest = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
 
-    Signature expected;
-    mpz_init_set_str(expected.r, "47760720287736789683069083573948166072371263571273732180050208132677181355037", 10);
-    mpz_init_set_str(expected.s, "42326741621592248130836344113577397674154087107773159600666149373314130004215", 10);
+    Signature signature = ecdsa.signMessage(digest, keyPair, k);
+
+    mpz_clear(k); // Clean up
+
+    // Set expected signature
+    Signature expected("0x69979C16867D369D95E8852B4C68B323A66A7AAE0A3C112B2F426726EF93B41D", 
+                        "0x5D9416379D19A392740CF6EE448161D630E04CD968EC74DB3EA4C6CE67CC48F7");
 
     // Compare the key pair components
     EXPECT_TRUE(mpz_cmp(signature.r, expected.r) == 0);
     EXPECT_TRUE(mpz_cmp(signature.s, expected.s) == 0);
-
-    // Clear memory
-    mpz_clear(k);
-    mpz_clear(signature.r);
-    mpz_clear(signature.s);
-    mpz_clear(expected.r);
-    mpz_clear(expected.s);
-
-    /*ECDSA ecdsa;
-    
-    KeyPair keyPair = {{"5844747745739988917638281854633664105197999881451444700670129218777985873582",
-                        "108534668176366933332951134464297919708693135604831156472843095507119755132861"},
-                        "36911659202040455512047859400253132650624032136469391266733306307680092206180"};
-
-    const InfInt k = "67228059374187986264907871817984995299114694677537144137068659840319595636958";
-    std::string message = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
-
-    Signature signature = ecdsa.signMessage(message, keyPair, k);
-
-    Signature expected = {"47760720287736789683069083573948166072371263571273732180050208132677181355037",
-                          "42326741621592248130836344113577397674154087107773159600666149373314130004215"};
-
-    EXPECT_EQ(signature.r, expected.r);
-    EXPECT_EQ(signature.s, expected.s);*/
 }
 
 TEST(TestECDSAsignature, sigVer)
 {
     ECDSA ecdsa;
 
-    Point publicKey;
-    mpz_init_set_str(publicKey.x, "5844747745739988917638281854633664105197999881451444700670129218777985873582", 10);
-    mpz_init_set_str(publicKey.y, "108534668176366933332951134464297919708693135604831156472843095507119755132861", 10);
+    // Set the Key Pair
+    Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+                    "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
+    KeyPair keyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
 
-    std::string message = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";\
+    // Set known digest
+    std::string digest = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
 
-    Signature signature;
-    mpz_init_set_str(signature.r, "47760720287736789683069083573948166072371263571273732180050208132677181355037", 10);
-    mpz_init_set_str(signature.s, "42326741621592248130836344113577397674154087107773159600666149373314130004215", 10);
+    // Set known valid signature
+    Signature signature("0x69979C16867D369D95E8852B4C68B323A66A7AAE0A3C112B2F426726EF93B41D", 
+                        "0x5D9416379D19A392740CF6EE448161D630E04CD968EC74DB3EA4C6CE67CC48F7");
 
-    bool verify = ecdsa.verifySignature(message, signature, publicKey);
+    bool verify = ecdsa.verifySignature(digest, signature, keyPair.publicKey);
 
     // Compare the key pair components
     EXPECT_TRUE(verify);
-
-    // Clear memory
-    mpz_clear(signature.r);
-    mpz_clear(signature.s);
-    
-    /*Point publicKey = {"5844747745739988917638281854633664105197999881451444700670129218777985873582",
-                       "108534668176366933332951134464297919708693135604831156472843095507119755132861"};
-
-    std::string message = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
-
-    Signature signature = {"47760720287736789683069083573948166072371263571273732180050208132677181355037",
-                           "42326741621592248130836344113577397674154087107773159600666149373314130004215"};
-
-    bool verify = ecdsa.verifySignature(message, signature, publicKey);
-
-    EXPECT_EQ(verify, true);*/
 }
 
 TEST(TestECDSAsignature, PWCT) {
     ECDSA ecdsa(StandardCurve::P256);
 
-    // Expected key pair
-    KeyPair keyPair;
-    mpz_init_set_str(keyPair.privateKey,  "36911659202040455512047859400253132650624032136469391266733306307680092206180", 10);
-    mpz_init_set_str(keyPair.publicKey.x, "13025038577035367868028521755794722443625521375819261296867266283988044595075", 10);
-    mpz_init_set_str(keyPair.publicKey.y, "93289668407624934715496999573355830041670389702655399598324526119224759438505", 10);
+    // Set key pair
+    Point publicKey("0x1CCBE91C075FC7F4F033BFA248DB8FCCD3565DE94BBFB12F3C59FF46C271BF83", 
+                    "0xCE4014C68811F9A21A1FDB2C0E6113E06DB7CA93B7404E78DC7CCD5CA89A4CA9");
+    KeyPair keyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
 
+    // Set known random value
     mpz_t k;
-    mpz_init_set_str(k, "67228059374187986264907871817984995299114694677537144137068659840319595636958", 10);
-    std::string message = "44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56";
+    mpz_init_set_str(k, "94A1BBB14B906A61A280F245F9E93C7F3B4A6247824F5D33B9670787642A68DE", 16);
 
-    Signature signature = ecdsa.signMessage(message, keyPair, k);
+    // Set known digest
+    std::string digest = "44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56";
 
-    Signature expected;
-    mpz_init_set_str(expected.r, "110216805958592777714039232774448176272891959258816807100364142388121497551532", 10);
-    mpz_init_set_str(expected.s, "63308726082909978129457058886438288747780283410792251258965605561145777031427", 10);
+    Signature signature = ecdsa.signMessage(digest, keyPair, k);
+
+    mpz_clear(k); // Clean Up
+
+    // Set expected signature
+    Signature expected("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC", 
+                       "0x8BF77819CA05A6B2786C76262BF7371CEF97B218E96F175A3CCDDA2ACC058903");
 
     // Compare the key pair components
     EXPECT_TRUE(mpz_cmp(signature.r, expected.r) == 0);
     EXPECT_TRUE(mpz_cmp(signature.s, expected.s) == 0);
 
-    bool verify = ecdsa.verifySignature(message, signature, keyPair.publicKey);
+    bool verify = ecdsa.verifySignature(digest, signature, keyPair.publicKey);
 
     EXPECT_TRUE(verify);
-    
-    /*KeyPair keyPair = {{"13025038577035367868028521755794722443625521375819261296867266283988044595075",
-                        "93289668407624934715496999573355830041670389702655399598324526119224759438505"},
-                        "36911659202040455512047859400253132650624032136469391266733306307680092206180"};
-
-    const InfInt k = "67228059374187986264907871817984995299114694677537144137068659840319595636958";
-    
-    std::string message = "44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56";
-
-    Signature signature = ecdsa.signMessage(message, keyPair, k);
-
-    Signature expected = {"110216805958592777714039232774448176272891959258816807100364142388121497551532",
-                          "63308726082909978129457058886438288747780283410792251258965605561145777031427"};
-
-    EXPECT_EQ(signature.r, expected.r);
-    EXPECT_EQ(signature.s, expected.s);
-
-    bool verify = ecdsa.verifySignature(message, signature, keyPair.publicKey);
-
-    EXPECT_EQ(verify, true);*/
 }
 
 TEST(TestECDSAsignature, inducedFailureVerification)
 {
     ECDSA ecdsa;
 
-    KeyPair keyPair = ecdsa.generateKeyPair();
+    //KeyPair keyPair = ecdsa.generateKeyPair();
+    ecdsa.generateKeyPair();
 
-    std::string message = "1AC5";
+    std::string digest = "1AC5";
 
-    Signature signature = ecdsa.signMessage(message, keyPair);
+    Signature signature = ecdsa.signMessage(digest, ecdsa.keyPair);
 
-    message= "1AC6";
-    bool verify = ecdsa.verifySignature(message, signature, keyPair.publicKey);
+    digest= "1AC6";
+    bool verify = ecdsa.verifySignature(digest, signature, ecdsa.keyPair.publicKey);
 
     // Compare the key pair components
     EXPECT_TRUE(!verify);
-    
-    /*KeyPair keyPair = ecdsa.generateKeyPair();
-
-    std::string message = "1AC5";
-
-    Signature signature = ecdsa.signMessage(message, keyPair);
-
-    message= "1AC6";
-    bool verify = ecdsa.verifySignature(message, signature, keyPair.publicKey);
-
-    EXPECT_EQ(verify, false);*/
 }

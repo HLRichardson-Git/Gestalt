@@ -60,7 +60,7 @@ TEST(testSHA1Hash, hashKatSHA1) {
 // Large Known Answer Test(KAT) for SHA1 from:
 // [1] - https://www.di-mgt.com.au/sha_testvectors.html
 TEST(testLargeSHA1Hash, hashLargeKatSHA1) {
-
+    GTEST_SKIP();
     // Prompt for confirmation before running the test
     std::cout << "Do you want to run the extremely long test? (Y/N): ";
     char confirmation;
