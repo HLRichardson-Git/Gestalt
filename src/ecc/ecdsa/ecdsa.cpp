@@ -15,47 +15,14 @@
 
 #include <gestalt/ecdsa.h>
 
-KeyPair ECDSA::generateKeyPair() {
-    // Initialize GMP random state
-    mpz_t temp;
-    mpz_init(temp);
-
-    // Generate a random private key between 1 and curve order - 1
-    mpz_t min;
-    mpz_init(min);
-    mpz_set_ui(min, 1);
-    ecc.getRandomNumber(min, ecc.curve.n - 1, temp);
-
-    // Calculate the public key
-    Point pubKeyPoint = ecc.scalarMultiplyPoints(temp, ecc.curve.basePoint);
-    KeyPair T(temp, pubKeyPoint);
-
-    // Clean up
-    mpz_clear(min);
-    mpz_clear(temp);
-
-    return T;
-}
-
-KeyPair ECDSA::setKeyPair(const std::string& strKey) {
-    mpz_t n;
-    mpz_init(n);
-    stringToGMP(strKey, n);
-
-    KeyPair T(n, ecc.scalarMultiplyPoints(n, ecc.curve.basePoint));
-
-    mpz_clear(n);
-    return T;
-}
-
 void ECDSA::prepareMessage(const std::string& message, mpz_t& result) {
     // Calculate the length of the hash in bits
     size_t hashBitLen = message.length() * 4;
 
     // Check if the hash length exceeds the curve's bit length
-    if (hashBitLen >= ecc.curve.bitLength) {
+    if (hashBitLen >= ellipticCurve.bitLength) {
         // Truncate the hash to fit the curve's bit length
-        std::string truncatedHash = message.substr(0, ecc.curve.bitLength / 4); // Divide by 4 to get byte length
+        std::string truncatedHash = message.substr(0, ellipticCurve.bitLength / 4); // Divide by 4 to get byte length
         // Convert the truncated hash from hexadecimal string to mpz_t integer
         mpz_init_set_str(result, truncatedHash.c_str(), 16);
     } else {
@@ -65,11 +32,8 @@ void ECDSA::prepareMessage(const std::string& message, mpz_t& result) {
 }
 
 void ECDSA::fieldElementToInteger(const mpz_t& fieldElement, const mpz_t& modulus, mpz_t result) {
-    // Initialize GMP variables
     mpz_t temp, element;
     mpz_inits(temp, element, NULL);
-
-    // Copy fieldElement to element
     mpz_set(element, fieldElement);
 
     // If the modulus is an odd prime, no conversion is needed
@@ -88,26 +52,21 @@ void ECDSA::fieldElementToInteger(const mpz_t& fieldElement, const mpz_t& modulu
         }
     }
 
-    // Clear GMP variables
     mpz_clears(temp, element, NULL);
 }
 
-Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair) {
-    // Prepare the message
+Signature ECDSA::signMessage(const std::string& message) {
     mpz_t e;
     mpz_init(e);
     prepareMessage(message, e);
 
-    // Generate a random number k
     mpz_t k, min;
     mpz_init(k);
     mpz_init_set_ui(min, 1);
-    ecc.getRandomNumber(min, ecc.curve.n - 1, k);
+    getRandomNumber(min, ellipticCurve.n - 1, k);
 
-    // Generate the signature
-    Signature signature = generateSignature(e, keyPair, k);
+    Signature signature = generateSignature(e, k);
 
-    // Clear temporary variables
     mpz_clear(k);
     mpz_clear(e);
     mpz_clear(min);
@@ -115,37 +74,34 @@ Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair)
     return signature;
 }
 
-Signature ECDSA::signMessage(const std::string& message, const KeyPair& keyPair, mpz_t& k) {
-    // Prepare the message
+Signature ECDSA::signMessage(const std::string& message, mpz_t& k) {
     mpz_t e;
     mpz_init(e);
     prepareMessage(message, e);
 
-    // Generate the signature
-    Signature signature = generateSignature(e, keyPair, k);
+    Signature signature = generateSignature(e, k);
 
-    // Clear temporary variables
     mpz_clear(e);
 
     return signature;
 }
 
-Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t& k) {
+Signature ECDSA::generateSignature(const mpz_t& e, mpz_t& k) {
     // Generate the point R
-    Point R = ecc.scalarMultiplyPoints(k, ecc.curve.basePoint);
+    Point R = scalarMultiplyPoints(k, ellipticCurve.basePoint);
 
     // Convert x-coordinate of R to integer
     mpz_t R_integer;
     mpz_init(R_integer);
-    fieldElementToInteger(R.x, ecc.curve.n, R_integer);
+    fieldElementToInteger(R.x, ellipticCurve.n, R_integer);
 
     Signature signature;
-    mpz_mod(signature.r, R_integer, ecc.curve.n);
+    mpz_mod(signature.r, R_integer, ellipticCurve.n);
 
     // Calculate kInverse
     mpz_t kInverse;
     mpz_init(kInverse);
-    mpz_invert(kInverse, k, ecc.curve.n);
+    mpz_invert(kInverse, k, ellipticCurve.n);
 
     // Calculate s
     mpz_t temp;
@@ -153,7 +109,7 @@ Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t
     mpz_mul(temp, keyPair.privateKey, signature.r); // temp = privateKey * r
     mpz_add(temp, e, temp); // temp = e + privateKey * r
     mpz_mul(temp, temp, kInverse); // temp = (e + privateKey * r) * kInverse
-    mpz_mod(signature.s, temp, ecc.curve.n); // s = (e + privateKey * r) * kInverse mod n
+    mpz_mod(signature.s, temp, ellipticCurve.n); // s = (e + privateKey * r) * kInverse mod n
 
     // Clear temporary variables
     mpz_clear(R_integer);
@@ -163,7 +119,7 @@ Signature ECDSA::generateSignature(const mpz_t& e, const KeyPair& keyPair, mpz_t
     return signature;
 }
 
-bool ECDSA::verifySignature(const std::string& message, const Signature signature, const Point& publicKey) {
+bool ECDSA::verifySignature(const std::string& message, const Signature signature) {
         // Prepare the message
     mpz_t e;
     mpz_init(e);
@@ -172,33 +128,33 @@ bool ECDSA::verifySignature(const std::string& message, const Signature signatur
     // Calculate sInverse using GMP's modular inverse function
     mpz_t sInverse;
     mpz_init(sInverse);
-    mpz_invert(sInverse, signature.s, ecc.curve.n);
+    mpz_invert(sInverse, signature.s, ellipticCurve.n);
 
     // Calculate u1 = sInverse * e mod n
     mpz_t u1;
     mpz_init(u1);
     mpz_mul(u1, sInverse, e);
-    mpz_mod(u1, u1, ecc.curve.n);
+    mpz_mod(u1, u1, ellipticCurve.n);
 
     // Calculate u2 = sInverse * r mod n
     mpz_t u2;
     mpz_init(u2);
     mpz_mul(u2, sInverse, signature.r);
-    mpz_mod(u2, u2, ecc.curve.n);
+    mpz_mod(u2, u2, ellipticCurve.n);
 
     // Calculate P = u1*G + u2*publicKey
     Point P;
-    P = ecc.addPoints(ecc.scalarMultiplyPoints(u1, ecc.curve.basePoint), ecc.scalarMultiplyPoints(u2, publicKey));
+    P = addPoints(scalarMultiplyPoints(u1, ellipticCurve.basePoint), scalarMultiplyPoints(u2, keyPair.publicKey));
 
     // Convert x-coordinate of P to integer
     mpz_t P_integer;
     mpz_init(P_integer);
-    fieldElementToInteger(P.x, ecc.curve.n, P_integer);
+    fieldElementToInteger(P.x, ellipticCurve.n, P_integer);
 
     // Calculate P.x mod n
     mpz_t P_mod_n;
     mpz_init(P_mod_n);
-    mpz_mod(P_mod_n, P_integer, ecc.curve.n);
+    mpz_mod(P_mod_n, P_integer, ellipticCurve.n);
 
     // Compare r with P.x mod n
     bool verified = (mpz_cmp(signature.r, P_mod_n) == 0);

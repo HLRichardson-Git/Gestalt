@@ -15,31 +15,35 @@
 
 #pragma once
 
-#include <iostream>
-//#include <gmp.h>
-
 #include "eccObjects.h"
+#include "standardCurves.h"
 
 class ECC {
 private:
 
-public:
-    //KeyPair keyPair;
-    Curve curve;
-
-    ECC(StandardCurve curve = StandardCurve::test) : curve(getCurveParams(curve)) {}
-
-    // Destructor
-    ~ECC() {}
-
-    // Method to set the curve to a new standard curve
-    void setCurve(StandardCurve curveType) {
-        curve = getCurveParams(curveType);
-    }
+    KeyPair keyPair;
+    Curve ellipticCurve;
 
     Point addPoints(Point P, Point Q);
     Point doublePoint(Point P);
     Point scalarMultiplyPoints(const mpz_t& k, Point P);
 
     void getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
+    
+    friend class ECDSA;
+    //friend class ECDH;
+public:
+
+    ECC(StandardCurve curve = StandardCurve::secp256k1) : ellipticCurve(getCurveParams(curve)) {}
+
+    ~ECC() {}
+
+    KeyPair generateKeyPair();
+
+    void setKeyPair(const KeyPair& newKeyPair) { keyPair = newKeyPair; }
+    void setKeyPair(const std::string& strKey);
+    void setCurve(StandardCurve curveType) { ellipticCurve = getCurveParams(curveType); }
+    KeyPair getKeyPair() const { return keyPair; }
+
+    friend class TestECC;
 };

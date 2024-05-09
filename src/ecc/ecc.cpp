@@ -11,9 +11,6 @@
  */
 
 #include <math.h>
-#include <random>
-#include <tuple>
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <gmp.h>
@@ -30,9 +27,9 @@ Point ECC::addPoints(Point P, Point Q) {
     /* s = (y1 - y2) / (x1 - x2) */
     mpz_sub(T.x, P.y, Q.y);
     mpz_sub(T.y, P.x, Q.x);
-    mpz_invert(T.y, T.y, curve.p);
+    mpz_invert(T.y, T.y, ellipticCurve.p);
     mpz_mul(s, T.x, T.y);
-    mpz_mod(s, s, curve.p);
+    mpz_mod(s, s, ellipticCurve.p);
 
     /* rx = s^2 - (x1 + x2) */
     mpz_mul(T.x, s, s);
@@ -49,8 +46,8 @@ Point ECC::addPoints(Point P, Point Q) {
     /* We assign the destination parameters in the end to allow them to
      be identical to the inputs. */
     Point R;
-    mpz_mod(R.x, T.x, curve.p);
-    mpz_mod(R.y, T.y, curve.p);
+    mpz_mod(R.x, T.x, ellipticCurve.p);
+    mpz_mod(R.y, T.y, ellipticCurve.p);
 
     return R;
 }
@@ -64,16 +61,16 @@ Point ECC::doublePoint(Point P) {
 
     /* s = (3x^2 + a) / 2y */
     mpz_mul(T.x, P.x, P.x);
-    mpz_mod(T.x, T.x, curve.p);
+    mpz_mod(T.x, T.x, ellipticCurve.p);
     mpz_mul_ui(T.x, T.x, 3);
-    mpz_add(T.x, T.x, curve.a);
-    mpz_mod(T.x, T.x, curve.p);
+    mpz_add(T.x, T.x, ellipticCurve.a);
+    mpz_mod(T.x, T.x, ellipticCurve.p);
 
     mpz_mul_ui(T.y, P.y, 2);
-    mpz_invert(T.y, T.y, curve.p);
+    mpz_invert(T.y, T.y, ellipticCurve.p);
 
     mpz_mul(s, T.x, T.y);
-    mpz_mod(s, s, curve.p);
+    mpz_mod(s, s, ellipticCurve.p);
 
     /* rx = s^2 - 2x */
     mpz_mul(T.x, s, s);
@@ -90,8 +87,8 @@ Point ECC::doublePoint(Point P) {
     /* We assign the destination parameters in the end to allow them to
         be identical to the inputs. */
     Point R;
-    mpz_mod(R.x, T.x, curve.p);
-    mpz_mod(R.y, T.y, curve.p);  
+    mpz_mod(R.x, T.x, ellipticCurve.p);
+    mpz_mod(R.y, T.y, ellipticCurve.p);  
 
     return R;
 }
@@ -132,4 +129,38 @@ void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
     // Clear temporary variables and random state
     mpz_clear(range);
     gmp_randclear(state);
+}
+
+KeyPair ECC::generateKeyPair() {
+    // Initialize GMP random state
+    mpz_t temp;
+    mpz_init(temp);
+
+    // Generate a random private key between 1 and curve order - 1
+    mpz_t min;
+    mpz_init(min);
+    mpz_set_ui(min, 1);
+    getRandomNumber(min, ellipticCurve.n - 1, temp);
+
+    // Calculate the public key
+    Point pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.basePoint);
+    KeyPair T(temp, pubKeyPoint);
+
+    // Clean up
+    mpz_clear(min);
+    mpz_clear(temp);
+
+    return T;
+}
+
+void ECC::setKeyPair(const std::string& strKey) {
+    mpz_t n;
+    mpz_init(n);
+    stringToGMP(strKey, n);
+
+    KeyPair T(n, scalarMultiplyPoints(n, ellipticCurve.basePoint));
+
+    mpz_clear(n);
+
+    keyPair = T;
 }

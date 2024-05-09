@@ -16,75 +16,67 @@
 #include <sstream>
 #include <tuple>
 
-TEST(TestECC_Arithmetic, testPointAddition)
+class TestECC : public ::testing::Test {
+private:
+    ECC ecc;
+protected:
+    Point addPoints(Point P, Point Q) {return ecc.addPoints(P, Q);};
+    Point doublePoint(Point P) {return ecc.doublePoint(P);};
+    Point scalarMultiplyPoints(const mpz_t& k, Point P) {return ecc.scalarMultiplyPoints(k, P);};
+};
+
+TEST_F(TestECC, testPointAddition)
 {
-    ECC ecc(StandardCurve::P256);
+    Point P("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
+            "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
+    Point Q("0xd901df95be82c8953b83e569b9b63b0b52e6ee9a2e6fc400e852090e3f6fec69", 
+            "0x99a666ff41bf66483e1fd92960b931df1effeb4465673c52cc011e4a0a803df3");
 
-    // Set point P & Q
-    Point P("67228059374187986264907871817984995299114694677537144137068659840319595636958", 
-            "36911659202040455512047859400253132650624032136469391266733306307680092206180");
-    Point Q("79584758605949253762341734104702304948499678541099118250653347730022630682716", 
-            "82005680352103069544532681048882113537922206207710011425498220375837764433226");
+    Point R = addPoints(P, Q);
 
-    // Perform point addition
-    Point R = ecc.addPoints(P, Q);
+    Point expected("0x3be0eb288273201f90f975710f08f41076dd79587499283ad471f2f33a03c81", 
+                   "0x328a64c3e38dc5e5b1734b91fae70425703c74e400d1740389a8424280d915b3");
 
-    // Set expected point
-    Point expected("16247106453250244225622460159038600432635777869376973139750787284798796257055", 
-                   "84741935852476448650405200364169101653520738128916381383119006842903426464819");
-
-    // Compare the points
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
-TEST(TestECC_Arithmetic, testPointDouble)
+TEST_F(TestECC, testPointDouble)
 {
-    ECC ecc(StandardCurve::P256);
-    
-    // Set point P
-    Point P("16247106453250244225622460159038600432635777869376973139750787284798796257055", 
-            "84741935852476448650405200364169101653520738128916381383119006842903426464819");
+    Point P("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
+            "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
 
-    Point R = ecc.doublePoint(P);
+    Point R = doublePoint(P);
 
-    // Set expected point
-    Point expected("94661065609916795805170830853666726936855561355503933991787557860394254628829", 
-                   "22871027890686529937969966456841486853953364797665548725333072814274627436453");
-    
-    // Compare the points
+    Point expected("0x102effa403b27f4252a0c8d52522a54812b78646638e1e4ef9dcaf725c587f95", 
+                   "0x8a556d2f948557616ed4b3360fa83f2fe43815a80375c2f8f35d5c0e94467750");
+
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
-TEST(TestECC_Arithmetic, testPointMultiplication)
+TEST_F(TestECC, testPointMultiplication)
 {
-    ECC ecc(StandardCurve::secp256k1);
-
-    // Set point P
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
-    // Set scalar value
     mpz_t n;
     mpz_init_set_str(n, "8", 16);
 
-    Point R = ecc.scalarMultiplyPoints(n, P);
+    Point R = scalarMultiplyPoints(n, P);
 
-    mpz_clear(n); // Clean Up
+    mpz_clear(n);
 
-    // Set expected Point
     Point expected("0x86a5ee3b95e14201a8dc231aedbf5b0c48b31d2f1e6ccee090a8d798dd37e896", 
                    "0x4c571310c823401a22185452f49473f315757896ac032cfcbdbc15b0cd74a422");
 
-    // Compare the points
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
 TEST(TestECC_Objects, PointInitialization)
 {
-    // Check Heexidecimal value initialization
+    // Check Hexidecimal value initialization
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
@@ -117,7 +109,7 @@ TEST(TestECC_Objects, PointInitialization)
     EXPECT_TRUE(mpz_cmp(T.x, n) == 0);
     EXPECT_TRUE(mpz_cmp(T.y, n) == 0);
 
-    mpz_clears(x, y, n, NULL); // Clean Up
+    mpz_clears(x, y, n, NULL);
 }
 
 TEST(TestECC_Objects, PointAssignmentOperator)
@@ -133,7 +125,7 @@ TEST(TestECC_Objects, PointAssignmentOperator)
 
 TEST(TestECC_Objects, KeyPairInitialization)
 {
-    // Check Heexidecimal value initialization
+    // Check Hexidecimal value initialization
     Point publicKey1("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair P("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey1);
@@ -173,7 +165,7 @@ TEST(TestECC_Objects, KeyPairInitialization)
     EXPECT_TRUE(mpz_cmp(T.publicKey.x, n) == 0);
     EXPECT_TRUE(mpz_cmp(T.publicKey.y, n) == 0);
 
-    mpz_clears(x, y, n, NULL); // Clean Up
+    mpz_clears(x, y, n, NULL);
 }
 
 TEST(TestECC_Objects, KeyPairAssignmentOperator)
@@ -191,7 +183,7 @@ TEST(TestECC_Objects, KeyPairAssignmentOperator)
 
 TEST(TestECC_Objects, SignatureInitialization)
 {
-    // Check Heexidecimal value initialization
+    // Check Hexidecimal value initialization
     Signature P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
                 "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
@@ -224,7 +216,7 @@ TEST(TestECC_Objects, SignatureInitialization)
     EXPECT_TRUE(mpz_cmp(T.r, n) == 0);
     EXPECT_TRUE(mpz_cmp(T.s, n) == 0);
 
-    mpz_clears(r, s, n, NULL); // Clean Up
+    mpz_clears(r, s, n, NULL);
 }
 
 TEST(TestECC_Objects, SignatureAssignmentOperator)

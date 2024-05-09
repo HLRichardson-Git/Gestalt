@@ -51,7 +51,6 @@ set (Sources
     src/modes/cbc.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
-    src/ecc/eccObjects.cpp
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
     tools/utils.cpp

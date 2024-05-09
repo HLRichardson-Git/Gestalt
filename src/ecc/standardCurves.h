@@ -5,122 +5,35 @@
  */
 
 /*
- * eccObjects.cpp
+ * standardCurves.h
  *
  * This file contains the implementation of Gestalts ECC security functions.
  */
 
-#include <gmp.h>
-#include <string>
 #include <iostream>
+#include <gmp.h>
 
-#include "eccObjects.h"
+class Point;
 
-void stringToGMP(const std::string& str, mpz_t& result) {
-    //mpz_init(result);
-    
-    // Check if the string starts with "0x" to determine if it's hexadecimal
-    if (str.substr(0, 2) == "0x") {
-        std::string truncatedStr = str.substr(2, str.length());
-        mpz_set_str(result, truncatedStr.c_str(), 16);
-    } else {
-        mpz_set_str(result, str.c_str(), 10);
-    }
-}
+// Enumerate the available standard curves
+enum class StandardCurve {
+    test,
+    //Curve25519,
+    //Curve383187,
+    //Curve41417,
+    P256,
+    secp256k1,
+    // Add more standard curves as needed
+};
 
-/*  Point Object  */
-
-Point::Point() {
-    mpz_inits(x, y, NULL);
-}
-
-Point::Point(const std::string& strX, const std::string& strY) {
-    mpz_inits(x, y, NULL);
-    stringToGMP(strX, x);
-    stringToGMP(strY, y);
-}
-
-// Copy constructor definition
-Point::Point(const Point& other) {
-    // Initialize x and y with the same values as other
-    mpz_init_set(x, other.x);
-    mpz_init_set(y, other.y);
-}
-
-void Point::operator =(const Point& R) {
-    mpz_set(this->x, R.x);
-    mpz_set(this->y, R.y);
-}
-
-Point::~Point() {
-    mpz_clear(x);
-    mpz_clear(y);
-}
-
-Point Point::setPoint(const std::string& strX, const std::string& strY) {
-    return Point(strX, strY);
-}
-
-/*  KeyPair Object  */
-
-KeyPair::KeyPair() {
-    mpz_init(privateKey);
-}
-
-KeyPair::KeyPair(const mpz_t& gmpPriv, const Point& strPub) {
-    mpz_init(privateKey);
-    mpz_set(privateKey, gmpPriv);
-    publicKey = strPub;
-}
-
-KeyPair::KeyPair(const std::string& strPriv, const Point& strPub) {
-    mpz_init(privateKey);
-    stringToGMP(strPriv, privateKey);
-    publicKey = strPub;
-}
-
-KeyPair::KeyPair(const KeyPair& other) {
-    mpz_init_set(privateKey, other.privateKey);
-    publicKey = other.publicKey;
-}
-
-void KeyPair::operator =(const KeyPair& R) {
-    mpz_set(this->privateKey, R.privateKey);
-    this->publicKey = R.publicKey;
-}
-
-KeyPair::~KeyPair() {
-    mpz_clear(privateKey);
-}
-
-/*  Signature Object  */
-
-Signature::Signature() {
-    mpz_inits(r, s, NULL);
-}
-
-Signature::Signature(const std::string& strR, const std::string& strS) {
-    mpz_inits(r, s, NULL);
-    stringToGMP(strR, r);
-    stringToGMP(strS, s);
-}
-
-// Copy constructor definition
-Signature::Signature(const Signature& other) {
-    // Initialize x and y with the same values as other
-    mpz_init_set(r, other.r);
-    mpz_init_set(s, other.s);
-}
-
-void Signature::operator =(const Signature& other) {
-    mpz_set(this->r, other.r);
-    mpz_set(this->s, other.s);
-}
-
-Signature::~Signature() {
-    mpz_clear(r);
-    mpz_clear(s);
-}
+struct Curve {
+    mpz_t a;
+    mpz_t b;
+    mpz_t p;
+    Point basePoint;
+    mpz_t n;
+    size_t bitLength;
+};
 
 inline Curve init_test() {
     Curve test;
@@ -161,7 +74,7 @@ inline Curve init_secp256k1() {
     return secp256k1;
 }
 
-Curve getCurveParams(StandardCurve curve) {
+inline Curve getCurveParams(StandardCurve curve) {
     switch (curve) {
         case StandardCurve::test:
             return init_test();
