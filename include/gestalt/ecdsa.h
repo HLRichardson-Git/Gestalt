@@ -7,8 +7,22 @@
 /*
  * ecdsa.h
  *
- * This file contains the definitions of Gestalts ECDSA security functions.
+ * This file contains declarations for Elliptic Curve Digital Signature Algorithm (ECDSA) for Gestalt.
+ * ECDSA is a cryptographic algorithm used for generating and verifying digital signatures based on
+ * elliptic curve cryptography (ECC). It offers efficient signature generation and verification
+ * while providing a high level of security, making it suitable for a wide range of applications
+ * such as secure communication protocols and digital authentication systems.
+ *
+ * This class provides functionality for signature generation, signature verification, and other 
+ * operations necessary for implementing ECDSA-based security protocols.
+ *
+ * References:
+ * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
+ * - "Guide to Elliptic Curve Cryptography" by Darrel Hankerson, Alfred Menezes, Scott Vanstone
+ * - "FIPS 186-5 Digital Signature Standard (DSS)" by NIST
+ *
  */
+
 
 #pragma once
 
@@ -19,10 +33,11 @@
 class ECDSA : public ECC {
 private:
 
-    void prepareMessage(const std::string& message, mpz_t& result);
-    void fieldElementToInteger(const mpz_t& fieldElement, const mpz_t& modulus, mpz_t result);
+    void prepareMessage(const std::string& messageHash, mpz_t& result);
+    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result);
 
     Signature generateSignature(const mpz_t& e, mpz_t& k);
+    //Signature generateSignature(const mpz_t& e, BigInt& K);
 public:
 
     ECDSA() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
@@ -33,7 +48,8 @@ public:
 
 	~ECDSA() {}
 
-    Signature signMessage(const std::string& message);
-    Signature signMessage(const std::string& message, mpz_t& k);
-    bool verifySignature(const std::string& message, const Signature signature);
+    Signature signMessage(const std::string& messageHash);
+    //Signature signMessage(const std::string& message, mpz_t& k);
+    Signature signMessage(const std::string& messageHash, BigInt& K);
+    bool verifySignature(const std::string& messageHash, const Signature signature);
 };

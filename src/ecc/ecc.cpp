@@ -7,8 +7,20 @@
 /*
  * ecc.cpp
  *
- * This file contains the implementation of Gestalts ECC security functions.
+ * This file contains the implementation of Elliptic Curve Cryptography (ECC) algorithms for Gestalt.
+ * ECC is a powerful cryptographic technique based on the algebraic properties of elliptic curves
+ * over finite fields.
+ *
+ * This implementation covers key operations in ECC, including point addition, point doubling,
+ * scalar multiplication, and the ECC arithmetic required for cryptographic operations.
+ *
+ * References:
+ * - "Guide to Elliptic Curve Cryptography" by Darrel Hankerson, Alfred Menezes, Scott Vanstone
+ * - "Elliptic Curves: Number Theory and Cryptography" by Lawrence C. Washington
+ * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
+ *
  */
+
 
 #include <math.h>
 #include <string>
@@ -143,7 +155,7 @@ KeyPair ECC::generateKeyPair() {
     getRandomNumber(min, ellipticCurve.n - 1, temp);
 
     // Calculate the public key
-    Point pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.basePoint);
+    Point pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.generator);
     KeyPair T(temp, pubKeyPoint);
 
     // Clean up
@@ -158,7 +170,7 @@ void ECC::setKeyPair(const std::string& strKey) {
     mpz_init(n);
     stringToGMP(strKey, n);
 
-    KeyPair T(n, scalarMultiplyPoints(n, ellipticCurve.basePoint));
+    KeyPair T(n, scalarMultiplyPoints(n, ellipticCurve.generator));
 
     mpz_clear(n);
 

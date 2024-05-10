@@ -60,18 +60,55 @@ TEST_F(TestECC, testPointMultiplication)
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
-    mpz_t n;
-    mpz_init_set_str(n, "8", 16);
+    BigInt N("0x8");
 
-    Point R = scalarMultiplyPoints(n, P);
-
-    mpz_clear(n);
+    Point R = scalarMultiplyPoints(N.n, P);
 
     Point expected("0x86a5ee3b95e14201a8dc231aedbf5b0c48b31d2f1e6ccee090a8d798dd37e896", 
                    "0x4c571310c823401a22185452f49473f315757896ac032cfcbdbc15b0cd74a422");
 
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
+}
+
+TEST(TestECC_Objects, BigIntInitialization)
+{
+    // Check Hexidecimal value initialization
+    BigInt P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577");
+
+    BigInt N = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
+
+    EXPECT_TRUE(mpz_cmp(P.n, N.n) == 0);
+
+    // Check decimal value initialization
+    BigInt Q = "60903095697897716130768633358908066527972563868462147701232486991401305237654";
+
+    N = "60903095697897716130768633358908066527972563868462147701232486991401305237654";
+
+    EXPECT_TRUE(mpz_cmp(Q.n, N.n) == 0);
+
+    // Make sure P != Q
+    EXPECT_TRUE(mpz_cmp(P.n, Q.n) != 0);
+
+    // Check proper NULL initialization
+    BigInt T;
+    mpz_t t;
+    mpz_init(t);
+
+    EXPECT_TRUE(mpz_cmp(T.n, t) == 0);
+    EXPECT_TRUE(mpz_cmp(T.n, t) == 0);
+
+    mpz_clears(t, NULL);
+}
+
+TEST(TestECC_Objects, BigIntAssignmentOperator)
+{
+    BigInt P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577");
+
+    BigInt Q = P;
+
+    EXPECT_TRUE(mpz_cmp(P.n, Q.n) == 0);
+    EXPECT_TRUE(mpz_cmp(P.n, Q.n) == 0);
 }
 
 TEST(TestECC_Objects, PointInitialization)

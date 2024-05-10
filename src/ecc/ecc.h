@@ -5,13 +5,21 @@
  */
 
 /*
- * ecc.cpp
+ * ecc.h
  *
- * This file contains standard strong Ellicptic Curves.
+ * This file contains declarations for Elliptic Curve Cryptography (ECC) class for Gestalt.
+ * ECC is a public-key cryptography method based on the algebraic structure of elliptic curves
+ * over finite fields.
+ *
+ * The class provides functionality for key generation, point arithmetic, and generating random numbers.
  *
  * References:
- * - 
+ * - "Guide to Elliptic Curve Cryptography" by Darrel Hankerson, Alfred Menezes, Scott Vanstone
+ * - "Elliptic Curves: Number Theory and Cryptography" by Lawrence C. Washington
+ * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
+ *
  */
+
 
 #pragma once
 

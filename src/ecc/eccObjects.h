@@ -7,10 +7,8 @@
 /*
  * eccObjects.h
  *
- * This file contains popular standard curves uses in Elliptic Curve Cryptography.
+ * This file contains data objects used in Elliptic Curve Cryptography.
  *
- * References:
- * - 
  */
 #pragma once
 
@@ -26,6 +24,31 @@ inline void stringToGMP(const std::string& str, mpz_t& result) {
     }
 }
 
+class BigInt {
+public:
+    mpz_t n;
+
+    BigInt() { mpz_init(n); }
+    BigInt(const std::string& strN) {
+        mpz_init(n);
+        stringToGMP(strN, n);
+    }
+    BigInt(const BigInt& other) {
+        mpz_init_set(n, other.n);
+    }
+    void operator =(const BigInt& other) {
+        mpz_set(this->n, other.n);
+    }
+    void operator =(const std::string& strN) {
+        mpz_init(n);
+        stringToGMP(strN, n);
+    }
+
+    ~BigInt() {
+        mpz_clear(n);
+    }
+};
+
 class Point {
 public:
     mpz_t x, y;
@@ -36,13 +59,13 @@ public:
         stringToGMP(strX, x);
         stringToGMP(strY, y);
     }
-    Point::Point(const Point& other) {
+    Point(const Point& other) {
         mpz_init_set(x, other.x);
         mpz_init_set(y, other.y);
     }
-    void Point::operator =(const Point& R) {
-        mpz_set(this->x, R.x);
-        mpz_set(this->y, R.y);
+    void operator =(const Point& other) {
+        mpz_set(this->x, other.x);
+        mpz_set(this->y, other.y);
     }
 
     ~Point() {
