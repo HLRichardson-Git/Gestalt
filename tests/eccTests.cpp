@@ -6,6 +6,11 @@
 
 /*
  * eccTests.cpp
+ *
+ * This file containts the unit tests for the ECC (Elliptic Curve Cryptography) Gestalt arithmetic functions. 
+ * These tests cover various scenarios including point addition, doubling, and multiplication by a scalar.
+ * The tests also include initialization and operations for the ECC objects created for Gestalt.
+ * 
  */
 
 #include "ecc/ecc.h"

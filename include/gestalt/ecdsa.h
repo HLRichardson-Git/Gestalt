@@ -37,7 +37,6 @@ private:
     void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result);
 
     Signature generateSignature(const mpz_t& e, mpz_t& k);
-    //Signature generateSignature(const mpz_t& e, BigInt& K);
 public:
 
     ECDSA() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
