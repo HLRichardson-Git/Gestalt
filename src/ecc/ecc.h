@@ -37,7 +37,9 @@ private:
     Point scalarMultiplyPoints(const mpz_t& k, Point P);
 
     void getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
-    
+    bool isIdentityPoint(Point P);
+    bool isPointOnCurve(Point P);
+
     friend class ECDSA;
     //friend class ECDH;
 public:

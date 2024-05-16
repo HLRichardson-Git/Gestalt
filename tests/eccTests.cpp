@@ -28,6 +28,8 @@ protected:
     Point addPoints(Point P, Point Q) {return ecc.addPoints(P, Q);};
     Point doublePoint(Point P) {return ecc.doublePoint(P);};
     Point scalarMultiplyPoints(const mpz_t& k, Point P) {return ecc.scalarMultiplyPoints(k, P);};
+    bool isIdentityPoint(Point P) { return ecc.isIdentityPoint(P) ;};
+    bool isPointOnCurve(Point P) { return ecc.isPointOnCurve(P) ;};
 };
 
 TEST_F(TestECC, testPointAddition)
@@ -41,6 +43,21 @@ TEST_F(TestECC, testPointAddition)
 
     Point expected("0x3be0eb288273201f90f975710f08f41076dd79587499283ad471f2f33a03c81", 
                    "0x328a64c3e38dc5e5b1734b91fae70425703c74e400d1740389a8424280d915b3");
+
+    EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
+    EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
+}
+
+TEST_F(TestECC, identityPointAddition)
+{
+    Point P("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
+            "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
+    Point Q("0x0", "0x0");
+
+    Point R = addPoints(P, Q);
+
+    Point expected("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
+                   "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
 
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
@@ -74,6 +91,25 @@ TEST_F(TestECC, testPointMultiplication)
 
     EXPECT_TRUE(mpz_cmp(R.x, expected.x) == 0);
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
+}
+
+TEST_F(TestECC, pointIsIdentiy)
+{
+    Point P("0x0", "0x0");
+    EXPECT_TRUE(isIdentityPoint(P));
+
+    Point Q("0x1", "0x1");
+    EXPECT_FALSE(isIdentityPoint(Q));
+}
+
+TEST_F(TestECC, pointIsOnCurve)
+{
+    Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
+            "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
+    EXPECT_TRUE(isPointOnCurve(P));
+
+    Point Q("-1000", "56");
+    EXPECT_FALSE(isPointOnCurve(Q));
 }
 
 TEST(TestECC_Objects, BigIntInitialization)
