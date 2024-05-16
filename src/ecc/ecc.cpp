@@ -29,8 +29,10 @@
 
 #include "ecc.h"
 
-// Function to add two points
 Point ECC::addPoints(Point P, Point Q) {
+    if (isIdentityPoint(P)) { return Q; }
+    if (isIdentityPoint(Q)) { return P; }
+
     Point T;
 
     mpz_t s;
@@ -64,7 +66,6 @@ Point ECC::addPoints(Point P, Point Q) {
     return R;
 }
 
-// Function to double a point
 Point ECC::doublePoint(Point P) {
     Point T;
     
@@ -109,9 +110,7 @@ Point ECC::doublePoint(Point P) {
 Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
     Point T = P;
 
-    // Perform scalar multiplication using the double-and-add algorithm
     for (int i = mpz_sizeinbase(k, 2) - 2; i >= 0; --i) {
-        // Double the point
         T = doublePoint(T);
 
         // If the current bit of the scalar is 1, add the base point
@@ -121,7 +120,6 @@ Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
     return T;
 }
 
-// Function to generate random numbers
 void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
     // Initialize GMP random state
     gmp_randstate_t state;
@@ -138,13 +136,22 @@ void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
     // Add the minimum value to the random number to shift it into the desired range
     mpz_add(result, result, min);
 
-    // Clear temporary variables and random state
     mpz_clear(range);
     gmp_randclear(state);
 }
 
+bool ECC::isIdentityPoint(Point P) {
+    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
+    return (mpz_cmp_ui(P.x, 0) == 0 && mpz_cmp_ui(P.y, 0) == 0);
+}
+
+bool ECC::isPointOnCurve(Point P) {
+    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
+    return (mpz_cmp_ui(P.x, 0) >= 0 && mpz_cmp(P.x, ellipticCurve.p) < 0) && 
+           (mpz_cmp_ui(P.y, 0) >= 0 && mpz_cmp(P.y, ellipticCurve.p) < 0);
+}
+
 KeyPair ECC::generateKeyPair() {
-    // Initialize GMP random state
     mpz_t temp;
     mpz_init(temp);
 
@@ -158,7 +165,6 @@ KeyPair ECC::generateKeyPair() {
     Point pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.generator);
     KeyPair T(temp, pubKeyPoint);
 
-    // Clean up
     mpz_clear(min);
     mpz_clear(temp);
 
