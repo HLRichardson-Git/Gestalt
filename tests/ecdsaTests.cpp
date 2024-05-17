@@ -108,7 +108,6 @@ std::string CustomNameGenerator(const testing::TestParamInfo<ECDSATestVector>& i
     const ECDSATestVector& test = info.param;
     return test.name;
 }
-
 class ECDSASignatureGenTest : public testing::TestWithParam<ECDSATestVector> {
 };
 

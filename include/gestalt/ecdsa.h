@@ -48,7 +48,6 @@ public:
 	~ECDSA() {}
 
     Signature signMessage(const std::string& messageHash);
-    //Signature signMessage(const std::string& message, mpz_t& k);
     Signature signMessage(const std::string& messageHash, BigInt& K);
     bool verifySignature(const std::string& messageHash, const Signature signature);
 };

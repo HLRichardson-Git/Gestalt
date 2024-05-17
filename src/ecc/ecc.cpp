@@ -30,8 +30,8 @@
 #include "ecc.h"
 
 Point ECC::addPoints(Point P, Point Q) {
-    if (isIdentityPoint(P)) { return Q; }
-    if (isIdentityPoint(Q)) { return P; }
+    if (isIdentityPoint(P)) return Q;
+    if (isIdentityPoint(Q)) return P;
 
     Point T;
 
@@ -140,6 +140,11 @@ void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
     gmp_randclear(state);
 }
 
+bool ECC::isInDomainRange(const mpz_t k) {
+    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
+    return (mpz_cmp_ui(k, 0) >= 0 && mpz_cmp(k, ellipticCurve.p) < 0);
+}
+
 bool ECC::isIdentityPoint(Point P) {
     // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
     return (mpz_cmp_ui(P.x, 0) == 0 && mpz_cmp_ui(P.y, 0) == 0);
@@ -147,8 +152,21 @@ bool ECC::isIdentityPoint(Point P) {
 
 bool ECC::isPointOnCurve(Point P) {
     // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
-    return (mpz_cmp_ui(P.x, 0) >= 0 && mpz_cmp(P.x, ellipticCurve.p) < 0) && 
-           (mpz_cmp_ui(P.y, 0) >= 0 && mpz_cmp(P.y, ellipticCurve.p) < 0);
+    return (isInDomainRange(P.x)) && (isInDomainRange(P.y));
+}
+
+std::string ECC::isValidKeyPair(const KeyPair& K) {
+    if (!isInDomainRange(K.privateKey)) return "Error: Given Private Key is not in range [1, n - 1].";
+    if (!isPointOnCurve(K.publicKey)) return "Error: Given Public Key is not on the curve.";
+    if (isIdentityPoint(K.publicKey)) return "Error: Given Public Key is the Identity element.";
+
+    // Check d*G = pubKey
+    Point R = scalarMultiplyPoints(K.privateKey, ellipticCurve.generator);
+    if (mpz_cmp(R.x, K.publicKey.x) != 0 || mpz_cmp(R.y, K.publicKey.y) != 0) {
+        return "Error: Pair-wise consistency check failed.";
+    }
+
+    return ""; // Return an empty string if the key pair is valid
 }
 
 KeyPair ECC::generateKeyPair() {
@@ -159,10 +177,15 @@ KeyPair ECC::generateKeyPair() {
     mpz_t min;
     mpz_init(min);
     mpz_set_ui(min, 1);
-    getRandomNumber(min, ellipticCurve.n - 1, temp);
 
-    // Calculate the public key
-    Point pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.generator);
+    Point pubKeyPoint;
+    do {
+        getRandomNumber(min, ellipticCurve.n - 1, temp);
+        // Calculate the public key
+        pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.generator);
+        // ensure the public key is not the identity element
+    } while(isIdentityPoint(pubKeyPoint));
+
     KeyPair T(temp, pubKeyPoint);
 
     mpz_clear(min);
@@ -171,12 +194,22 @@ KeyPair ECC::generateKeyPair() {
     return T;
 }
 
+void ECC::setKeyPair(const KeyPair& newKeyPair) {
+    std::string validationError = isValidKeyPair(newKeyPair);
+    if (!validationError.empty()) {
+        throw std::invalid_argument(validationError);
+    }
+    keyPair = newKeyPair;
+}
+
 void ECC::setKeyPair(const std::string& strKey) {
     mpz_t n;
     mpz_init(n);
     stringToGMP(strKey, n);
 
     KeyPair T(n, scalarMultiplyPoints(n, ellipticCurve.generator));
+    if(isIdentityPoint(T.publicKey)) throw 
+        std::invalid_argument("Error: Given Private Key derives identity public key.");
 
     mpz_clear(n);
 

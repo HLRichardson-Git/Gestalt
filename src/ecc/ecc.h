@@ -37,8 +37,10 @@ private:
     Point scalarMultiplyPoints(const mpz_t& k, Point P);
 
     void getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
+    bool isInDomainRange(const mpz_t k);
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
+    std::string isValidKeyPair(const KeyPair& K);
 
     friend class ECDSA;
     //friend class ECDH;
@@ -50,7 +52,7 @@ public:
 
     KeyPair generateKeyPair();
 
-    void setKeyPair(const KeyPair& newKeyPair) { keyPair = newKeyPair; }
+    void setKeyPair(const KeyPair& newKeyPair);
     void setKeyPair(const std::string& strKey);
     void setCurve(StandardCurve curveType) { ellipticCurve = getCurveParams(curveType); }
     KeyPair getKeyPair() const { return keyPair; }

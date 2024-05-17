@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.16.3)
 
-#set (Project_Name Gestalt)
-#project (${Project_Name} VERSION 0.3.1 LANGUAGES C CXX)
-#project (${Project_Name} VERSION 0.3.1 LANGUAGES CXX)
-
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -17,32 +13,10 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 enable_testing ()
 
 include(FetchContent)
-
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-
-# Include MPIR library
 include(ExternalProject)
 
-set(prefix "${CMAKE_BINARY_DIR}/deps")
-set(MPIR_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mpir${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(MPIR_INCLUDE_DIR "${prefix}/include")
-
-ExternalProject_Add(mpir
-    PREFIX "${prefix}"
-    DOWNLOAD_NAME mpir-cmake.tar.gz
-    DOWNLOAD_NO_PROGRESS TRUE
-    URL https://github.com/chfast/mpir/archive/cmake.tar.gz
-    URL_HASH SHA256=d32ea73cb2d8115a8e59b244f96f29bad7ff03367162b660bae6495826811e06
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        -DCMAKE_INSTALL_LIBDIR=lib
-        -DCMAKE_BUILD_TYPE=Release
-        -DMPIR_GMP=On
-    BUILD_BYPRODUCTS "${MPIR_LIBRARY}"
-)
+add_subdirectory(external/googletest)
+add_subdirectory(external/gmp)
 
 set (Sources
     src/aes/aes.cpp
