@@ -30,13 +30,21 @@
 #include <gestalt/ecdsa.h>
 
 void ECDSA::prepareMessage(const std::string& messageHash, mpz_t& result) {
-    size_t hashBitLength = messageHash.length() * 4;
+    std::string hashWithoutPrefix = messageHash;
+    if (messageHash.compare(0, 2, "0x") == 0) {
+        hashWithoutPrefix = messageHash.substr(2);
+    }
+
+    size_t hashBitLength = hashWithoutPrefix.length() * 4;
+    //size_t hashBitLength = messageHash.length() * 4;
 
     if (hashBitLength >= ellipticCurve.bitLength) {
-        std::string truncatedHash = messageHash.substr(0, ellipticCurve.bitLength / 4);
-        mpz_init_set_str(result, truncatedHash.c_str(), 16);
+        std::string truncatedHash = hashWithoutPrefix.substr(0, ellipticCurve.bitLength / 4);
+        //mpz_init_set_str(result, truncatedHash.c_str(), 16);
+        mpz_set_str(result, truncatedHash.c_str(), 16);
     } else {
-        mpz_init_set_str(result, messageHash.c_str(), 16);
+        //mpz_init_set_str(result, messageHash.c_str(), 16);
+        mpz_set_str(result, hashWithoutPrefix.c_str(), 16);
     }
 }
 
@@ -47,21 +55,26 @@ void ECDSA::fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) {
 
     // If the modulus is an odd prime, no conversion is needed
     if (mpz_odd_p(ellipticCurve.n) && mpz_probab_prime_p(ellipticCurve.n, 25)) {
-        mpz_set(result, element); // Copy fieldElement to result
+        mpz_set(result, element);
     } else {
-        mpz_set_ui(result, 0); // Initialize result to 0
-        mpz_set_ui(temp, 1);   // Initialize temp to 1
+        mpz_set_ui(result, 0);
+        mpz_set_ui(temp, 1);
         // Convert the field element to an integer by evaluating the binary polynomial at x = 2
         while (mpz_cmp_ui(element, 0) > 0) {
             if (mpz_odd_p(element)) {
                 mpz_add(result, result, temp);
             }
-            mpz_mul_2exp(temp, temp, 1); // Multiply temp by 2
-            mpz_fdiv_q_2exp(element, element, 1); // Divide element by 2
+            mpz_mul_2exp(temp, temp, 1);
+            mpz_fdiv_q_2exp(element, element, 1);
         }
     }
 
     mpz_clears(temp, element, NULL);
+}
+
+bool ECDSA::isInvalidSignature(Signature S) {
+    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
+    return (mpz_cmp_ui(S.r, 0) == 0 || mpz_cmp_ui(S.s, 0) == 0);
 }
 
 Signature ECDSA::signMessage(const std::string& messageHash) {
@@ -72,9 +85,12 @@ Signature ECDSA::signMessage(const std::string& messageHash) {
     mpz_t randomNumber, minBound;
     mpz_init(randomNumber);
     mpz_init_set_ui(minBound, 1); // Its easier to set minBound here as mpz_t rather than in getRandomNumber
-    getRandomNumber(minBound, ellipticCurve.n - 1, randomNumber);
 
-    Signature signature = generateSignature(e, randomNumber);
+    Signature signature;
+    do {
+        getRandomNumber(minBound, ellipticCurve.n - 1, randomNumber);
+        signature = generateSignature(e, randomNumber);
+    } while(isInvalidSignature(signature)); // Check if r = 0 or s = 0
 
     mpz_clears(randomNumber, e, minBound, NULL);
 
@@ -87,6 +103,8 @@ Signature ECDSA::signMessage(const std::string& messageHash, BigInt& K) {
     prepareMessage(messageHash, e);
 
     Signature signature = generateSignature(e, K.n);
+
+    if(isInvalidSignature(signature)) throw std::invalid_argument("Error: Private key derives invalid signature.");
 
     mpz_clear(e);
 

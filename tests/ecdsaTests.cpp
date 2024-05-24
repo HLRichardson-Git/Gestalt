@@ -182,3 +182,76 @@ TEST(TestECDSAsignature, inducedFailureVerification)
 
     EXPECT_TRUE(!verify);
 }
+
+class TestECDSA : public ::testing::Test {
+private:
+    ECDSA ecdsa;
+protected:
+    void prepareMessage(const std::string& messageHash, mpz_t& result) { 
+        ecdsa.prepareMessage(messageHash, result);
+    };
+    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) { 
+        ecdsa.fieldElementToInteger(fieldElement, result);
+    };
+    bool isInvalidSignature(Signature S) { return ecdsa.isInvalidSignature(S); };
+    void setKeyPair(const std::string& givenKey) { ecdsa.setKeyPair(givenKey); };
+    Signature generateSignature(const mpz_t& e, mpz_t& k) { return ecdsa.generateSignature(e, k); };
+};
+
+TEST_F(TestECDSA, PrepareMessage)
+{
+    BigInt result;
+    BigInt expected;
+
+    std::string smallerThanBitSize = "0xFFF";
+    expected = "0xFFF";
+    prepareMessage(smallerThanBitSize, result.n);
+    EXPECT_TRUE(mpz_cmp(result.n, expected.n) == 0);
+
+    std::string sameBitSize = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+    expected = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+    prepareMessage(sameBitSize, result.n);
+    EXPECT_TRUE(mpz_cmp(result.n, expected.n) == 0);
+
+    std::string largerThanBitSize = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+    expected = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+    prepareMessage(largerThanBitSize, result.n);
+    EXPECT_TRUE(mpz_cmp(result.n, expected.n) == 0);
+}
+
+TEST_F(TestECDSA, FieldElementToInteger) 
+{
+    BigInt result;
+    BigInt fieldElement = "0x123456789ABCDEF";
+    fieldElementToInteger(fieldElement.n, result.n);
+
+    EXPECT_TRUE(mpz_cmp(fieldElement.n, result.n) == 0);
+}
+
+TEST_F(TestECDSA, IsValidSignature) 
+{
+    Signature validSig("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC", 
+                       "0x8BF77819CA05A6B2786C76262BF7371CEF97B218E96F175A3CCDDA2ACC058903");
+    Signature invalidSig;
+    
+    EXPECT_FALSE(isInvalidSignature(validSig));
+    EXPECT_TRUE(isInvalidSignature(invalidSig));
+}
+
+TEST_F(TestECDSA, GenerateSignature) 
+{
+    std::string digest = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
+    BigInt e;
+    prepareMessage(digest, e.n);
+    fieldElementToInteger(e.n, e.n);
+    setKeyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464");
+    BigInt k = "0x94A1BBB14B906A61A280F245F9E93C7F3B4A6247824F5D33B9670787642A68DE";
+
+    Signature signature = generateSignature(e.n, k.n);
+
+    Signature expected("0x69979C16867D369D95E8852B4C68B323A66A7AAE0A3C112B2F426726EF93B41D",
+                       "0x5D9416379D19A392740CF6EE448161D630E04CD968EC74DB3EA4C6CE67CC48F7");
+
+    EXPECT_TRUE(mpz_cmp(signature.r, expected.r) == 0);
+    EXPECT_TRUE(mpz_cmp(signature.s, expected.s) == 0);
+}

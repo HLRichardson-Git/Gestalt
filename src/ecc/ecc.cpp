@@ -108,16 +108,16 @@ Point ECC::doublePoint(Point P) {
 
 // Implementation of the double-and-add algoirthm
 Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
-    Point T = P;
+    Point result = P;
 
     for (int i = mpz_sizeinbase(k, 2) - 2; i >= 0; --i) {
-        T = doublePoint(T);
+        result = doublePoint(result);
 
         // If the current bit of the scalar is 1, add the base point
-        if (mpz_tstbit(k, i)) T = addPoints(T, P);
+        if (mpz_tstbit(k, i)) result = addPoints(result, P);
     }
 
-    return T;
+    return result;
 }
 
 void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
@@ -161,8 +161,8 @@ std::string ECC::isValidKeyPair(const KeyPair& K) {
     if (isIdentityPoint(K.publicKey)) return "Error: Given Public Key is the Identity element.";
 
     // Check d*G = pubKey
-    Point R = scalarMultiplyPoints(K.privateKey, ellipticCurve.generator);
-    if (mpz_cmp(R.x, K.publicKey.x) != 0 || mpz_cmp(R.y, K.publicKey.y) != 0) {
+    Point result = scalarMultiplyPoints(K.privateKey, ellipticCurve.generator);
+    if (mpz_cmp(result.x, K.publicKey.x) != 0 || mpz_cmp(result.y, K.publicKey.y) != 0) {
         return "Error: Pair-wise consistency check failed.";
     }
 
@@ -181,17 +181,15 @@ KeyPair ECC::generateKeyPair() {
     Point pubKeyPoint;
     do {
         getRandomNumber(min, ellipticCurve.n - 1, temp);
-        // Calculate the public key
         pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.generator);
-        // ensure the public key is not the identity element
-    } while(isIdentityPoint(pubKeyPoint));
+    } while(isIdentityPoint(pubKeyPoint)); // ensure the public key is not the identity element
 
-    KeyPair T(temp, pubKeyPoint);
+    KeyPair result(temp, pubKeyPoint);
 
     mpz_clear(min);
     mpz_clear(temp);
 
-    return T;
+    return result;
 }
 
 void ECC::setKeyPair(const KeyPair& newKeyPair) {
@@ -202,16 +200,16 @@ void ECC::setKeyPair(const KeyPair& newKeyPair) {
     keyPair = newKeyPair;
 }
 
-void ECC::setKeyPair(const std::string& strKey) {
+void ECC::setKeyPair(const std::string& givenKey) {
     mpz_t n;
     mpz_init(n);
-    stringToGMP(strKey, n);
+    stringToGMP(givenKey, n);
 
-    KeyPair T(n, scalarMultiplyPoints(n, ellipticCurve.generator));
-    if(isIdentityPoint(T.publicKey)) throw 
+    KeyPair result(n, scalarMultiplyPoints(n, ellipticCurve.generator));
+    if(isIdentityPoint(result.publicKey)) throw 
         std::invalid_argument("Error: Given Private Key derives identity public key.");
 
     mpz_clear(n);
 
-    keyPair = T;
+    keyPair = result;
 }
