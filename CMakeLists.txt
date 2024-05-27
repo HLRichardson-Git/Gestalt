@@ -27,6 +27,7 @@ set (Sources
     src/sha1/sha1Core.cpp
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
+    src/ecc/ecdh/ecdh.cpp
     tools/utils.cpp
 )
 

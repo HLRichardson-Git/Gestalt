@@ -190,9 +190,6 @@ protected:
     void prepareMessage(const std::string& messageHash, mpz_t& result) { 
         ecdsa.prepareMessage(messageHash, result);
     };
-    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) { 
-        ecdsa.fieldElementToInteger(fieldElement, result);
-    };
     bool isInvalidSignature(Signature S) { return ecdsa.isInvalidSignature(S); };
     void setKeyPair(const std::string& givenKey) { ecdsa.setKeyPair(givenKey); };
     Signature generateSignature(const mpz_t& e, mpz_t& k) { return ecdsa.generateSignature(e, k); };
@@ -219,15 +216,6 @@ TEST_F(TestECDSA, PrepareMessage)
     EXPECT_TRUE(mpz_cmp(result.n, expected.n) == 0);
 }
 
-TEST_F(TestECDSA, FieldElementToInteger) 
-{
-    BigInt result;
-    BigInt fieldElement = "0x123456789ABCDEF";
-    fieldElementToInteger(fieldElement.n, result.n);
-
-    EXPECT_TRUE(mpz_cmp(fieldElement.n, result.n) == 0);
-}
-
 TEST_F(TestECDSA, IsValidSignature) 
 {
     Signature validSig("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC", 
@@ -243,7 +231,6 @@ TEST_F(TestECDSA, GenerateSignature)
     std::string digest = "4c24c2225c70900f85f97d6ff7936f1dca59e8283f1a1a8872c981b98a0ee53a";
     BigInt e;
     prepareMessage(digest, e.n);
-    fieldElementToInteger(e.n, e.n);
     setKeyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464");
     BigInt k = "0x94A1BBB14B906A61A280F245F9E93C7F3B4A6247824F5D33B9670787642A68DE";
 

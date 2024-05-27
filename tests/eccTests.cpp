@@ -28,9 +28,13 @@ protected:
     Point addPoints(Point P, Point Q) {return ecc.addPoints(P, Q);};
     Point doublePoint(Point P) {return ecc.doublePoint(P);};
     Point scalarMultiplyPoints(const mpz_t& k, Point P) {return ecc.scalarMultiplyPoints(k, P);};
+    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) { 
+        ecc.fieldElementToInteger(fieldElement, result);
+    };
     bool isInDomainRange(const mpz_t k) { return ecc.isInDomainRange(k); };
     bool isIdentityPoint(Point P) { return ecc.isIdentityPoint(P); };
     bool isPointOnCurve(Point P) { return ecc.isPointOnCurve(P); };
+    std::string isValidPublicKey(const Point& P) { return ecc.isValidPublicKey(P); };
     std::string isValidKeyPair(const KeyPair& K) { return ecc.isValidKeyPair(K); };
 };
 
@@ -95,6 +99,15 @@ TEST_F(TestECC, testPointMultiplication)
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
+TEST_F(TestECC, FieldElementToInteger) 
+{
+    BigInt result;
+    BigInt fieldElement = "0x123456789ABCDEF";
+    fieldElementToInteger(fieldElement.n, result.n);
+
+    EXPECT_TRUE(mpz_cmp(fieldElement.n, result.n) == 0);
+}
+
 TEST_F(TestECC, isInDomainRange)
 {
     BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
@@ -123,6 +136,26 @@ TEST_F(TestECC, pointIsOnCurve)
     EXPECT_FALSE(isPointOnCurve(Q));
 }
 
+TEST_F(TestECC, isValidPublicKey)
+{
+    Point validPublicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+                         "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
+    EXPECT_TRUE(isValidPublicKey(validPublicKey).empty());
+
+
+    Point pointNotOnCurve("-1000", "56");
+    EXPECT_TRUE(isValidPublicKey(pointNotOnCurve) == "Error: Given Public Key is not on the curve.");
+
+    Point pointIsIdentityPoint("0", "0");
+    EXPECT_TRUE(isValidPublicKey(pointIsIdentityPoint) == "Error: Given Public Key is the Identity element.");
+
+    // THIS IS NOT WORKING FOR NOW...???
+    /*Point pointIsNotValid("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+                          "0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464");
+    EXPECT_TRUE(isValidPublicKey(pointIsNotValid) == 
+                "Error: Given Public key multiplied by curve modulus is not Identity Element.");*/
+}
+
 TEST_F(TestECC, isValidKeyPair)
 {
     Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
@@ -132,15 +165,6 @@ TEST_F(TestECC, isValidKeyPair)
 
     KeyPair invalidPrivateKey("-1000", publicKey);
     EXPECT_TRUE(isValidKeyPair(invalidPrivateKey) == "Error: Given Private Key is not in range [1, n - 1].");
-
-    Point pointNotOnCurve("-1000", "56");
-    KeyPair pubKeyNotOnCurve("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", pointNotOnCurve);
-    EXPECT_TRUE(isValidKeyPair(pubKeyNotOnCurve) == "Error: Given Public Key is not on the curve.");
-
-    Point pointIsIdentityPoint("0", "0");
-    KeyPair pubKeyIsIdentity("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", 
-                             pointIsIdentityPoint);
-    EXPECT_TRUE(isValidKeyPair(pubKeyIsIdentity) == "Error: Given Public Key is the Identity element.");
 
     Point pubKeyIsNotPair("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                           "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");

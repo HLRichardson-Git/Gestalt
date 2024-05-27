@@ -23,8 +23,6 @@
  *
  */
 
-
-#include <cmath>
 #include <gmp.h>
 
 #include <gestalt/ecdsa.h>
@@ -36,40 +34,13 @@ void ECDSA::prepareMessage(const std::string& messageHash, mpz_t& result) {
     }
 
     size_t hashBitLength = hashWithoutPrefix.length() * 4;
-    //size_t hashBitLength = messageHash.length() * 4;
 
     if (hashBitLength >= ellipticCurve.bitLength) {
         std::string truncatedHash = hashWithoutPrefix.substr(0, ellipticCurve.bitLength / 4);
-        //mpz_init_set_str(result, truncatedHash.c_str(), 16);
         mpz_set_str(result, truncatedHash.c_str(), 16);
     } else {
-        //mpz_init_set_str(result, messageHash.c_str(), 16);
         mpz_set_str(result, hashWithoutPrefix.c_str(), 16);
     }
-}
-
-void ECDSA::fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) {
-    mpz_t temp, element;
-    mpz_inits(temp, element, NULL);
-    mpz_set(element, fieldElement);
-
-    // If the modulus is an odd prime, no conversion is needed
-    if (mpz_odd_p(ellipticCurve.n) && mpz_probab_prime_p(ellipticCurve.n, 25)) {
-        mpz_set(result, element);
-    } else {
-        mpz_set_ui(result, 0);
-        mpz_set_ui(temp, 1);
-        // Convert the field element to an integer by evaluating the binary polynomial at x = 2
-        while (mpz_cmp_ui(element, 0) > 0) {
-            if (mpz_odd_p(element)) {
-                mpz_add(result, result, temp);
-            }
-            mpz_mul_2exp(temp, temp, 1);
-            mpz_fdiv_q_2exp(element, element, 1);
-        }
-    }
-
-    mpz_clears(temp, element, NULL);
 }
 
 bool ECDSA::isInvalidSignature(Signature S) {

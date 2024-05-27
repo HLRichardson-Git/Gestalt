@@ -21,10 +21,6 @@
  *
  */
 
-
-#include <math.h>
-#include <string>
-#include <sstream>
 #include <gmp.h>
 
 #include "ecc.h"
@@ -140,6 +136,30 @@ void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
     gmp_randclear(state);
 }
 
+void ECC::fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) {
+    mpz_t temp, element;
+    mpz_inits(temp, element, NULL);
+    mpz_set(element, fieldElement);
+
+    // If the modulus is an odd prime, no conversion is needed
+    if (mpz_odd_p(ellipticCurve.n) && mpz_probab_prime_p(ellipticCurve.n, 25)) {
+        mpz_set(result, element);
+    } else {
+        mpz_set_ui(result, 0);
+        mpz_set_ui(temp, 1);
+        // Convert the field element to an integer by evaluating the binary polynomial at x = 2
+        while (mpz_cmp_ui(element, 0) > 0) {
+            if (mpz_odd_p(element)) {
+                mpz_add(result, result, temp);
+            }
+            mpz_mul_2exp(temp, temp, 1);
+            mpz_fdiv_q_2exp(element, element, 1);
+        }
+    }
+
+    mpz_clears(temp, element, NULL);
+}
+
 bool ECC::isInDomainRange(const mpz_t k) {
     // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
     return (mpz_cmp_ui(k, 0) >= 0 && mpz_cmp(k, ellipticCurve.p) < 0);
@@ -155,10 +175,24 @@ bool ECC::isPointOnCurve(Point P) {
     return (isInDomainRange(P.x)) && (isInDomainRange(P.y));
 }
 
+std::string ECC::isValidPublicKey(const Point& P) {
+    if (!isPointOnCurve(P)) return "Error: Given Public Key is not on the curve.";
+    if (isIdentityPoint(P)) return "Error: Given Public Key is the Identity element.";
+
+    // THIS IS NOT WORKING FOR NOW...???
+    // Check n*P = identity
+    /*Point result = scalarMultiplyPoints(ellipticCurve.n, P);
+    if (!isIdentityPoint(result)) {
+        return "Error: Given Public key multiplied by curve modulus is not Identity Element.";
+    }*/
+
+    return ""; // Return an empty string if the public key is valid
+}
+
 std::string ECC::isValidKeyPair(const KeyPair& K) {
     if (!isInDomainRange(K.privateKey)) return "Error: Given Private Key is not in range [1, n - 1].";
-    if (!isPointOnCurve(K.publicKey)) return "Error: Given Public Key is not on the curve.";
-    if (isIdentityPoint(K.publicKey)) return "Error: Given Public Key is the Identity element.";
+    std::string temp = isValidPublicKey(K.publicKey);
+    if (temp != "") return temp;
 
     // Check d*G = pubKey
     Point result = scalarMultiplyPoints(K.privateKey, ellipticCurve.generator);

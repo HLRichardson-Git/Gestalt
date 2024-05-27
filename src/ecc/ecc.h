@@ -37,13 +37,15 @@ private:
     Point scalarMultiplyPoints(const mpz_t& k, Point P);
 
     void getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
+    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result);
     bool isInDomainRange(const mpz_t k);
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
+    std::string isValidPublicKey(const Point& P);
     std::string isValidKeyPair(const KeyPair& K);
 
     friend class ECDSA;
-    //friend class ECDH;
+    friend class ECDH;
 public:
 
     ECC(StandardCurve curve = StandardCurve::secp256k1) : ellipticCurve(getCurveParams(curve)) {}

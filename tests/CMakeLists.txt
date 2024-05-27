@@ -10,6 +10,7 @@ set (Sources
     sha1Tests.cpp
     eccTests.cpp
     ecdsaTests.cpp
+    ecdhTests.cpp
 )
 
 add_executable (${This} ${Sources})

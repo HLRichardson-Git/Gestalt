@@ -26,15 +26,12 @@
 
 #pragma once
 
-#include <string>
-
 #include "../src/ecc/ecc.h"
 
 class ECDSA : public ECC {
 private:
 
     void prepareMessage(const std::string& messageHash, mpz_t& result);
-    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result);
     bool isInvalidSignature(Signature S);
 
     Signature generateSignature(const mpz_t& e, mpz_t& k);
