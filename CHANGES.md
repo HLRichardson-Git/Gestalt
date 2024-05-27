@@ -1,7 +1,7 @@
 Gestalt CHANGES
 ===============
 
-This is a detailed breakdown of significant changes.
+This is a general breakdown of significant changes.
 
 For a full list of changes, see the [git commit log][log] and pick the
 appropriate release branch.
@@ -11,9 +11,23 @@ appropriate release branch.
 Gestalt Releases
 ----------------
 
+ - [Gestalt 0.4](#gestalt-04)
  - [Gestalt 0.3](#gestalt-03)
  - [Gestalt 0.2](#gestalt-02)
  - [Gestalt 0.1](#gestalt-01)
+
+ Gestalt 0.4
+-----------
+
+### Changes between 0.3 and 0.4 [27 May 2024]
+
+ * Implemented the ECDSA signing algorithm, providing users with the ability to 
+      sign and verify messages.
+ * Implemented the ECDH shared secret computation algorithm, providing users with 
+      the ability to compute shared secrets on a insecure channel.
+ * Ensured backward compatibility with existing library functionality and 
+       usage patterns.
+ * Updated documentation to include information on utilizing ECDSA and ECDH.
 
  Gestalt 0.3
 -----------

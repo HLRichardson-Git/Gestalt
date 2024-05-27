@@ -160,15 +160,6 @@ std::string hexToBinary(const std::string& hexStr) {
     return binStr;
 }
 
-// Function to convert binary string to integer
-int binaryToInt(const std::string& binStr) {
-    int result = 0;
-    for (char c : binStr) {
-        result = result * 2 + (c - '0');
-    }
-    return result;
-}
-
 std::string generateRandomHexData(size_t numBytes) {
     std::random_device rd;
     std::mt19937 gen(rd());

@@ -23,7 +23,6 @@ std::string convertToHex(const std::string& input);
 std::string decimalToBinary(int num);
 int hexStringToInt(const std::string& hexString);
 std::string hexToBinary(const std::string& hexStr);
-int binaryToInt(const std::string& binStr);
 std::string generateRandomHexData(size_t numBytes);
 std::string generateRandomData(size_t sizeInMB);
 void xorBlock(unsigned char* a, const std::string& b, size_t blockIndex);
