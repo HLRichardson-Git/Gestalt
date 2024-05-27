@@ -19,6 +19,7 @@
 #include <string>
 
 testSHA1Functions testSHA1Object;
+const bool skipLargeHash = true; // This test can take a bit, so set to false if you'd like to test.
 
 // Known Answer Test(KAT) for SHA1 from:
 // [1] - https://nvlpubs.nist.gov/nistpubs/Legacy/FIPS/fipspub180-1.pdf
@@ -60,39 +61,31 @@ TEST(testSHA1Hash, hashKatSHA1) {
 // Large Known Answer Test(KAT) for SHA1 from:
 // [1] - https://www.di-mgt.com.au/sha_testvectors.html
 TEST(testLargeSHA1Hash, hashLargeKatSHA1) {
-
-    // Prompt for confirmation before running the test
-    std::cout << "Do you want to run the extremely long test? (Y/N): ";
-    char confirmation;
-    std::cin >> confirmation;
-    if (confirmation == 'Y' || confirmation == 'y') {
-        // See [2] test vector 5.
-        std::string largeSeed = "a"; // repeated 1,000,000 times.
-        std::string largeKAT = "";
-        const size_t largeRepetitions = 1000000;
-        for (size_t i = 0; i < largeRepetitions; i++) {
-            largeKAT += largeSeed;
-        }
-        const std::string expectedLargeKAT = "34aa973cd4c4daa4f61eeb2bdbad27316534016f";
-        std::string largeDigest = hashSHA1(largeKAT);
-
-        EXPECT_EQ(largeDigest, expectedLargeKAT);
-
-        // See [2] test vector 6. 
-        // repeated 16,777,216 times
-        std::string extremelyLongSeed = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno";
-        std::string extremelyLongKAT = "";
-        const size_t extremelyLongRepetitions = 16777216;
-        for (size_t i = 0; i < extremelyLongRepetitions; i++) {
-            extremelyLongKAT += extremelyLongSeed;
-        }
-        const std::string expectedExtremelyLongKAT = "7789f0c9ef7bfc40d93311143dfbe69e2017f592";
-        std::string expectedExtremelyLongDigest = hashSHA1(extremelyLongKAT);
-
-        EXPECT_EQ(expectedExtremelyLongDigest, expectedExtremelyLongKAT);
-    } else {
-        std::cout << "Skipping extremely long test." << std::endl;
+    if(skipLargeHash) GTEST_SKIP();
+    // See [2] test vector 5.
+    std::string largeSeed = "a"; // repeated 1,000,000 times.
+    std::string largeKAT = "";
+    const size_t largeRepetitions = 1000000;
+    for (size_t i = 0; i < largeRepetitions; i++) {
+        largeKAT += largeSeed;
     }
+    const std::string expectedLargeKAT = "34aa973cd4c4daa4f61eeb2bdbad27316534016f";
+    std::string largeDigest = hashSHA1(largeKAT);
+
+    EXPECT_EQ(largeDigest, expectedLargeKAT);
+
+    // See [2] test vector 6. 
+    // repeated 16,777,216 times
+    std::string extremelyLongSeed = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno";
+    std::string extremelyLongKAT = "";
+    const size_t extremelyLongRepetitions = 16777216;
+    for (size_t i = 0; i < extremelyLongRepetitions; i++) {
+        extremelyLongKAT += extremelyLongSeed;
+    }
+    const std::string expectedExtremelyLongKAT = "7789f0c9ef7bfc40d93311143dfbe69e2017f592";
+    std::string expectedExtremelyLongDigest = hashSHA1(extremelyLongKAT);
+
+    EXPECT_EQ(expectedExtremelyLongDigest, expectedExtremelyLongKAT);
 }
 
 

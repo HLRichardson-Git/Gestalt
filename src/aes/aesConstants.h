@@ -5,7 +5,7 @@
  */
 
 /*
- * aesConstants.cpp
+ * aesConstants.h
  *
  * This file contains the constants and lookup tables used in the AES (Advanced Encryption Standard) algorithm implementation.
  * AES is a symmetric encryption algorithm used for secure data transmission and storage.

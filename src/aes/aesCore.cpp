@@ -45,6 +45,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 
 #include "aesCore.h"
 #include "aesConstants.h"
