@@ -22,7 +22,6 @@
  *
  */
 
-
 #pragma once
 
 #include "../src/ecc/ecc.h"

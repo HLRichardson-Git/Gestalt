@@ -41,7 +41,7 @@ private:
     bool isInDomainRange(const mpz_t k);
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
-    std::string isValidPublicKey(const Point& P);
+    std::string isValidPublicKey(const Point P);
     std::string isValidKeyPair(const KeyPair& K);
 
     friend class ECDSA;
