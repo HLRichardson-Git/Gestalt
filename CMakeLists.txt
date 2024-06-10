@@ -5,7 +5,7 @@ set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set (Project_Name Gestalt)
-project (${Project_Name} VERSION 0.4 LANGUAGES C CXX)
+project (${Project_Name} VERSION 0.4.1 LANGUAGES C CXX)
 
 set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/external")
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
@@ -41,7 +41,7 @@ target_include_directories(${Project_Name} PUBLIC  ${PROJECT_SOURCE_DIR}/include
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/external)
 target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/tools)
-target_include_directories(${Project_Name} PRIVATE ${MPIR_INCLUDE_DIR})
+target_include_directories(${Project_Name} PUBLIC ${MPIR_INCLUDE_DIR})
 
 # Link MPIR library
 add_dependencies(${Project_Name} mpir)

@@ -12,3 +12,5 @@
 
 #include "aes.h"
 #include "sha1.h"
+#include "ecdsa.h"
+#include "ecdh.h"
