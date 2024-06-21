@@ -88,7 +88,7 @@ TEST_F(TestECC, testPointMultiplication)
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
-    BigInt N("0x8");
+    BigInt N = "0x8";
 
     Point R = scalarMultiplyPoints(N.n, P);
 
@@ -205,7 +205,7 @@ TEST_F(TestECC, setKeyPair)
 TEST(TestECC_Objects, BigIntInitialization)
 {
     // Check Hexidecimal value initialization
-    BigInt P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577");
+    BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
     BigInt N = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
@@ -234,7 +234,7 @@ TEST(TestECC_Objects, BigIntInitialization)
 
 TEST(TestECC_Objects, BigIntAssignmentOperator)
 {
-    BigInt P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577");
+    BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
     BigInt Q = P;
 

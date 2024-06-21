@@ -25,6 +25,7 @@ Gestalt Releases
       point condition correctly.
  * Fixed issue where ecdsa.h and ecdh.h were not included in gestalt.h
  * Added build options to allow users the option to handle their own dependencies.
+ * Fixed bug in eccObjects.h that caused BigInt initialization to not work properly.
 
 ### Changes between 0.3 and 0.4 [27 May 2024]
 
