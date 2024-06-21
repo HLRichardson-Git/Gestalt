@@ -19,7 +19,7 @@ Gestalt Releases
  Gestalt 0.4
 -----------
 
-### Changes between 0.4 and 0.4.1 [xx YYY 2024]
+### Changes between 0.4 and 0.4.1 [06 Jun 2024]
 
  * Fixed bug in ecc.cpp for function isValidKeyPair that wasn't detecting an identity
       point condition correctly.
