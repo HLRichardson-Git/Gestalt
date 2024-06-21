@@ -120,7 +120,7 @@ TEST_P(ECDSASignatureGenTest, sigGen)
 
     ECDSA ecdsa(test.curve, test.privateKey);
     
-    BigInt k_value(test.k);
+    BigInt k_value = test.k;
 
     Signature signature = ecdsa.signMessage(test.msg, k_value);
 

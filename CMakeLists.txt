@@ -1,22 +1,22 @@
 cmake_minimum_required(VERSION 3.16.3)
 
+# Project setup
+project (Gestalt VERSION 0.4 LANGUAGES C CXX)
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set (Project_Name Gestalt)
-project (${Project_Name} VERSION 0.4 LANGUAGES C CXX)
+# Options for toggling features
+option(GESTALT_BUILD_TESTS "Build unit tests" ON)
+option(GESTALT_FETCH_MPIR "Fetch MPIR library automatically" ON)
+option(GESTALT_FETCH_GOOGLETEST "Fetch GoogleTest library automatically" ON)
 
 set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/external")
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
-enable_testing ()
-
+# Include required modules
 include(FetchContent)
 include(ExternalProject)
-
-add_subdirectory(external/googletest)
-add_subdirectory(external/gmp)
 
 set (Sources
     src/aes/aes.cpp
@@ -31,21 +31,53 @@ set (Sources
     tools/utils.cpp
 )
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-add_library (${Project_Name} STATIC ${Sources})
+add_library (${PROJECT_NAME} STATIC ${Sources})
 
 # Specify the directories where header files are located
-target_include_directories(${Project_Name} PUBLIC  ${PROJECT_SOURCE_DIR}/include)
-target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/src)
-target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/external)
-target_include_directories(${Project_Name} PRIVATE ${PROJECT_SOURCE_DIR}/tools)
-target_include_directories(${Project_Name} PRIVATE ${MPIR_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/external
+        ${PROJECT_SOURCE_DIR}/tools
+        ${MPIR_INCLUDE_DIR}
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+# Conditionally fetch or find MPIR
+if(GESTALT_FETCH_MPIR)
+    add_subdirectory(external/gmp)
+    set(MPIR_LIB_TARGET mpir)
+    add_dependencies(${PROJECT_NAME} mpir)
+else()
+    find_package(MPIR REQUIRED)
+    if(NOT MPIR_FOUND)
+        message(FATAL_ERROR "MPIR library not found. Please install MPIR or set FETCH_MPIR to ON.")
+    endif()
+    set(MPIR_INCLUDE_DIR ${MPIR_INCLUDE_DIR})
+    set(MPIR_LIBRARY ${MPIR_LIBRARY})
+endif()
 
 # Link MPIR library
-add_dependencies(${Project_Name} mpir)
-target_link_libraries(${Project_Name} PRIVATE ${MPIR_LIBRARY})
+target_include_directories(${PROJECT_NAME} PRIVATE ${MPIR_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${MPIR_LIBRARY})
 
-target_link_libraries(${Project_Name} PRIVATE gtest_main)
-add_subdirectory(tests)
+# Enable testing and include GoogleTest if GESTALT_BUILD_TESTS is ON
+if(GESTALT_BUILD_TESTS)
+    enable_testing()
+
+    if(GESTALT_FETCH_GOOGLETEST)
+        add_subdirectory(external/googletest)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(googletest)
+    else()
+        # Find GoogleTest
+        find_package(GTest REQUIRED)
+        if(NOT GTest_FOUND)
+            message(FATAL_ERROR "GoogleTest not found. Please provide GoogleTest or set GESTALT_FETCH_GOOGLETEST to ON.")
+        endif()
+    endif()
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE gtest_main)
+    add_subdirectory(tests)
+endif()

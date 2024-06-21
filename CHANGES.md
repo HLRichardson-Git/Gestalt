@@ -19,6 +19,14 @@ Gestalt Releases
  Gestalt 0.4
 -----------
 
+### Changes between 0.4 and 0.4.1 [06 Jun 2024]
+
+ * Fixed bug in ecc.cpp for function isValidKeyPair that wasn't detecting an identity
+      point condition correctly.
+ * Fixed issue where ecdsa.h and ecdh.h were not included in gestalt.h
+ * Added build options to allow users the option to handle their own dependencies.
+ * Fixed bug in eccObjects.h that caused BigInt initialization to not work properly.
+
 ### Changes between 0.3 and 0.4 [27 May 2024]
 
  * Implemented the ECDSA signing algorithm, providing users with the ability to 

@@ -29,19 +29,35 @@ public:
     mpz_t n;
 
     BigInt() { mpz_init(n); }
-    BigInt(const std::string& strN) {
+        BigInt(const std::string& strN) {
         mpz_init(n);
         stringToGMP(strN, n);
     }
+    
     BigInt(const BigInt& other) {
         mpz_init_set(n, other.n);
     }
-    void operator =(const BigInt& other) {
-        mpz_set(this->n, other.n);
-    }
-    void operator =(const std::string& strN) {
+
+    BigInt(const char* strN) {
         mpz_init(n);
         stringToGMP(strN, n);
+    }
+
+    BigInt& operator=(const BigInt& other) {
+        if (this != &other) {
+            mpz_set(n, other.n);
+        }
+        return *this;
+    }
+
+    BigInt& operator=(const std::string& strN) {
+        stringToGMP(strN, n);
+        return *this;
+    }
+
+    BigInt& operator=(const char* strN) {
+        stringToGMP(strN, n);
+        return *this;
     }
 
     ~BigInt() {
@@ -59,10 +75,12 @@ public:
         stringToGMP(strX, x);
         stringToGMP(strY, y);
     }
+
     Point(const Point& other) {
         mpz_init_set(x, other.x);
         mpz_init_set(y, other.y);
     }
+
     void operator =(const Point& other) {
         mpz_set(this->x, other.x);
         mpz_set(this->y, other.y);
@@ -87,15 +105,18 @@ public:
         mpz_set(privateKey, gmpPriv);
         publicKey = strPub;
     }
+
     KeyPair(const std::string& strPriv, const Point& strPub) {
         mpz_init(privateKey);
         stringToGMP(strPriv, privateKey);
         publicKey = strPub;
     }
+
     KeyPair(const KeyPair& other) {
         mpz_init_set(privateKey, other.privateKey);
         publicKey = other.publicKey;
     }
+
     void operator =(const KeyPair& R) {
         mpz_set(this->privateKey, R.privateKey);
         this->publicKey = R.publicKey;
@@ -114,10 +135,12 @@ public:
         stringToGMP(strR, r);
         stringToGMP(strS, s);
     }
+
     Signature(const Signature& other) {
         mpz_init_set(r, other.r);
         mpz_init_set(s, other.s);
     }
+    
     void operator =(const Signature& other) {
         mpz_set(this->r, other.r);
         mpz_set(this->s, other.s);

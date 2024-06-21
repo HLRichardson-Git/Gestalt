@@ -31,9 +31,9 @@ protected:
     void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) { 
         ecc.fieldElementToInteger(fieldElement, result);
     };
-    bool isInDomainRange(const mpz_t k) { return ecc.isInDomainRange(k); };
-    bool isIdentityPoint(Point P) { return ecc.isIdentityPoint(P); };
-    bool isPointOnCurve(Point P) { return ecc.isPointOnCurve(P); };
+    bool isInDomainRange(const mpz_t& k) { return ecc.isInDomainRange(k); };
+    bool isIdentityPoint(const Point& P) { return ecc.isIdentityPoint(P); };
+    bool isPointOnCurve(const Point& P) { return ecc.isPointOnCurve(P); };
     std::string isValidPublicKey(const Point& P) { return ecc.isValidPublicKey(P); };
     std::string isValidKeyPair(const KeyPair& K) { return ecc.isValidKeyPair(K); };
 };
@@ -88,7 +88,7 @@ TEST_F(TestECC, testPointMultiplication)
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
-    BigInt N("0x8");
+    BigInt N = "0x8";
 
     Point R = scalarMultiplyPoints(N.n, P);
 
@@ -138,8 +138,9 @@ TEST_F(TestECC, pointIsOnCurve)
 
 TEST_F(TestECC, isValidPublicKey)
 {
-    Point validPublicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
-                         "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
+    Point validPublicKey("0xffc5679a309953b590ef4a3601a5598e83893017527859dd6312ec1177f53749", 
+                         "0xe8ba1c3fa2e5c9d3312e93361b08662d81cb540c1b08a7e0e17b1b5651462584");
+    std::cout << isValidPublicKey(validPublicKey) << std::endl;
     EXPECT_TRUE(isValidPublicKey(validPublicKey).empty());
 
 
@@ -149,11 +150,12 @@ TEST_F(TestECC, isValidPublicKey)
     Point pointIsIdentityPoint("0", "0");
     EXPECT_TRUE(isValidPublicKey(pointIsIdentityPoint) == "Error: Given Public Key is the Identity element.");
 
-    // THIS IS NOT WORKING FOR NOW...???
-    /*Point pointIsNotValid("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
-                          "0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464");
-    EXPECT_TRUE(isValidPublicKey(pointIsNotValid) == 
-                "Error: Given Public key multiplied by curve modulus is not Identity Element.");*/
+    Point resultIsIdentity("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+                           "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
+    BigInt modulus = "0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141";
+    Point result = scalarMultiplyPoints(modulus.n, resultIsIdentity);
+    EXPECT_EQ(mpz_cmp_ui(result.x, 0), 0);
+    EXPECT_EQ(mpz_cmp_ui(result.y, 0), 0);
 }
 
 TEST_F(TestECC, isValidKeyPair)
@@ -203,7 +205,7 @@ TEST_F(TestECC, setKeyPair)
 TEST(TestECC_Objects, BigIntInitialization)
 {
     // Check Hexidecimal value initialization
-    BigInt P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577");
+    BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
     BigInt N = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
@@ -232,7 +234,7 @@ TEST(TestECC_Objects, BigIntInitialization)
 
 TEST(TestECC_Objects, BigIntAssignmentOperator)
 {
-    BigInt P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577");
+    BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
     BigInt Q = P;
 
