@@ -24,6 +24,7 @@ Gestalt includes:
 
 - **AES**
 - **SHA1**
+- **SHA2**
 - **ECDSA**
 - **ECDH**
 - More to come.
