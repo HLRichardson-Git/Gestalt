@@ -63,24 +63,35 @@ const std::array<uint64_t, 80> K512 = {
     0x431d67c49c100d4c, 0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817,
 };
 
-void applyPadding(std::string& in, size_t wordSize) {
-    size_t messageLength = in.length() * 8;
-    in += (char)0x80;
-    size_t blockSize = wordSize * 16; // is (wordSize == 4 ? 64 : 128)
+std::string applyPadding(const std::string& in, size_t wordSize) {
+    std::string out = in;
+    uint64_t bitLengthLow = static_cast<uint64_t>(in.length()) * 8;
+    uint64_t bitLengthHigh = (wordSize == 4) ? 0 : (static_cast<uint64_t>(in.length()) >> 61);
 
-    // Fill in with zeros until is a multiple of 64 or 128 minus the last 64 bits
-    while ((in.length() % blockSize) != blockSize - 8) {
-        in += (char)0x00;
+    out += (char)0x80; // apend that character '1'
+    uint64_t lengthTailBits = wordSize * 16; // i.e. (wordSize == 4 ? 64 : 128)
+
+    // Fill in with zeros until it reaches the tail bits that are reserveed for the message length
+    while ((out.length() % lengthTailBits) != 14 * wordSize) {
+        out += (char)0x00;
     }
 
-    // Fill last 64 bits with the length of the message
+    // Append message length
+    if (lengthTailBits == 128) { // If message shall be in last 128 bits fill in highest 64 bits
+        for (int i = 7; i >= 0; --i) {
+            out += (char)((bitLengthHigh >> (i * 8)) & 0xFF);
+        }
+    }
+    // else just fill in last 64-bits
     for (int i = 7; i >= 0; --i) {
-        in += (char)((messageLength >> (i * 8)) & 0xFF);
+        out += (char)((bitLengthLow >> (i * 8)) & 0xFF);
     }
+    
+    return out;
 }
 
 template<typename T, int N>
-void fillBlock(std::string& in, T W[N]) {
+void fillBlock(const std::string& in, T W[N]) {
     size_t wordSize = sizeof(T);
     
     for (int i = 0; i < 16; ++i) {
@@ -96,13 +107,13 @@ void fillBlock(std::string& in, T W[N]) {
 }
 
 template<typename T, size_t NumOfWords, const std::array<T, NumOfWords>& K, size_t HashSize>
-std::string sha2(std::string& in, std::array<T, 8> H) {
+std::string sha2(const std::string& in, std::array<T, 8> H) {
     size_t wordSize = sizeof(T);
-    applyPadding(in, wordSize);
+    std::string msg = applyPadding(in, wordSize);
 
-    for (size_t i = 0; i < in.length(); i += (wordSize == 4 ? 64 : 128)) {
+    for (size_t i = 0; i < msg.length(); i += (wordSize == 4 ? 64 : 128)) {
         T W[NumOfWords] = {0};
-        std::string chunk = in.substr(i, (wordSize == 4 ? 64 : 128));
+        std::string chunk = msg.substr(i, (wordSize == 4 ? 64 : 128));
         fillBlock<T, NumOfWords>(chunk, W);
 
         // Initialize hash value for this chunk
@@ -155,21 +166,21 @@ std::string sha2(std::string& in, std::array<T, 8> H) {
 }
 
 // Note that we do not yet check the message fits in the bounds defined by NIST
-std::string hashSHA224(std::string& in) {
+std::string hashSHA224(const std::string& in) {
     constexpr std::array<uint32_t, 8> H = {
         0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4
     };
     return sha2<uint32_t, 64, K256, 28>(in, H);
 }
 
-std::string hashSHA256(std::string& in) {
+std::string hashSHA256(const std::string& in) {
     constexpr std::array<uint32_t, 8> H = {
         0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
     };
     return sha2<uint32_t, 64, K256, 32>(in, H);
 }
 
-std::string hashSHA384(std::string& in) {
+std::string hashSHA384(const std::string& in) {
     constexpr std::array<uint64_t, 8> H = {
         0xcbbb9d5dc1059ed8, 0x629a292a367cd507, 0x9159015a3070dd17, 0x152fecd8f70e5939,
         0x67332667ffc00b31, 0x8eb44a8768581511, 0xdb0c2e0d64f98fa7, 0x47b5481dbefa4fa4
@@ -177,7 +188,7 @@ std::string hashSHA384(std::string& in) {
     return sha2<uint64_t, 80, K512, 48>(in, H);
 }
 
-std::string hashSHA512(std::string& in) {
+std::string hashSHA512(const std::string& in) {
     constexpr std::array<uint64_t, 8> H = {
         0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
         0x510e527fade682d1, 0x9b05688c2b3e6c1f, 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179
@@ -185,7 +196,7 @@ std::string hashSHA512(std::string& in) {
     return sha2<uint64_t, 80, K512, 64>(in, H);
 }
 
-std::string hashSHA512_224(std::string& in) {
+std::string hashSHA512_224(const std::string& in) {
     constexpr std::array<uint64_t, 8> H = {
         0x8C3D37C819544DA2, 0x73E1996689DCD4D6, 0x1DFAB7AE32FF9C82, 0x679DD514582F9FCF,
         0x0F6D2B697BD44DA8, 0x77E36F7304C48942, 0x3F9D85A86A1D36C8, 0x1112E6AD91D692A1
@@ -193,7 +204,7 @@ std::string hashSHA512_224(std::string& in) {
     return sha2<uint64_t, 80, K512, 28>(in, H);
 }
 
-std::string hashSHA512_256(std::string& in) {
+std::string hashSHA512_256(const std::string& in) {
     constexpr std::array<uint64_t, 8> H = {
         0x22312194FC2BF72C, 0x9F555FA3C84C64C2, 0x2393B86B6F53B151, 0x963877195940EABD,
         0x96283EE2A88EFFE3, 0xBE5E1E2553863992, 0x2B0199FC2C85B8AA, 0x0EB72DDC81C52CA2

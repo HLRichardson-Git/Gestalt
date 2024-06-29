@@ -14,9 +14,9 @@
 
 #include <string>
 
-std::string hashSHA224(std::string& in);
-std::string hashSHA256(std::string& in);
-std::string hashSHA384(std::string& in);
-std::string hashSHA512(std::string& in);
-std::string hashSHA512_224(std::string& in);
-std::string hashSHA512_256(std::string& in);
+std::string hashSHA224(const std::string& in);
+std::string hashSHA256(const std::string& in);
+std::string hashSHA384(const std::string& in);
+std::string hashSHA512(const std::string& in);
+std::string hashSHA512_224(const std::string& in);
+std::string hashSHA512_256(const std::string& in);
