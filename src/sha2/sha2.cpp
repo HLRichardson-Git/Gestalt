@@ -63,26 +63,35 @@ const std::array<uint64_t, 80> K512 = {
     0x431d67c49c100d4c, 0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817,
 };
 
+bool isValidSHA2Length(uint64_t length) {
+    return length >= 0 && length < ULLONG_MAX - 1;
+}
+
 std::string applyPadding(const std::string& in, size_t wordSize) {
     std::string out = in;
     uint64_t bitLengthLow = static_cast<uint64_t>(in.length()) * 8;
     uint64_t bitLengthHigh = (wordSize == 4) ? 0 : (static_cast<uint64_t>(in.length()) >> 61);
 
-    out += (char)0x80; // apend that character '1'
-    uint64_t lengthTailBits = wordSize * 16; // i.e. (wordSize == 4 ? 64 : 128)
+    // Validate input length against SHA-2 bounds
+    if (wordSize == 4 && !isValidSHA2Length(bitLengthLow))
+        throw std::invalid_argument("Error: Given input for SHA256 family is larger than 0 <= length < 2^64.");
+    if (wordSize == 8 && !isValidSHA2Length(bitLengthHigh))
+        throw std::invalid_argument("Error: Given input for SHA512 family is out of bounds 0 <= length < 2^128.");
 
-    // Fill in with zeros until it reaches the tail bits that are reserveed for the message length
-    while ((out.length() % lengthTailBits) != 14 * wordSize) {
+    out += (char)0x80; // apend that character '1'
+
+    // Append zeros until reaching the message length boundary
+    while ((out.length() % (wordSize * 16)) != 14 * wordSize) { // 14 * wordsize = wordSize * 16 - (wordSize * 2)
         out += (char)0x00;
     }
 
     // Append message length
-    if (lengthTailBits == 128) { // If message shall be in last 128 bits fill in highest 64 bits
+    if (wordSize == 8) { // Append high 64 bits if using SHA-512
         for (int i = 7; i >= 0; --i) {
             out += (char)((bitLengthHigh >> (i * 8)) & 0xFF);
         }
     }
-    // else just fill in last 64-bits
+    // Append low 64 bits in any case
     for (int i = 7; i >= 0; --i) {
         out += (char)((bitLengthLow >> (i * 8)) & 0xFF);
     }
@@ -90,8 +99,13 @@ std::string applyPadding(const std::string& in, size_t wordSize) {
     return out;
 }
 
-template<typename T, int N>
-void fillBlock(const std::string& in, T W[N]) {
+/*
+ * Fills block to be hashed by SHA2 function.
+ * @tparam T Type of the word (uint32_t or uint64_t).
+ * @tparam NumOfWords Number of words in the W array (64 for SHA-256, 80 for SHA-512).
+ */
+template<typename T, int NumOfWords>
+void fillBlock(const std::string& in, T W[NumOfWords]) {
     size_t wordSize = sizeof(T);
     
     for (int i = 0; i < 16; ++i) {
@@ -101,11 +115,21 @@ void fillBlock(const std::string& in, T W[N]) {
         }
     }
 
-    for (int i = 16; i < N; ++i) {
+    for (int i = 16; i < NumOfWords; ++i) {
         W[i] = SSIG1(W[i - 2]) + W[i - 7] + SSIG0(W[i - 15]) + W[i - 16];
     }
 }
 
+/*
+ * Computes SHA-2 hash for the input message.
+ * @tparam T Type of the word (uint32_t or uint64_t).
+ * @tparam NumOfWords Number of words in the W array (64 for SHA-256, 80 for SHA-512).
+ * @tparam K Array of constants (K256 or K512).
+ * @tparam HashSize Size of the hash output in bytes.
+ * @param in The input message.
+ * @param H Initial hash values.
+ * @return The computed hash as a hex string.
+ */
 template<typename T, size_t NumOfWords, const std::array<T, NumOfWords>& K, size_t HashSize>
 std::string sha2(const std::string& in, std::array<T, 8> H) {
     size_t wordSize = sizeof(T);
@@ -153,10 +177,9 @@ std::string sha2(const std::string& in, std::array<T, 8> H) {
     // Handle special case that function call is SHA512_224
     // I agree its ugly
     if (wordSize == 8 && HashSize == 28) {
-        hashValue[24] = static_cast<uint64_t>(SHR(56, H[3]) & 0xFF);
-        hashValue[25] = static_cast<uint64_t>(SHR(48, H[3]) & 0xFF);
-        hashValue[26] = static_cast<uint64_t>(SHR(40, H[3]) & 0xFF);
-        hashValue[27] = static_cast<uint64_t>(SHR(32, H[3]) & 0xFF);
+        for (int i = 0; i < 4; ++i) {
+            hashValue[24 + i] = static_cast<uint8_t>((H[3] >> (56 - i * 8)) & 0xFF);
+        }
     }
 
     for (size_t i = 0; i < HashSize; i++) {
