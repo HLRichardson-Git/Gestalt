@@ -260,16 +260,16 @@ std::string CustomNameGenerator(const testing::TestParamInfo<SHA2TestVectors>& i
     const SHA2TestVectors& test = info.param;
     return test.name;
 }
-class SHA224HashTest : public testing::TestWithParam<SHA2TestVectors> {};
-class SHA256HashTest : public testing::TestWithParam<SHA2TestVectors> {};
-class SHA3844HashTest : public testing::TestWithParam<SHA2TestVectors> {};
-class SHA512HashTest : public testing::TestWithParam<SHA2TestVectors> {};
-class SHA512_224HashTest : public testing::TestWithParam<SHA2TestVectors> {};
-class SHA512_256HashTest : public testing::TestWithParam<SHA2TestVectors> {};
+class SHA2_224HashTest : public testing::TestWithParam<SHA2TestVectors> {};
+class SHA2_256HashTest : public testing::TestWithParam<SHA2TestVectors> {};
+class SHA2_3844HashTest : public testing::TestWithParam<SHA2TestVectors> {};
+class SHA2_512HashTest : public testing::TestWithParam<SHA2TestVectors> {};
+class SHA2_512_224HashTest : public testing::TestWithParam<SHA2TestVectors> {};
+class SHA2_512_256HashTest : public testing::TestWithParam<SHA2TestVectors> {};
 
-INSTANTIATE_TEST_SUITE_P(All, SHA224HashTest, testing::ValuesIn(SHA224_VECTORS), CustomNameGenerator);
-INSTANTIATE_TEST_SUITE_P(All, SHA256HashTest, testing::ValuesIn(SHA256_VECTORS), CustomNameGenerator);
-INSTANTIATE_TEST_SUITE_P(All, SHA3844HashTest, testing::ValuesIn(SHA384_VECTORS), CustomNameGenerator);
-INSTANTIATE_TEST_SUITE_P(All, SHA512HashTest, testing::ValuesIn(SHA512_VECTORS), CustomNameGenerator);
-INSTANTIATE_TEST_SUITE_P(All, SHA512_224HashTest, testing::ValuesIn(SHA512_224_VECTORS), CustomNameGenerator);
-INSTANTIATE_TEST_SUITE_P(All, SHA512_256HashTest, testing::ValuesIn(SHA512_256_VECTORS), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(All, SHA2_224HashTest, testing::ValuesIn(SHA224_VECTORS), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(All, SHA2_256HashTest, testing::ValuesIn(SHA256_VECTORS), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(All, SHA2_3844HashTest, testing::ValuesIn(SHA384_VECTORS), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(All, SHA2_512HashTest, testing::ValuesIn(SHA512_VECTORS), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(All, SHA2_512_224HashTest, testing::ValuesIn(SHA512_224_VECTORS), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(All, SHA2_512_256HashTest, testing::ValuesIn(SHA512_256_VECTORS), CustomNameGenerator);

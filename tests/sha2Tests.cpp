@@ -18,88 +18,72 @@
 
 const bool skipLargeHash = true; // This test can take a bit, so set to false if you'd like to test.
 
+std::string prepareInput(std::string in, size_t repetitions) {
+    std::string out = "";
+    for (size_t i = 0; i < repetitions; i++) {
+        out += in;
+    }
+    return out;
+}
+
 // SHA2 Tets Vectors from:
 // [1] - https://www.di-mgt.com.au/sha_testvectors.html
-TEST_P(SHA224HashTest, KAT) {
-    const SHA2TestVectors &test = GetParam();
-    SCOPED_TRACE(test.name);
+TEST_P(SHA2_224HashTest, KAT) {
+    const SHA2TestVectors &vector = GetParam();
+    SCOPED_TRACE(vector.name);
 
-    if (skipLargeHash && test.repetitions != 1)
+    if (skipLargeHash && vector.repetitions != 1)
         GTEST_SKIP();
 
-    std::string in = "";
-    for (size_t i = 0; i < test.repetitions; i++) 
-        in += test.in;
-
-    EXPECT_EQ(hashSHA224(in), test.expected);
+    EXPECT_EQ(hashSHA224(prepareInput(vector.in, vector.repetitions)), vector.expected);
 }
 
-TEST_P(SHA256HashTest, KAT) {
-    const SHA2TestVectors &test = GetParam();
-    SCOPED_TRACE(test.name);
+TEST_P(SHA2_256HashTest, KAT) {
+    const SHA2TestVectors &vector = GetParam();
+    SCOPED_TRACE(vector.name);
 
-    if (skipLargeHash && test.repetitions != 1)
+    if (skipLargeHash && vector.repetitions != 1)
         GTEST_SKIP();
 
-    std::string in = "";
-    for (size_t i = 0; i < test.repetitions; i++) 
-        in += test.in;
-
-    EXPECT_EQ(hashSHA256(in), test.expected);
+    EXPECT_EQ(hashSHA256(prepareInput(vector.in, vector.repetitions)), vector.expected);
 }
 
-TEST_P(SHA3844HashTest, KAT) {
-    const SHA2TestVectors &test = GetParam();
-    SCOPED_TRACE(test.name);
+TEST_P(SHA2_3844HashTest, KAT) {
+    const SHA2TestVectors &vector = GetParam();
+    SCOPED_TRACE(vector.name);
 
-    if (skipLargeHash && test.repetitions != 1)
+    if (skipLargeHash && vector.repetitions != 1)
         GTEST_SKIP();
 
-    std::string in = "";
-    for (size_t i = 0; i < test.repetitions; i++) 
-        in += test.in;
-
-    EXPECT_EQ(hashSHA384(in), test.expected);
+    EXPECT_EQ(hashSHA384(prepareInput(vector.in, vector.repetitions)), vector.expected);
 }
 
-TEST_P(SHA512HashTest, KAT) {
-    const SHA2TestVectors &test = GetParam();
-    SCOPED_TRACE(test.name);
+TEST_P(SHA2_512HashTest, KAT) {
+    const SHA2TestVectors &vector = GetParam();
+    SCOPED_TRACE(vector.name);
 
-    if (skipLargeHash && test.repetitions != 1)
+    if (skipLargeHash && vector.repetitions != 1)
         GTEST_SKIP();
 
-    std::string in = "";
-    for (size_t i = 0; i < test.repetitions; i++) 
-        in += test.in;
-
-    EXPECT_EQ(hashSHA512(in), test.expected);
+    EXPECT_EQ(hashSHA512(prepareInput(vector.in, vector.repetitions)), vector.expected);
 }
 
-TEST_P(SHA512_224HashTest, KAT) {
-    const SHA2TestVectors &test = GetParam();
-    SCOPED_TRACE(test.name);
+TEST_P(SHA2_512_224HashTest, KAT) {
+    const SHA2TestVectors &vector = GetParam();
+    SCOPED_TRACE(vector.name);
 
-    if (skipLargeHash && test.repetitions != 1)
+    if (skipLargeHash && vector.repetitions != 1)
         GTEST_SKIP();
 
-    std::string in = "";
-    for (size_t i = 0; i < test.repetitions; i++) 
-        in += test.in;
-
-    EXPECT_EQ(hashSHA512_224(in), test.expected);
+    EXPECT_EQ(hashSHA512_224(prepareInput(vector.in, vector.repetitions)), vector.expected);
 }
 
-TEST_P(SHA512_256HashTest, KAT) {
-    const SHA2TestVectors &test = GetParam();
-    SCOPED_TRACE(test.name);
+TEST_P(SHA2_512_256HashTest, KAT) {
+    const SHA2TestVectors &vector = GetParam();
+    SCOPED_TRACE(vector.name);
 
-    if (skipLargeHash && test.repetitions != 1)
+    if (skipLargeHash && vector.repetitions != 1)
         GTEST_SKIP();
 
-    std::string in = "";
-    for (size_t i = 0; i < test.repetitions; i++) 
-        in += test.in;
-
-    EXPECT_EQ(hashSHA512_256(in), test.expected);
+    EXPECT_EQ(hashSHA512_256(prepareInput(vector.in, vector.repetitions)), vector.expected);
 }
