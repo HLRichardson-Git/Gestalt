@@ -9,6 +9,7 @@ set (Sources
     desTests.cpp
     sha1Tests.cpp
     sha2Tests.cpp
+    hmacTests.cpp
     eccTests.cpp
     ecdsaTests.cpp
     ecdhTests.cpp

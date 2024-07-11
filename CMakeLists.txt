@@ -26,6 +26,7 @@ set (Sources
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
     src/sha2/sha2.cpp
+    src/hmac/hmac.cpp
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
     src/ecc/ecdh/ecdh.cpp
