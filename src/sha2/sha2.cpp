@@ -10,11 +10,11 @@
  * This file contains the implementation of Gestalts SHA2 security functions.
  */
 
-#include <gestalt/sha2.h>
-#include "sha2Constants.h"
-
 #include <sstream>
 #include <iomanip>
+
+#include <gestalt/sha2.h>
+#include "sha2Constants.h"
 
 #define ROTR(n, x) ((x >> n) | (x << (32 - n)))
 #define ROTR512(n, x) ((x >> n) | (x << (64 - n)))

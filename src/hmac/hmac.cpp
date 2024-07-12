@@ -18,51 +18,34 @@
 #include "hmac.h"
 #include "utils.h"
 
-void HMAC::hmacManager(const HASH_ALGORITHM HASH) {
+std::pair<unsigned int, unsigned int> HMAC::getHashParameters(const HASH_ALGORITHM HASH) {
     switch (HASH) {
-        case SHA1:
-            B = 64;
-            L = 20;
-            break;
-        case SHA224:
-            B = 64;
-            L = 28;
-            break;
-        case SHA256:
-            B = 64;
-            L = 32;
-            break;
-        case SHA384:
-            B = 128;
-            L = 48;
-            break;
-        case SHA512:
-            B = 128;
-            L = 64;
-            break;
-        case SHA512_224:
-            B = 128;
-            L = 28;
-            break;
-        case SHA512_256:
-            B = 128;
-            L = 32;
-            break;
-        default:
-            B = 0;
-            L = 0;
-            throw std::invalid_argument("Error: Invalid hash algorithm given for HMAC");
-            break;
+        case SHA1: return {64, 20};
+        case SHA224: return {64, 28};
+        case SHA256: return {64, 32};
+        case SHA384: return {128, 48};
+        case SHA512: return {128, 64};
+        case SHA512_224: return {128, 28};
+        case SHA512_256: return {128, 32};
+        default: throw std::invalid_argument("Error: Invalid hash algorithm given for HMAC");
     }
+}
+
+void HMAC::hmacManager(const HASH_ALGORITHM HASH) {
+    std::pair<unsigned int, unsigned int> params = getHashParameters(HASH);
+    B = params.first;
+    L = params.second;
 }
 
 void HMAC::processKey(const std::string& key, hash_f hash) {
     size_t keySize = key.length();
 
     if (keySize > B) {
-        std::string hashedKey = hash(key);
+        std::string hashedKey = hexToBytes(hash(key));
         std::copy(hashedKey.begin(), hashedKey.end(), K.begin());
-    } else {
+    } 
+    // No need to append zeros manually because K is already initialized with zeros
+    else {
         std::copy(key.begin(), key.end(), K.begin());
     }
 }
@@ -81,5 +64,5 @@ std::string HMAC::xorVectors(const std::vector<unsigned char>& a, const std::vec
 
 std::string HMAC::keyedHash(const std::string& key, const std::string& input, hash_f hash) {
     processKey(key, hash);
-    return hash(xorVectors(K, opad) + hexToASCII_Bytes(hash(xorVectors(K, ipad) + input)));
+    return hash(xorVectors(K, opad) + hexToBytes(hash(xorVectors(K, ipad) + input)));
 }

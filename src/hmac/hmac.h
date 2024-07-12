@@ -17,25 +17,18 @@
 
 typedef std::string (*hash_f)(const std::string& in);
 
-enum HASH_ALGORITHM {
-    SHA1,
-    SHA224,
-    SHA256,
-    SHA384,
-    SHA512,
-    SHA512_224,
-    SHA512_256
-};
+enum HASH_ALGORITHM { SHA1, SHA224, SHA256, SHA384, SHA512, SHA512_224, SHA512_256 };
 
 class HMAC {
 private:
-    size_t B;
-    size_t L;
+    uint64_t B;
+    uint64_t L;
+    
     std::vector<unsigned char> ipad;
     std::vector<unsigned char> opad;
     std::vector<unsigned char> K;     
     
-    void printHex(const std::vector<unsigned char>& vec);
+    static std::pair<unsigned int, unsigned int> getHashParameters(const HASH_ALGORITHM HASH);
     void hmacManager(const HASH_ALGORITHM HASH);
     void processKey(const std::string& key, hash_f hash);
     std::string xorVectors(const std::vector<unsigned char>& a, const std::vector<unsigned char>& b);

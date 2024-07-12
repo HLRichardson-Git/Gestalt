@@ -30,7 +30,7 @@ std::string trimHexStr(const std::string& hex) {
     return hex.substr(2, hex.length());
 }
 
-std::string hexToASCII_Bytes(std::string hex) {
+std::string hexToBytes(std::string hex) {
     std::string res;
     res.reserve(hex.size() / 2);
     for (int i = 0; i < hex.size(); i += 2)
