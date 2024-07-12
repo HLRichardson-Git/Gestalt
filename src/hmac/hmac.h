@@ -24,7 +24,7 @@ enum HASH_ALGORITHM {
     SHA384,
     SHA512,
     SHA512_224,
-    SHA512_384
+    SHA512_256
 };
 
 class HMAC {
@@ -38,18 +38,15 @@ private:
     void printHex(const std::vector<unsigned char>& vec);
     void hmacManager(const HASH_ALGORITHM HASH);
     void processKey(const std::string& key, hash_f hash);
-    std::string xorVectors(std::vector<unsigned char> a, std::vector<unsigned char> b);
+    std::string xorVectors(const std::vector<unsigned char>& a, const std::vector<unsigned char>& b);
 
 public:
 
-    HMAC (HASH_ALGORITHM HASH) { 
+    explicit HMAC (HASH_ALGORITHM HASH) { 
         hmacManager(HASH); 
         ipad = std::vector<unsigned char>(B, 0x36);
         opad = std::vector<unsigned char>(B, 0x5c);
-        //std::cout << "ipad = ";
-        //printHex(ipad);
-        //std::cout << "opad = ";
-        //printHex(opad);
+        K    = std::vector<unsigned char>(B, 0x00);
     }
 
     std::string keyedHash(const std::string& key, const std::string& input, hash_f hash);
