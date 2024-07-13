@@ -1,3 +1,4 @@
+<a id="readme-top"></a>
 <p align="center">
   <img width="500" height="150" src="images/banner.png">
 </p>
@@ -14,19 +15,19 @@ Our goal is to provide a straightforward and intuitive interface for implementin
  - [Building Gestalt](#building-gestalt)
    - [CMake](#cmake)
  - [Supported Algorithms](#supported-algorithms)
- - [Usage](#usage)
- - [Development](#development)
  - [Documentation](#documentation)
- - [License](#license)
- - [Support](#support)
+ - [Usage](#usage)
  - [Contributing](#contributing)
+ - [Roadmap](#roadmap)
+ - [License](#license)
+ - [Contact](#contact)
  - [Legalities](#legalities)
 
 
 
 ## Building Gestalt
 
-To get started, check out our [website]() and [examples](). Whether you're a experienced developer or new to cryptography, Gestalt is here to make cryptography accessible and hassle-free.
+To get started, check out our [website](https://gestaltcrypto.github.io/) and [examples](https://gestaltcrypto.github.io/). Whether you're a experienced developer or new to cryptography, Gestalt is here to make cryptography accessible and hassle-free.
 
 ### CMake
 
@@ -47,13 +48,8 @@ You can include Gestalt in your CMake project by using 'FetchContent`:
     )
 
     FetchContent_MakeAvailable(Gestalt)
-    add_executable(MyExecutable main.cpp)
-    target_include_directories(MyExecutable PRIVATE ${MPIR_INCLUDE_DIR})
-    target_link_libraries (MyExecutable PRIVATE 
-        Gestalt 
-        ${MPIR_LIBRARY}
-        gmp
-    )
+    add_executable(${PROJECT_NAME} main.cpp)
+    target_link_libraries (${PROJECT_NAME} PRIVATE Gestalt)
     ```
 
 2. **Build your project**:
@@ -72,10 +68,11 @@ You can include Gestalt in your CMake project by using 'FetchContent`:
     ```
 
 By using the `FetchContent` module, Gestalt and its dependencies will be automatically downloaded and made available to your project. You can then link against it as shown in the example above.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Supported Algorithms
 
-To see more about the supported algorithms check out our [website]() and [examples]().
+To see more about the supported algorithms check out our [website](https://gestaltcrypto.github.io/) and [examples](https://gestaltcrypto.github.io/).
 
 | Algorithm        | Type                 | Description                                                            |
 |------------------|----------------------|------------------------------------------------------------------------|
@@ -88,10 +85,16 @@ To see more about the supported algorithms check out our [website]() and [exampl
 | ECDH              | Asymmetric Encryption| Elliptic Curve Shared Secret computation                                            |
 
 *More algorithms are being implemented very often, see [open issues](https://github.com/HLRichardson-Git/Gestalt/issues) to see algorithms in devlopment*
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Documentation
+
+If you want to read more about using Gestalt the best place to start is the Gestalt webstites ["Getting Started"]() page. You can also find a few examples under [Usage](#usage), or for more detailed examples check out Gestalts website ["Examples"](https://gestaltcrypto.github.io/) page.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Using Gestalt is meant to be a simple as possible for developers to quickly use cryptographic algorithms. For more examples, check out our [examples]().
+Using Gestalt is meant to be a simple as possible for developers to quickly use cryptographic algorithms. Here just a couple examples of using Gestalt:
 
 ### Example using AES CBC:
 
@@ -126,10 +129,11 @@ int main() {
 }
 ```
 
-### Example using ECDSA with P-256:
+### Example using ECDSA with P-256 and SHA2-256:
 
 ```cpp
 #include <gestalt/ecdsa.h>
+#include <gestalt/sha2.h>
 #include <iostream>
 
 int main() {
@@ -137,70 +141,85 @@ int main() {
     ECDSA ecdsa(StandardCurve::P256, privateKey);
 
     std::string message = "Hello, Gestalt!";
+    std::string messageHash = hashSHA256(message);
 
-    Signature signature = ecdsa.signMessage(message, k_value);
+    Signature signature = ecdsa.signMessage(messageHash);
+    bool signatureStatus = ecdsa.verifySignature(messageHash, signature);
 
-    std::cout << "Signature r: " << signature.r << std::endl;
-    std::cout << "Signature s: " << signature.s << std::endl;
+    if (signatureStatus) std::cout << "Valid!" << std::endl;
 
     return 0;
 }
 ```
 
+For more examples, check out our [examples]().
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ## Contributing
 
-Gestalt is an open-source project where contribution is encouraged, having
-a local copy of the git repository with the entire project history gives you 
-much more insight into the code base.
+First off thank you to anyone who takes the time to contribute to Gestalt! Contrubutors are what will make Gestalt even better, so any contributions are **greatly appreciated!**
 
-A local copy of the Git Repository can be obtained by cloning it from
+Gestalt adheres to the contributor maintained [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [hunter@hunterrichardson.net]()
 
-    git clone https://github.com/HLRichardson-Git/Gestalt.git
+If you have a suggestion that would make Gestalt better, feel free to open an issue and one of the maintainers will try to respond in a timely manner. Don't forget to give Gestalt a star, it keeps us very motivated!
 
-Documentation
-=============
+Make sure you read through [CONTRIBUTING](CONTRIBUTING.md) before contributing. Here are the steps to follow if you want to contribute:
 
-README Files
-------------
+1. Fork Gestalt
+2. Create your own branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Presently we only have this singular README file. But as the project grows
-more will be published for specific topics for clarification that is out
-of the scope of this.
+**Note:** *It is planned to create a [Gestalt Organization](https://github.com/GestaltCrypto)*
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-The Gestalt Guide
------------------
-WIP
+## Roadmap
 
-License
-=======
+- [ ] Add all FIPS approved algorithms
+- [ ] Refactor for multiple build environments
+- [ ] Update all documentation to be current
+- [ ] Prepare for 1.0 launch
+- [ ] Implement Non-Approved FIPS algorithms
+
+See the [open issues](https://github.com/HLRichardson-Git/Gestalt/issues) for a full list of proposed features (and known issues).
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## License
 
 Gestalt is licensed under the MIT License, which means that
 you are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software.
 
 See the [LICENSE](LICENSE) file for more details.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Support
-=======
+## Contact
 
-WIP
+Hunter Richardson - [hunter@hunterrichardson.net]()
 
-Contributing
-============
+Gestalt: https://github.com/HLRichardson-Git/Gestalt
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-If you are interested and willing to contribute to the Gestalt project,
-please take a look at the [CONTRIBUTING](CONTRIBUTING.md) file.
-
-Legalities
-==========
+## Legalities
 
 A number of nations restrict the use or export of cryptography. If you are
 potentially subject to such restrictions, you should seek legal advice before
 attempting to develop or distribute cryptographic code.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Copyright
-=========
+## Acknowledgments
+
+A special thanks to the following people and resources that make Gestalt better:
+
+* [Gestalt Contributors](AUTHORS.md)
+* [NIST](https://csrc.nist.gov/publications/fips)
+* [GoogleTest](https://github.com/google/googletest)
+* [GMP](https://gmplib.org/)
+
+## Copyright
 
 Copyright (c) 2023-2024 The Gestalt Project Authors.
 
 All rights reserved.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>

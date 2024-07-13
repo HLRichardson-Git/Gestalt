@@ -1,18 +1,16 @@
-Authors
-=======
+Gestalt was designed and developed by Hunter RIchardson.
 
-This is the list of Gestalt authors for copyright purposes.
-It does not necessarily list everyone who has contributed code,
-since in some cases, their employer may be the copyright holder.
-To see the full list of contributors, see the revision history in
-source control.
+### Current Maintainers
 
-Groups
-------
+* **Hunter Richardson**
 
- * None yet
+### Alumni
 
-Individuals
------------
+*
 
- * Hunter Richardson
+## Thanks
+
+Special thanks to the following extraordinary individuals, without whom
+Gestalt would not be possible:
+
+* 
