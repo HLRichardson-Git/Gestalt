@@ -61,7 +61,7 @@ else()
 endif()
 
 # Link MPIR library
-target_include_directories(${PROJECT_NAME} PRIVATE ${MPIR_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${MPIR_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MPIR_LIBRARY})
 
 # Enable testing and include GoogleTest if GESTALT_BUILD_TESTS is ON
