@@ -6,7 +6,7 @@
 Welcome to the Gestalt
 ======================
 
-Gestalt is a user-friendly cryptography library designed for developers who want to seamlessly integrate cryptographic functions into their projects. 
+Gestalt is a user-friendly cryptography library designed for developers who want to seamlessly integrate cryptographic algorithms into their projects. 
 
 Our goal is to provide a straightforward and intuitive interface for implementing essential cryptographic operations without the hassle associated with more complex libraries.
 
@@ -27,7 +27,7 @@ Our goal is to provide a straightforward and intuitive interface for implementin
 
 ## Building Gestalt
 
-To get started, check out our [website](https://gestaltcrypto.github.io/) and [examples](https://gestaltcrypto.github.io/). Whether you're a experienced developer or new to cryptography, Gestalt is here to make cryptography accessible and hassle-free.
+To get started, check out our [website](https://gestaltcrypto.github.io/) and [examples](https://gestaltcrypto.github.io/). Whether you're an experienced developer or new to cryptography, Gestalt is here to make cryptography accessible and hassle-free.
 
 ### CMake
 
@@ -79,8 +79,8 @@ To see more about the supported algorithms check out our [website](https://gesta
 | AES          | Symmetric Encryption | Advanced Encryption Standard                         |
 | SHA-1          | Hash Function        | Secure Hash Algorithm                              |
 | SHA-2          | Hash Function        | Secure Hash Algorithm                              |
-| HMAC-SHA1      | Message Authentication Code | HMAC using SHA-256                                                    |
-| HMAC-SHA2      | Message Authentication Code | HMAC using SHA-512                                                    |
+| HMAC-SHA1      | Message Authentication Code | HMAC using SHA-1                                                   |
+| HMAC-SHA2      | Message Authentication Code | HMAC using SHA-2                                                    |
 | ECDSA              | Asymmetric Encryption| Elliptic Curve Signature Algorithm                                            |
 | ECDH              | Asymmetric Encryption| Elliptic Curve Shared Secret computation                                            |
 
@@ -89,12 +89,12 @@ To see more about the supported algorithms check out our [website](https://gesta
 
 ## Documentation
 
-If you want to read more about using Gestalt the best place to start is the Gestalt webstites ["Getting Started"]() page. You can also find a few examples under [Usage](#usage), or for more detailed examples check out Gestalts website ["Examples"](https://gestaltcrypto.github.io/) page.
+If you want to read more about using Gestalt the best place to start is the Gestalt website ["Getting Started"](https://gestaltcrypto.github.io/) page. You can also find a few examples under [Usage](#usage), or for more detailed examples check out Gestalts website ["Examples"](https://gestaltcrypto.github.io/) page.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-Using Gestalt is meant to be a simple as possible for developers to quickly use cryptographic algorithms. Here just a couple examples of using Gestalt:
+Using Gestalt is meant to be as simple as possible for developers to quickly use cryptography algorithms. Here are just a couple of examples of using Gestalt:
 
 ### Example using AES CBC:
 
@@ -152,16 +152,16 @@ int main() {
 }
 ```
 
-For more examples, check out our [examples]().
+For more examples, check out our [examples](https://gestaltcrypto.github.io/).
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contributing
 
-First off thank you to anyone who takes the time to contribute to Gestalt! Contrubutors are what will make Gestalt even better, so any contributions are **greatly appreciated!**
+First off, thank you to anyone who takes the time to contribute to Gestalt! Contributors are what will make Gestalt even better, so any contributions are **greatly appreciated!**
 
-Gestalt adheres to the contributor maintained [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [hunter@hunterrichardson.net]()
+Gestalt adheres to the contributor-maintained [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [hunter@hunterrichardson.net]()
 
-If you have a suggestion that would make Gestalt better, feel free to open an issue and one of the maintainers will try to respond in a timely manner. Don't forget to give Gestalt a star, it keeps us very motivated!
+If you have a suggestion that would make Gestalt better, feel free to open an issue and one of the maintainers will try to respond promptly. Remember to give Gestalt a star, it keeps us very motivated!
 
 Make sure you read through [CONTRIBUTING](CONTRIBUTING.md) before contributing. Here are the steps to follow if you want to contribute:
 
@@ -176,10 +176,10 @@ Make sure you read through [CONTRIBUTING](CONTRIBUTING.md) before contributing. 
 
 ## Roadmap
 
-- [ ] Add all FIPS approved algorithms
+- [ ] Add all FIPS-approved algorithms
 - [ ] Refactor for multiple build environments
 - [ ] Update all documentation to be current
-- [ ] Prepare for 1.0 launch
+- [ ] Prepare for the 1.0 launch
 - [ ] Implement Non-Approved FIPS algorithms
 
 See the [open issues](https://github.com/HLRichardson-Git/Gestalt/issues) for a full list of proposed features (and known issues).

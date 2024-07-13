@@ -13,4 +13,4 @@ Gestalt was designed and developed by Hunter RIchardson.
 Special thanks to the following extraordinary individuals, without whom
 Gestalt would not be possible:
 
-* 
+*
