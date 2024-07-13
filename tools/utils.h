@@ -17,6 +17,9 @@
 #include <vector>
 #include <string>
 
+bool isHex(std::string in);
+std::string trimHexStr(const std::string& hex);
+std::string hexToBytes(std::string hex); 
 std::vector<unsigned char> hexStringToBytesVec(const std::string& hexStr);
 void hexStringToBytes(const std::string& hexString, unsigned char* output);
 std::string convertToHex(const std::string& input);

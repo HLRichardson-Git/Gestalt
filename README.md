@@ -1,43 +1,153 @@
-Welcome to the Gestalt Project
-==============================
+<p align="center">
+  <img width="500" height="150" src="images/banner.png">
+</p>
 
-Gestalt is an educational project first, and a robust production cryptographic library second.
+Welcome to the Gestalt
+======================
 
-All FIPS approved algorithms are based on available standards, and
-tested using KAT or roundtrip validation.
+Gestalt is a user-friendly cryptography library designed for developers who want to seamlessly integrate cryptographic functions into their projects. 
 
-Table of Contents
-=================
+Our goal is to provide a straightforward and intuitive interface for implementing essential cryptographic operations without the hassle associated with more complex libraries.
 
- - [Overview](#overview)
- - [Download](#download)
+## Table of Contents
+
+ - [Building Gestalt](#building-gestalt)
+   - [CMake](#cmake)
+ - [Supported Algorithms](#supported-algorithms)
+ - [Usage](#usage)
+ - [Development](#development)
  - [Documentation](#documentation)
  - [License](#license)
  - [Support](#support)
  - [Contributing](#contributing)
  - [Legalities](#legalities)
 
-Overview
-========
 
-Gestalt includes:
 
-- **AES**
-- **SHA1**
-- **ECDSA**
-- **ECDH**
-- More to come.
+## Building Gestalt
 
-Download
-========
+To get started, check out our [website]() and [examples](). Whether you're a experienced developer or new to cryptography, Gestalt is here to make cryptography accessible and hassle-free.
 
-For Production Use
-------------------
+### CMake
 
-Gestalt is not considered to be production ready.
+You can include Gestalt in your CMake project by using 'FetchContent`:
 
-For Testing and Development
----------------------------
+1. **Include `FetchContent` in your `CMakeLists.txt`**:
+
+    ```cmake
+    cmake_minimum_required(VERSION 3.16.3)
+    project(Project)
+
+    include(FetchContent)
+
+    FetchContent_Declare(
+      Gestalt
+      GIT_REPOSITORY https://github.com/HLRichardson-Git/Gestalt.git
+      GIT_TAG main
+    )
+
+    FetchContent_MakeAvailable(Gestalt)
+    add_executable(MyExecutable main.cpp)
+    target_include_directories(MyExecutable PRIVATE ${MPIR_INCLUDE_DIR})
+    target_link_libraries (MyExecutable PRIVATE 
+        Gestalt 
+        ${MPIR_LIBRARY}
+        gmp
+    )
+    ```
+
+2. **Build your project**:
+
+    ```sh
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build .
+    ```
+
+3. **Run the tests** (optional but recommended):
+
+    ```sh
+    ./_deps/gestalt-build/tests/Debug/tests.exe
+    ```
+
+By using the `FetchContent` module, Gestalt and its dependencies will be automatically downloaded and made available to your project. You can then link against it as shown in the example above.
+
+## Supported Algorithms
+
+To see more about the supported algorithms check out our [website]() and [examples]().
+
+| Algorithm        | Type                 | Description                                                            |
+|------------------|----------------------|------------------------------------------------------------------------|
+| AES          | Symmetric Encryption | Advanced Encryption Standard                         |
+| SHA-1          | Hash Function        | Secure Hash Algorithm                              |
+| SHA-2          | Hash Function        | Secure Hash Algorithm                              |
+| HMAC-SHA1      | Message Authentication Code | HMAC using SHA-256                                                    |
+| HMAC-SHA2      | Message Authentication Code | HMAC using SHA-512                                                    |
+| ECDSA              | Asymmetric Encryption| Elliptic Curve Signature Algorithm                                            |
+| ECDH              | Asymmetric Encryption| Elliptic Curve Shared Secret computation                                            |
+
+*More algorithms are being implemented very often, see [open issues](https://github.com/HLRichardson-Git/Gestalt/issues) to see algorithms in devlopment*
+
+## Usage
+
+Using Gestalt is meant to be a simple as possible for developers to quickly use cryptographic algorithms. For more examples, check out our [examples]().
+
+### Example using AES CBC:
+
+```cpp
+#include <gestalt/aes.h>
+#include <iostream>
+
+int main() {
+    std::string key = "10a58869d74be5a374cf867cfb473859"; // 128-bit key
+    std::string message = "Hello, Gestalt!";
+    std::string ciphertext = aesEncryptECB(message, key);
+
+    std::cout << "AES-CBC-128: " << ciphertext << std::endl;
+
+    return 0;
+}
+```
+
+### Example using SHA2-256:
+
+```cpp
+#include <gestalt/sha2.h>
+#include <iostream>
+
+int main() {
+    std::string message = "Hello, Gestalt!";
+    std::string hash = hashSHA256(message);
+
+    std::cout << "SHA2-256: " << hash << std::endl;
+
+    return 0;
+}
+```
+
+### Example using ECDSA with P-256:
+
+```cpp
+#include <gestalt/ecdsa.h>
+#include <iostream>
+
+int main() {
+    std::string privateKey = "0xC9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+    ECDSA ecdsa(StandardCurve::P256, privateKey);
+
+    std::string message = "Hello, Gestalt!";
+
+    Signature signature = ecdsa.signMessage(message, k_value);
+
+    std::cout << "Signature r: " << signature.r << std::endl;
+    std::cout << "Signature s: " << signature.s << std::endl;
+
+    return 0;
+}
+```
+
+## Contributing
 
 Gestalt is an open-source project where contribution is encouraged, having
 a local copy of the git repository with the entire project history gives you 

@@ -20,6 +20,29 @@
 #include <random>
 #include <thread>
 
+bool isHex(std::string in) {
+    if (in.substr(0, 2) == "0x")
+        return true;
+    return false;
+}
+
+std::string trimHexStr(const std::string& hex) {
+    return hex.substr(2, hex.length());
+}
+
+std::string hexToBytes(std::string hex) {
+    std::string res;
+    res.reserve(hex.size() / 2);
+    for (int i = 0; i < hex.size(); i += 2)
+    {
+        std::istringstream iss(hex.substr(i, 2));
+        int temp;
+        iss >> std::hex >> temp;
+        res += static_cast<char>(temp);
+    }
+    return res;
+}
+
 std::vector<unsigned char> hexStringToBytesVec(const std::string& hexStr)
 {
     std::vector<unsigned char> result(hexStr.size() / 2);
