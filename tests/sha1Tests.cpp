@@ -11,12 +11,11 @@
  */
 
 #include "gtest/gtest.h"
+#include <string>
 
 #include <gestalt/sha1.h>
 #include "../src/sha1/sha1Core.h"
 #include "../tools/utils.h"
-
-#include <string>
 
 testSHA1Functions testSHA1Object;
 const bool skipLargeHash = true; // This test can take a bit, so set to false if you'd like to test.

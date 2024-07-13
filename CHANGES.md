@@ -11,10 +11,21 @@ appropriate release branch.
 Gestalt Releases
 ----------------
 
+ - [Gestalt 0.5](#gestalt-05)
  - [Gestalt 0.4](#gestalt-04)
  - [Gestalt 0.3](#gestalt-03)
  - [Gestalt 0.2](#gestalt-02)
  - [Gestalt 0.1](#gestalt-01)
+
+ Gestalt 0.5
+-----------
+
+### Changes between 0.4 and 0.5 [13 Jul 2024]
+
+ * Adds SHA2
+ * Adds HMAC-SHA1
+ * Adds HMAC-SHA2
+ * Improves documentation
 
  Gestalt 0.4
 -----------

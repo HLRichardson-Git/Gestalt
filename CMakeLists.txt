@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 # Project setup
-project (Gestalt VERSION 0.4.1 LANGUAGES C CXX)
+project (Gestalt VERSION 0.5 LANGUAGES C CXX)
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -25,6 +25,8 @@ set (Sources
     src/modes/cbc.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
+    src/sha2/sha2.cpp
+    src/hmac/hmac.cpp
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
     src/ecc/ecdh/ecdh.cpp
@@ -59,7 +61,7 @@ else()
 endif()
 
 # Link MPIR library
-target_include_directories(${PROJECT_NAME} PRIVATE ${MPIR_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${MPIR_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MPIR_LIBRARY})
 
 # Enable testing and include GoogleTest if GESTALT_BUILD_TESTS is ON
