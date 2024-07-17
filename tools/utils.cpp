@@ -114,73 +114,29 @@ int hexStringToInt(const std::string& hexString) {
 }
 
 // Function to convert hexadecimal string to binary string
-std::string hexToBinary(const std::string& hexStr) {
-    std::string binStr;
-    for (char c : hexStr) {
+std::string hexToBinary(const std::string& hex) {
+    std::string binary;
+    for (char c : hex) {
         switch (c) {
-        case '0':
-            binStr += "0000";
-            break;
-        case '1':
-            binStr += "0001";
-            break;
-        case '2':
-            binStr += "0010";
-            break;
-        case '3':
-            binStr += "0011";
-            break;
-        case '4':
-            binStr += "0100";
-            break;
-        case '5':
-            binStr += "0101";
-            break;
-        case '6':
-            binStr += "0110";
-            break;
-        case '7':
-            binStr += "0111";
-            break;
-        case '8':
-            binStr += "1000";
-            break;
-        case '9':
-            binStr += "1001";
-            break;
-        case 'A':
-        case 'a':
-            binStr += "1010";
-            break;
-        case 'B':
-        case 'b':
-            binStr += "1011";
-            break;
-        case 'C':
-        case 'c':
-            binStr += "1100";
-            break;
-        case 'D':
-        case 'd':
-            binStr += "1101";
-            break;
-        case 'E':
-        case 'e':
-            binStr += "1110";
-            break;
-        case 'F':
-        case 'f':
-            binStr += "1111";
-            break;
-        case '.':
-            binStr += ".";
-            break;
-        default:
-                std::cerr << "Invalid hexadecimal character: " << c << std::endl;
-                return "";
+            case '0': binary.append("0000"); break;
+            case '1': binary.append("0001"); break;
+            case '2': binary.append("0010"); break;
+            case '3': binary.append("0011"); break;
+            case '4': binary.append("0100"); break;
+            case '5': binary.append("0101"); break;
+            case '6': binary.append("0110"); break;
+            case '7': binary.append("0111"); break;
+            case '8': binary.append("1000"); break;
+            case '9': binary.append("1001"); break;
+            case 'A': case 'a': binary.append("1010"); break;
+            case 'B': case 'b': binary.append("1011"); break;
+            case 'C': case 'c': binary.append("1100"); break;
+            case 'D': case 'd': binary.append("1101"); break;
+            case 'E': case 'e': binary.append("1110"); break;
+            case 'F': case 'f': binary.append("1111"); break;
         }
     }
-    return binStr;
+    return binary;
 }
 
 std::string generateRandomHexData(size_t numBytes) {
