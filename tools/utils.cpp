@@ -19,6 +19,7 @@
 #include <sstream>
 #include <random>
 #include <thread>
+#include <bitset>
 
 bool isHex(std::string in) {
     if (in.substr(0, 2) == "0x")
@@ -192,4 +193,12 @@ void xorBlock(unsigned char* a, const std::string& b, size_t blockIndex) {
     for (int i = 0; i < 16; i++) {
         a[blockIndex + i] ^= b[i];
     }
+}
+
+std::string printIntToBinary(uint64_t in) {
+    return std::bitset<64>(in).to_string();
+}
+
+std::string printIntToBinary(uint32_t in) {
+    return std::bitset<32>(in).to_string();
 }

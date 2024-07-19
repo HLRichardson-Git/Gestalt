@@ -10,31 +10,30 @@
 
 #include <iostream>
 #include <string>
+#include <bitset> // for testDES
 #include "gtest/gtest.h"
 
 #include <gestalt/des.h>
+#include "des/desConstants.h"
 
 class testDES {
 private:
-    DES_BITSET des;
+    DES des;
 public:
     testDES(std::string hexKey) : des(hexKey) {};
 
-    std::string getKey(size_t index) { return des.key[index].to_string(); };
-};
-
-class testDES_UINT64 {
-private:
-    DES_UINT64 des;
-public:
-    testDES_UINT64(std::string hexKey) : des(hexKey) {};
-
     std::string getKey(size_t index) { return std::bitset<DES_KEY_SIZE>(des.roundKeys[index]).to_string(); };
+    std::string initialPermutation(uint64_t in) { return printIntToBinary(des.permute(in, IP, DES_BLOCK_SIZE, IP_SIZE)); };
+    std::string expansion(uint32_t in) { return printIntToBinary(des.permute(static_cast<uint64_t>(in), E, 32, E_SIZE) & 0x0000FFFFFFFFFFFF); };
+    std::string sbox(uint64_t in) { return printIntToBinary(des.sboxSubstitution(in)); };
+    std::string permutation(uint32_t in) { return printIntToBinary(des.permute(in, P, 32, P_SIZE)); };
+    std::string f(uint32_t in) { return printIntToBinary(des.f(in, 0)); };
+    std::string finalPermutation(uint64_t in) { return printIntToBinary(des.permute(in, FP, DES_BLOCK_SIZE, FP_SIZE)); };
 };
 
+// Thanks to https://www.nayuki.io/page/des-cipher-internals-in-excel for DES test vector with internal steps
 const std::string expectedExpandedKey[16] = {
     "001110001010110011101111010001100101011001001010",
-    //"000110010100110011010000011100101101111010001100",
     "100010011011111011010100010010001001110100010010",
     "010101000111111011101110010011010100010000111100",
     "111100101111010101100000010010010101100011001000",
@@ -52,43 +51,84 @@ const std::string expectedExpandedKey[16] = {
     "110100110011101000101101001000111000110101101000"
 };
 
-TEST(testDES_BITSET, keyExpansion)
+TEST(testDES, keyExpansion)
 {
-    auto start = std::chrono::high_resolution_clock::now();
     testDES tester("752878397493CB70");
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    std::cout << "Time taken for bitset implementation: " << duration << " nanoseconds" << std::endl;
 
     for (size_t i = 0; i < 16; i++) {
         EXPECT_EQ(tester.getKey(i), expectedExpandedKey[i]);
     }
 }
 
-TEST(testDES_STRING, keyExpansion)
+TEST(testDES, encryptBlock)
 {
-    DES_STRING tester;
-    std::string binaryString = hexToBinary("752878397493CB70");
-    auto start = std::chrono::high_resolution_clock::now();
-    tester.generateKeySchedule(binaryString);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    std::cout << "Time taken for bitset implementation: " << duration << " nanoseconds" << std::endl;
+    DES tester("752878397493CB70");
+    uint64_t plaintext = 0x1122334455667788;
+    uint64_t ciphertext = tester.encryptBlock(plaintext);
+    uint64_t expected = 0xB5219EE81AA7499D;
 
-    for (size_t i = 0; i < 16; i++) {
-        EXPECT_EQ(tester.keyRounds[i], expectedExpandedKey[i]);
-    }
+    EXPECT_EQ(ciphertext, expected);
 }
 
-TEST(testDES_UINT64, keyExpansion)
+TEST(testDES, initialPermutation)
 {
-    auto start = std::chrono::high_resolution_clock::now();
-    testDES_UINT64 tester("752878397493CB70");
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    std::cout << "Time taken for bitset implementation: " << duration << " nanoseconds" << std::endl;
+    testDES tester("752878397493CB70");
+    uint64_t input = 0x1122334455667788;
+    std::string output =  tester.initialPermutation(input);
+    std::string expected = "0111100001010101011110000101010110000000011001101000000001100110";
 
-    for (size_t i = 0; i < 16; i++) {
-        EXPECT_EQ(tester.getKey(i), expectedExpandedKey[i]);
-    }
+    EXPECT_EQ(output, expected);
+}
+
+TEST(testDES, expansion)
+{
+    testDES tester("752878397493CB70");
+    uint32_t input = 0x80668066;
+    std::string output =  tester.expansion(input);
+    std::string expected = "010000000000001100001101010000000000001100001101";
+
+    EXPECT_EQ(output.substr(16, output.size()), expected);
+}
+
+TEST(testDES, substitution)
+{
+    testDES tester("752878397493CB70");
+    uint64_t input = 0x78AFE2065547;
+    std::string output =  tester.sbox(input);
+    std::string expected = "01111011110001101110001001011000";
+
+    EXPECT_EQ(output, expected);
+    //EXPECT_EQ(output, expected);
+}
+
+TEST(testDES, permutation)
+{
+    testDES tester("752878397493CB70");
+    uint32_t input = 0x7BC6E258;
+    std::string output =  tester.permutation(input);
+    std::string expected = "01001011011111011101001110000010";
+
+    EXPECT_EQ(output, expected);
+    //EXPECT_EQ(output, expected);
+}
+
+TEST(testDES, f)
+{
+    testDES tester("752878397493CB70");
+    uint32_t input = 0x80668066;
+    std::string output =  tester.f(input);
+    std::string expected = "01001011011111011101001110000010";
+
+    EXPECT_EQ(output, expected);
+    //EXPECT_EQ(output, expected);
+}
+
+TEST(testDES, finalPermutation)
+{
+    testDES tester("752878397493CB70");
+    uint64_t input = 0x4895A5E3AD2BDC34;
+    std::string output =  tester.finalPermutation(input);
+    std::string expected = "1011010100100001100111101110100000011010101001110100100110011101";
+    
+    EXPECT_EQ(output, expected);
 }
