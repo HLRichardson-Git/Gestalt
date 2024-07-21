@@ -190,8 +190,9 @@ std::string generateRandomData(size_t sizeInMB) {
 }
 
 void xorBlock(unsigned char* a, const std::string& b, size_t blockIndex) {
+    std::vector<unsigned char> bytesIV = hexStringToBytesVec(b);
     for (int i = 0; i < 16; i++) {
-        a[blockIndex + i] ^= b[i];
+        a[blockIndex + i] ^= bytesIV[i];
     }
 }
 

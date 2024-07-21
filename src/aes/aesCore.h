@@ -47,6 +47,7 @@ private:
 	void subWord(unsigned char temp[4]);
 	void rcon(unsigned char temp[4], int round);
 	
+	friend class AES_Functions;
 public:
 
 	explicit AES(const std::string& key);
@@ -60,19 +61,17 @@ public:
 
 	void encryptBlock(unsigned char* input);
 	void decryptBlock(unsigned char* input);
-
-	friend class TestAesFunctions;
 };
 
 // Friend class to test components of AES class
-class TestAesFunctions {
+class AES_Functions {
 private:
 	static const unsigned int Nb = 16; // Block size
 	AES aesObject;
 	unsigned char roundKey[Nb * 15]; // Array to hold round key
 public:
 
-	TestAesFunctions() : aesObject("10a58869d74be5a374cf867cfb473859") {
+	AES_Functions() : aesObject("10a58869d74be5a374cf867cfb473859") {
         aesObject.keyExpansion("10a58869d74be5a374cf867cfb473859", roundKey);
     }
 

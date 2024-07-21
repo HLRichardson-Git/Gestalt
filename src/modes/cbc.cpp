@@ -14,6 +14,8 @@
  * - NIST Special Publication SP800-38A: "Recommendation for Block Cipher Modes of Operation" (https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf)
  */
 
+#include <iostream>
+
 #include "modes.h"
 
 #include "../../tools/utils.h"
@@ -43,28 +45,29 @@
  * In CBC encryption, forward cipher operations cannot be performed in parallel.
  */
 
-template<typename BlockCipher>
-std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock) {
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher, BlockType> encryptBlock) {
     size_t msgLen = msg.length();
-	size_t paddedMsgLen = msgLen + 16 - (msgLen % 16);
-	unsigned char* input = new unsigned char[paddedMsgLen];
+	size_t paddedMsgLen = msgLen + BlockSize - (msgLen % BlockSize);
+
+	BlockType* input = new BlockType[paddedMsgLen];
 	memcpy(input, msg.c_str(), msgLen);
 
-	applyPCKS7Padding(input, msgLen, paddedMsgLen);
+	PaddingFunc(input, msgLen, paddedMsgLen);
 
-	// Create an instance of the block cipher with the provided key
     BlockCipher cipher(key);
-
-	for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += 16) {
+	
+	for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += BlockSize) {
 		xorBlock(input, iv, blockIndex);
 		(cipher.*encryptBlock)(input + blockIndex);
-		iv.assign(reinterpret_cast<char*>(input + blockIndex), 16);
+		iv.assign(reinterpret_cast<char*>(input + blockIndex), BlockSize);
+		iv = convertToHex(iv);
 	}
 
-	msg.assign(reinterpret_cast<char*>(input), paddedMsgLen);
+	std::string hexResult = toHex(reinterpret_cast<const unsigned char*>(input), paddedMsgLen);
 
 	delete[] input;
-	return msg;
+	return hexResult;
 }
 
 /*
@@ -90,10 +93,12 @@ std::string encryptCBC(std::string& msg, std::string key, std::string iv, functi
  * In CBC decryption, multiple inverse cipher operations can be performed in parallel.
  */
 
-template<typename BlockCipher>
-std::string decryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock) {
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string decryptCBC(std::string& hexMsg, std::string key, std::string iv, function<BlockCipher, BlockType> decryptBlock) {
+	std::string msg = fromHex(hexMsg);
+
     size_t msgLen = msg.length();
-	unsigned char* input = new unsigned char[msgLen];
+	BlockType* input = new BlockType[msgLen];
 	memcpy(input, msg.c_str(), msgLen);
 
 	std::string tmp = "";
@@ -101,15 +106,16 @@ std::string decryptCBC(std::string& msg, std::string key, std::string iv, functi
 	// Create an instance of the block cipher with the provided key
     BlockCipher cipher(key);
 
-	for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += 16) {
-		tmp.assign(reinterpret_cast<char*>(input + blockIndex), 16);
+	for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += BlockSize) {
+		tmp.assign(reinterpret_cast<char*>(input + blockIndex), BlockSize);
+		tmp = convertToHex(tmp);
 		(cipher.*decryptBlock)(input + blockIndex);
 		xorBlock(input, iv, blockIndex);
 		iv = tmp;
 	}
 
 	size_t origMsgLen = msgLen - static_cast<size_t>(input[msgLen - 1]);
-	removePCKS7Padding(input, origMsgLen, msgLen);
+	PaddingFunc(input, origMsgLen, msgLen);
 
 	msg.assign(reinterpret_cast<char*>(input), origMsgLen);
 
@@ -117,5 +123,5 @@ std::string decryptCBC(std::string& msg, std::string key, std::string iv, functi
 	return msg;
 }
 
-template std::string encryptCBC<AES>(std::string&, std::string, std::string, function<AES>);
-template std::string decryptCBC<AES>(std::string&, std::string, std::string, function<AES>);
+template std::string encryptCBC<AES, unsigned char, 16, applyPCKS7Padding>(std::string&, std::string, std::string, function<AES, unsigned char>);
+template std::string decryptCBC<AES, unsigned char, 16, removePCKS7Padding>(std::string&, std::string, std::string, function<AES, unsigned char>);
