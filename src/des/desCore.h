@@ -12,9 +12,7 @@
 
 #pragma once
 
-#include <string>
 #include <array>
-#include <vector>
 
 #include "../../tools/utils.h"
 
@@ -52,3 +50,6 @@ std::vector<uint64_t> stringToBlocks(const std::string& str);
 std::vector<uint64_t> hexStringToBlocks(const std::string& hex);
 std::string blocksToHexString(const std::vector<uint64_t>& blocks);
 std::string blocksToString(const std::vector<uint64_t>& blocks);
+
+void validateKey(const std::string& key);
+void validateKeys(const std::string& key1, const std::string& key2, const std::string& key3);

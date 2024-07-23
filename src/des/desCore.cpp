@@ -10,11 +10,11 @@
  * This file contains the implementation of Gestalts DES security functions.
  */
 
-#include <iostream>
 #include <iomanip>
 #include <string>
 #include <bitset>
 #include <sstream>
+#include <vector>
 
 #include "desCore.h"
 #include "desConstants.h"
@@ -74,26 +74,6 @@ uint32_t DES::f(uint32_t rightChunk, size_t round) {
     return permute(sboxSubstitution(expandedChunk ^ roundKeys[round]), P, 32, P_SIZE);
 }  
 
-/*uint64_t DES::encryptBlock(uint64_t block) {
-    block = permute(block, IP, DES_BLOCK_SIZE, IP_SIZE); // Initial permutation
-
-    uint32_t left = (block >> 32) & 0xFFFFFFFF;
-    uint32_t right = block & 0xFFFFFFFF;
-
-    for (size_t round = 0; round < DES_NUM_OF_ROUNDS - 1; round++) {
-        uint32_t temp = left ^ f(right, round);
-
-        left = right;
-        right = temp;
-    }
-
-    // Final round without swapping halves
-    left ^= f(right, DES_NUM_OF_ROUNDS - 1);
-    block = (static_cast<uint64_t>(left) << 32) | right;
-
-    return permute(block, FP, DES_BLOCK_SIZE, FP_SIZE); // Final permutation
-}*/
-
 uint64_t DES::encryptBlock(uint64_t block) {
     block = permute(block, IP, DES_BLOCK_SIZE, IP_SIZE); // Initial permutation
 
@@ -133,26 +113,6 @@ uint64_t DES::decryptBlock(uint64_t block) {
 
     return permute(block, FP, DES_BLOCK_SIZE, FP_SIZE); // Final permutation
 }
-
-/*void applyPKCS5Padding(uint64_t* input, size_t msgLen, size_t paddedLen) {
-    unsigned char paddingValue = paddedLen - msgLen;
-    for (size_t i = msgLen; i < paddedLen; ++i) {
-        reinterpret_cast<unsigned char*>(input)[i] = paddingValue;
-    }
-}
-void applyPKCS5Padding(uint64_t* input, size_t msgLen, size_t paddedLen) {
-    // Calculate the number of elements in the last block
-    int elementsInLastBlock = 8 - (msgLen % 8);
-    unsigned char paddingValue = static_cast<unsigned char>(elementsInLastBlock);
-    // Pad the message with the padding value
-    for (size_t i = msgLen; i < paddedLen; i++) {
-        input[i] = paddingValue;
-    }
-}
-
-std::string desEncryptECB(std::string& msg, const std::string& key) {
-    return encryptECB<DES, uint64_t, 8, applyPKCS5Padding>(msg, key, &DES::encryptBlock);
-}*/
 
 std::string applyPCKS5Padding(const std::string& data) {
     size_t blockSize = 8;
@@ -241,4 +201,26 @@ std::string blocksToString(const std::vector<uint64_t>& blocks) {
         }
     }
     return str;
+}
+
+void validateKey(const std::string& key) {
+    if (key.size() != 16) {
+        throw std::invalid_argument("DES key must be 8 bytes.");
+    }
+}
+
+void validateKeys(const std::string& key1, const std::string& key2, const std::string& key3) {
+    if (key1.size() != 16 || key2.size() != 16 || key3.size() != 16) {
+        throw std::invalid_argument("Each DES key must be 8 bytes.");
+    }
+
+    bool isThreeKey = (key1 != key2 && key1 != key3 && key2 != key3);
+    bool isTwoKey = (key1 == key3 && key1 != key2);
+
+    if (!isThreeKey && !isTwoKey) {
+        throw std::invalid_argument(
+            "Invalid keys: for 3-key 3DES, all keys must be distinct; "
+            "for 2-key 3DES, key1 must equal key3 and key1 must be distinct from key2."
+        );
+    }
 }
