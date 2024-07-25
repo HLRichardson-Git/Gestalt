@@ -154,13 +154,56 @@ While the prerequisites above must be satisfied prior to having your pull reques
 ### Cpp Styleguide
 
 * **Variables** should be camelCase
+    ```cpp
+    int someNumber = 0;
+    ```
 * **Constants** use ALL_CAPS_WITH_UNDERSCORES
+    ```cpp
+    const int SOME_CONSTANT_NUMBER = 0;
+    ```
 * **Functions** use camelCase for function names, and use verbs to describe actions.
     ```cpp
     void calculateArea();
     ```
-* **Classes & Structs** use PascalCase
+* **Classes & Structs** use PascalCase, and private should be first.
+    ```cpp
+    class SomeClass {
+    private:
+      // private functions/ variables
+    public:
+      // public functions/ variables
+    }
+    ```
 * **Indentions over spaces**
+    ```cpp
+    // Do:
+    class ExampleClass {
+    public:
+        void exampleFunction() {
+            int value1 = 10;
+            int longValue2 = 20;
+            int value3 = 30;
+
+            if (value1 > 0) {
+                doSomething(); // Proper indentation with tabs or spaces
+            }
+        }
+    };
+
+    // Don't:
+    class SomeClass {
+    public:
+        void exampleFunction() {
+            int value1     = 10;
+            int longValue2 = 20;
+            int value3     = 30;
+
+            if (value1 > 0) {
+                doSomething();    // Indentation mixed with spaces
+            }
+        }
+    };
+    ```
 * **Braces** should be placed on the same line as the statement declaration, and should be used even for single-line blocks.
     ```cpp
     if (condition) {
@@ -177,7 +220,53 @@ While the prerequisites above must be satisfied prior to having your pull reques
     }
     ```
 * **Comments** should use `//` for a single-line comment and `/* */` for multi-line comments with a `*` on each line. Do not use comments to describe everything, if you are writing a comment first ask if you can rewrite variable names to explain an operation.
+  * Single line comment:
+    ```cpp
+    int result = calculateSum(a, b); // Calculate the sum of a and b
+    ```
+  * Multi-line comment:
+    ```cpp
+    /*
+     * This function performs a complex calculation.
+     * It takes two parameters and returns their sum.
+     * The calculation is optimized for performance.
+     */
+    int calculateSum(int a, int b) {
+        return a + b;
+    }
+    ```
+  * Descriptive variables:
+    ```cpp
+    // Before
+    int x; // Result of the calculation
+
+    // After
+    int calculationResult;
+    ```
+  * Avoid redundant comments:
+    ```cpp
+    // Redundant comment
+    int sum = a + b; // Add a and b
+
+    // Improved code without unnecessary comment
+    int sum = a + b;
+    ```
+  * Explain why, no what:
+    ```cpp
+    // Good comment explaining why
+    int result = calculateSum(a, b); // Using calculateSum for precision in floating-point addition
+    ```
 * **Avoid magic numbers** by using named constants instead of raw literals to improve code readability.
+  ```cpp
+    // Do: 
+    const double PI = 3.14159;
+    int radius = 10;
+    double area = PI * radius * radius;
+
+    // Don't:
+    int radius = 10;
+    double area = 3.14159 * radius * radius; // Magic number for Pi
+    ```
 * **Error handling** should always be considered.
 * **Use standard library** when able to, adding additional dependencies should be rare.
 * **Naming** should be clear and explicit. **BUT** if you are implementing a standard algorithm, then the names of variables of the standard shall be used.

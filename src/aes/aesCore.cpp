@@ -418,42 +418,42 @@ void AES::rcon(unsigned char temp[4], int round) {
 }
 
 // Gets roundKey from testAesFunctions class
-const unsigned char* TestAesFunctions::testKeyExpansion() {
+const unsigned char* AES_Functions::testKeyExpansion() {
     return this->roundKey;
 }
 
 // Uses subByte function from AES for testing
-void TestAesFunctions::testSubByte(unsigned char state[Nb]) {
+void AES_Functions::testSubByte(unsigned char state[Nb]) {
     this->aesObject.subByte(state);
 }
 
 // Uses shiftRows function from AES for testing
-void TestAesFunctions::testShiftRows(unsigned char state[Nb]) {
+void AES_Functions::testShiftRows(unsigned char state[Nb]) {
     this->aesObject.shiftRows(state);
 }
 
 // Uses mixColumns function from AES for testing
-void TestAesFunctions::testMixColumns(unsigned char state[Nb]) {
+void AES_Functions::testMixColumns(unsigned char state[Nb]) {
     this->aesObject.mixColumns(state);
 }
 
 // Uses addRoundKey function from AES for testing
-void TestAesFunctions::testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey) {
+void AES_Functions::testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey) {
     this->aesObject.addRoundKey(state, roundKey);
 }
 
 // Uses invSubByte function from AES for testing
-void TestAesFunctions::testInvSubByte(unsigned char state[Nb]) {
+void AES_Functions::testInvSubByte(unsigned char state[Nb]) {
     this->aesObject.invSubByte(state);
 }
 
 // Uses invShiftRows function from AES for testing
-void TestAesFunctions::testInvShiftRows(unsigned char state[Nb]) {
+void AES_Functions::testInvShiftRows(unsigned char state[Nb]) {
     this->aesObject.invShiftRows(state);
 }
 
 // Uses invMixColumns function from AES for testing
-void TestAesFunctions::testInvMixColumns(unsigned char state[Nb]) {
+void AES_Functions::testInvMixColumns(unsigned char state[Nb]) {
     this->aesObject.invMixColumns(state);
 }
 

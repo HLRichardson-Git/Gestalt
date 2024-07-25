@@ -77,6 +77,7 @@ To see more about the supported algorithms check out our [website](https://gesta
 | Algorithm        | Type                 | Description                                                            |
 |------------------|----------------------|------------------------------------------------------------------------|
 | AES          | Symmetric Encryption | Advanced Encryption Standard                         |
+| DES/3DES          | Symmetric Encryption | Data Encryption Standard                         |
 | SHA-1          | Hash Function        | Secure Hash Algorithm                              |
 | SHA-2          | Hash Function        | Secure Hash Algorithm                              |
 | HMAC-SHA1      | Message Authentication Code | HMAC using SHA-1                                                   |
@@ -96,7 +97,7 @@ If you want to read more about using Gestalt the best place to start is the Gest
 
 Using Gestalt is meant to be as simple as possible for developers to quickly use cryptography algorithms. Here are just a couple of examples of using Gestalt:
 
-### Example using AES CBC:
+### Example using AES CBC with 128-bit key:
 
 ```cpp
 #include <gestalt/aes.h>
@@ -104,8 +105,9 @@ Using Gestalt is meant to be as simple as possible for developers to quickly use
 
 int main() {
     std::string key = "10a58869d74be5a374cf867cfb473859"; // 128-bit key
+    std::string iv  = "123456789abcdef123456789abcdef12";
     std::string message = "Hello, Gestalt!";
-    std::string ciphertext = aesEncryptECB(message, key);
+    std::string ciphertext = encryptAESCBC(message, iv, key);
 
     std::cout << "AES-CBC-128: " << ciphertext << std::endl;
 

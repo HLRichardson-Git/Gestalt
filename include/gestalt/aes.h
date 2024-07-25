@@ -12,10 +12,8 @@
 
 #pragma once
 
-#include <string>
+std::string encryptAESECB(std::string msg, std::string key);
+std::string decryptAESECB(std::string msg, std::string key);
 
-std::string aesEncryptECB(std::string msg, std::string key);
-std::string aesDecryptECB(std::string msg, std::string key);
-
-std::string aesEncryptCBC(std::string msg, std::string iv, std::string key);
-std::string aesDecryptCBC(std::string msg, std::string iv, std::string key);
+std::string encryptAESCBC(std::string msg, std::string iv, std::string key);
+std::string decryptAESCBC(std::string msg, std::string iv, std::string key);

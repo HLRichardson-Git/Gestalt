@@ -10,26 +10,24 @@
  * This file contains the implementation of Gestalts AES security functions.
  */
 
+#include <string>
+
 #include <gestalt/aes.h>
 #include "../aes/aesCore.h"
 #include "../modes/modes.h"
 
-std::string aesEncryptECB(std::string msg, std::string key) 
-{
-    return encryptECB<AES>(msg, key, &AES::encryptBlock);
+std::string encryptAESECB(std::string msg, std::string key) {
+    return encryptECB<AES, unsigned char, 16, applyPCKS7Padding>(msg, key, &AES::encryptBlock);
 }
 
-std::string aesDecryptECB(std::string msg, std::string key)
-{
-    return decryptECB<AES>(msg, key, &AES::decryptBlock);
+std::string decryptAESECB(std::string msg, std::string key) {
+    return decryptECB<AES, unsigned char, 16, removePCKS7Padding>(msg, key, &AES::decryptBlock);
 }
 
-std::string aesEncryptCBC(std::string msg, std::string iv, std::string key)
-{
-	return encryptCBC<AES>(msg, key, iv, &AES::encryptBlock);
+std::string encryptAESCBC(std::string msg, std::string iv, std::string key) {
+	return encryptCBC<AES, unsigned char, 16, applyPCKS7Padding>(msg, key, iv, &AES::encryptBlock);
 }
 
-std::string aesDecryptCBC(std::string msg, std::string iv, std::string key)
-{
-	return decryptCBC<AES>(msg, key, iv, &AES::decryptBlock);
+std::string decryptAESCBC(std::string msg, std::string iv, std::string key) {
+	return decryptCBC<AES, unsigned char, 16, removePCKS7Padding>(msg, key, iv, &AES::decryptBlock);
 }

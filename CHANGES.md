@@ -11,11 +11,22 @@ appropriate release branch.
 Gestalt Releases
 ----------------
 
+ - [Gestalt 0.6](#gestalt-06)
  - [Gestalt 0.5](#gestalt-05)
  - [Gestalt 0.4](#gestalt-04)
  - [Gestalt 0.3](#gestalt-03)
  - [Gestalt 0.2](#gestalt-02)
  - [Gestalt 0.1](#gestalt-01)
+
+ Gestalt 0.6
+-----------
+
+### Changes between 0.5 and 0.6 [24 Jul 2024]
+
+ * Adds DES-ECB/CBC
+ * Adds 3DES-ECB/CBC
+ * Fixes AES-CBC
+ * Improves testing for AES
 
  Gestalt 0.5
 -----------

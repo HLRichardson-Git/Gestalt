@@ -15,16 +15,42 @@
 
 #include <string>
 #include <cstring>
+#include <iomanip>
+#include <sstream>
 
-template<typename BlockCipher>
-using function = void (BlockCipher::*)(unsigned char*);
+inline std::string toHex(const unsigned char* data, size_t length) {
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (size_t i = 0; i < length; ++i) {
+        ss << std::setw(2) << static_cast<int>(data[i]);
+    }
+    return ss.str();
+}
 
-template<typename BlockCipher>
-std::string encryptECB(std::string& msg, std::string key, function<BlockCipher> encryptBlock);
-template<typename BlockCipher>
-std::string decryptECB(std::string& msg, std::string key, function<BlockCipher> decryptBlock);
+inline std::string fromHex(const std::string& hex) {
+    if (hex.length() % 2 != 0) {
+        throw std::invalid_argument("Hex string must have an even length");
+    }
 
-template<typename BlockCipher>
-std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> encryptBlock);
-template<typename BlockCipher>
-std::string decryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher> decryptBlock);
+    std::string binary;
+    binary.reserve(hex.length() / 2);
+    
+    for (size_t i = 0; i < hex.length(); i += 2) {
+        unsigned char byte = static_cast<unsigned char>(std::stoi(hex.substr(i, 2), nullptr, 16));
+        binary.push_back(byte);
+    }
+
+    return binary;
+}
+template<typename BlockCipher, typename BlockType>
+using function = void (BlockCipher::*)(BlockType*);
+
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string encryptECB(std::string& msg, std::string key, function<BlockCipher, BlockType> encryptBlock);
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string decryptECB(std::string& hexMsg, std::string key, function<BlockCipher, BlockType> decryptBlock);
+
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher, BlockType> encryptBlock);
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string decryptCBC(std::string& hexMsg, std::string key, std::string iv, function<BlockCipher, BlockType> decryptBlock);

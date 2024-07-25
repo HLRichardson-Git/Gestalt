@@ -15,9 +15,13 @@
  */
 
 #include "modes.h"
+#include <iomanip>
+#include <iostream> // for debugging
+#include <sstream>
 
 #include "../../tools/utils.h"
 #include "../aes/aesCore.h"
+#include <gestalt/des.h>
 
 /*
  * Electronic Codebook (ECB) Encryption In-Place:
@@ -37,28 +41,26 @@
  *
  * In ECB encryption, multiple forward cipher functions can be computed in parallel.
  */
-template<typename BlockCipher>
-std::string encryptECB(std::string& msg, std::string key, function<BlockCipher> encryptBlock) {
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string encryptECB(std::string& msg, std::string key, function<BlockCipher, BlockType> encryptBlock) {
     size_t msgLen = msg.length();
-    size_t paddedMsgLen = msgLen + 16 - (msgLen % 16);
-    unsigned char* input = new unsigned char[paddedMsgLen];
+    size_t paddedMsgLen = msgLen + BlockSize - (msgLen % BlockSize);
+
+    BlockType* input = new BlockType[paddedMsgLen];
     memcpy(input, msg.c_str(), msgLen);
 
-    applyPCKS7Padding(input, msgLen, paddedMsgLen);
+    PaddingFunc(input, msgLen, paddedMsgLen);
 
-    // Create an instance of the block cipher with the provided key
     BlockCipher cipher(key);
 
-    // Encrypt each block using the provided encryption function
-    for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += 16) {
+    for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += BlockSize) {
         (cipher.*encryptBlock)(input + blockIndex);
     }
 
-    // Update the message with the encrypted data
-    msg.assign(reinterpret_cast<char*>(input), paddedMsgLen);
+    std::string hexResult = toHex(reinterpret_cast<const unsigned char*>(input), paddedMsgLen);
 
     delete[] input;
-    return msg;
+    return hexResult;
 }
 
 /*
@@ -79,21 +81,23 @@ std::string encryptECB(std::string& msg, std::string key, function<BlockCipher> 
  *
  * In ECB decryption, multiple inverse cipher functions can be computed in parallel.
  */
-template<typename BlockCipher>
-std::string decryptECB(std::string& msg, std::string key, function<BlockCipher> decryptBlock) {
+template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+std::string decryptECB(std::string& hexMsg, std::string key, function<BlockCipher, BlockType> decryptBlock) {\
+    std::string msg = fromHex(hexMsg);
+
 	size_t msgLen = msg.length();
-	unsigned char* input = new unsigned char[msgLen];
+
+	BlockType* input = new BlockType[msgLen];
 	memcpy(input, msg.c_str(), msgLen);
 
-	// Create an instance of the block cipher with the provided key
     BlockCipher cipher(key);
 
-	for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += 16) {
+	for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += BlockSize) {
 		(cipher.*decryptBlock)(input + blockIndex);
 	}
 
 	size_t origMsgLen = msgLen - static_cast<size_t>(input[msgLen - 1]);
-	removePCKS7Padding(input, origMsgLen, msgLen);
+	PaddingFunc(input, origMsgLen, msgLen);
 
 	msg.assign(reinterpret_cast<char*>(input), origMsgLen);
 
@@ -101,5 +105,7 @@ std::string decryptECB(std::string& msg, std::string key, function<BlockCipher> 
     return msg;
 }
 
-template std::string encryptECB<AES>(std::string&, std::string, function<AES>);
-template std::string decryptECB<AES>(std::string&, std::string, function<AES>);
+template std::string encryptECB<AES, unsigned char, 16, applyPCKS7Padding>(std::string&, std::string, function<AES, unsigned char>);
+template std::string decryptECB<AES, unsigned char, 16, removePCKS7Padding>(std::string&, std::string, function<AES, unsigned char>);
+
+//template std::string encryptECB<DES, uint64_t, 8, applyPKCS5Padding>(std::string&, std::string, function<DES, uint64_t>);

@@ -11,7 +11,10 @@
  */
 
 #include "aes.h"
+#include "des.h"
 #include "sha1.h"
 #include "sha2.h"
+#include "hmac_sha1.h"
+#include "hmac_sha2.h"
 #include "ecdsa.h"
 #include "ecdh.h"

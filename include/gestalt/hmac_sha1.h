@@ -15,6 +15,6 @@
 #include <gestalt/sha1.h>
 #include "hmac/hmac.h"
 
-std::string hmacSHA1(const std::string& key, const std::string& input) {
+inline std::string hmacSHA1(const std::string& key, const std::string& input) {
     return HMAC(SHA1).keyedHash(key, input, hashSHA1);
 }
