@@ -6,12 +6,12 @@
 
 /*
  * desTests.cpp
+ *
+ * This file contains the unit tests for the DES (Data Encryption Standard) algorithm implementation.
  */
 
-#include <iostream>
-#include <string>
-#include <bitset>
 #include "gtest/gtest.h"
+#include <bitset>
 
 #include <gestalt/des.h>
 #include "des/desCore.h"
@@ -27,25 +27,20 @@ const std::string multiBlockPT =
     "a veritable tornado sweeping across the plains flattening everything in its path, tossing things up in the air, "
     "ripping them to shreds, crushing them to bits.";
 
-/*
- *        DES-ECB TESTS
- */
 TEST(DES_ECB, encrypt) {
-    std::string ciphertext = desEncryptECB(plaintext, key);
+    std::string ciphertext = encryptDESECB(plaintext, key);
     std::string expected = "fca4a0b8cb579ea8cc830fcf3a5ee2dc";
-
     EXPECT_EQ(ciphertext, expected);
 }
 
 TEST(DES_ECB, decrypt) {
     std::string ciphertext = "fca4a0b8cb579ea8cc830fcf3a5ee2dc";
-    std::string decryptedPlaintext = desDecryptECB(ciphertext, key);
-
+    std::string decryptedPlaintext = decryptDESECB(ciphertext, key);
     EXPECT_EQ(decryptedPlaintext, plaintext);
 }
 
 TEST(DES_ECB, multiBlock) {
-	std::string ciphertext = desEncryptECB(multiBlockPT, key);
+	std::string ciphertext = encryptDESECB(multiBlockPT, key);
 	std::string expected = 
         "e4e386dd911d20a6d3e3adf15c870dd7ee4ab9c3ead6258b3b0f37a400b2d2fa96aedd4e5bbae6a93c85adaa877d90a835d98b69fc4d3"
         "efcd3775123fc812108c28048094fd20758d854bedfb6e8eba0ea286cbf4d67e35aca2577b7a87910c8aaae65bad41491a86e62ebf879"
@@ -54,29 +49,24 @@ TEST(DES_ECB, multiBlock) {
         "b6b49526816cdaef970d685a97fd7526eae0c7e000dd9d88763daee8569325f7bcaa2f78734408cbcd375d0049da255b286cf13f8e5a";
 	EXPECT_EQ(ciphertext, expected); 
 
-	std::string descryptedPlaintext = desDecryptECB(ciphertext, key);
+	std::string descryptedPlaintext = decryptDESECB(ciphertext, key);
 	EXPECT_EQ(descryptedPlaintext, multiBlockPT); 
 }
 
-/*
- *        TRIPLE DES-ECB TESTS
- */
 TEST(TDES_ECB, encrypt) {
-    std::string ciphertext = des3EncryptECB(plaintext, key, key2, key3);
+    std::string ciphertext = encrypt3DESECB(plaintext, key, key2, key3);
     std::string expected = "8b3a49695d593b3633f5d3a48c4de370";
-
     EXPECT_EQ(ciphertext, expected);
 }
 
 TEST(TDES_ECB, decrypt) {
     std::string ciphertext = "8b3a49695d593b3633f5d3a48c4de370";
-    std::string decryptedPlaintect = des3DecryptECB(ciphertext, key, key2, key3);
-
+    std::string decryptedPlaintect = decrypt3DESECB(ciphertext, key, key2, key3);
     EXPECT_EQ(decryptedPlaintect, plaintext);
 }
 
 TEST(TDES_ECB, multiBlock) {
-	std::string ciphertext = des3EncryptECB(multiBlockPT, key, key2, key3);
+	std::string ciphertext = encrypt3DESECB(multiBlockPT, key, key2, key3);
 	std::string expected = 
         "4c730a6b6936f51cbed96f7930f4fc897074d5a6e4112e51f13a47639667890533800ac69dd821ef35ce239a6a04483741b3fc3fe252b"
         "9d18705b9c8c4457d3a617e09d07473a33be5f7ab899427be78bdfc1dc0fc9780e4e5e7cb3b33bbd8edccbf7ef518c9f22581d662c385"
@@ -85,29 +75,24 @@ TEST(TDES_ECB, multiBlock) {
         "be345d2fd7b756ccd38103a2564247f20ab8e54e8d8c0ccc3a1891fe2c90791123a1de0f1326e0e3d0a9ddc229092212f4f736e24010";
 	EXPECT_EQ(ciphertext, expected); 
 
-	std::string descryptedPlaintext = des3DecryptECB(ciphertext, key, key2, key3);
+	std::string descryptedPlaintext = decrypt3DESECB(ciphertext, key, key2, key3);
 	EXPECT_EQ(descryptedPlaintext, multiBlockPT); 
 }
 
-/*
- *        DES-CBC TESTS
- */
 TEST(DES_CBC, encrypt) {
-    std::string ciphertext = desEncryptCBC(plaintext, nonce, key);
+    std::string ciphertext = encryptDESCBC(plaintext, nonce, key);
     std::string expected = "95a32bce039b97b209e35f005da93c0c";
-
     EXPECT_EQ(ciphertext, expected);
 }
 
 TEST(DES_CBC, decrypt) {
     std::string ciphertext = "95a32bce039b97b209e35f005da93c0c";
-    std::string decryptedPlaintext = desDecryptCBC(ciphertext, nonce, key);
-
+    std::string decryptedPlaintext = decryptDESCBC(ciphertext, nonce, key);
     EXPECT_EQ(decryptedPlaintext, plaintext);
 }
 
 TEST(DES_CBC, multiBlock) {
-	std::string ciphertext = desEncryptCBC(multiBlockPT, nonce, key);
+	std::string ciphertext = encryptDESCBC(multiBlockPT, nonce, key);
 	std::string expected = 
         "1e7f5cb164f834ccf552938010224f1fe3331b853a236e2ee2712cd49d88319acb7fe7e7ae8279ba44b05cb8146d9a4cf28e84606191e"
         "cdcd415320f35ef5919a9d8c79c8885a93087c76748c029be3dbfe5a50f163f1cd04a50f18da13e4e4e8fb9500667b965d12d8f786ca9"
@@ -116,29 +101,24 @@ TEST(DES_CBC, multiBlock) {
         "088989990aabee547975d7cd56576ab79f038db9154c6d10054118fddace20b66d7debb753f00144676758a8eb25306207aeca21159e";
 	EXPECT_EQ(ciphertext, expected); 
 
-	std::string descryptedPlaintext = desDecryptCBC(ciphertext, nonce, key);
+	std::string descryptedPlaintext = decryptDESCBC(ciphertext, nonce, key);
 	EXPECT_EQ(descryptedPlaintext, multiBlockPT); 
 }
 
-/*
- *        TRIPLE DES-CBC TESTS
- */
 TEST(TDES_CBC, encrypt) {
-    std::string ciphertext = des3EncryptCBC(plaintext, nonce, key, key2, key3);
+    std::string ciphertext = encrypt3DESCBC(plaintext, nonce, key, key2, key3);
     std::string expected = "ee6edc51099b7783bf57f381d620957c";
-
     EXPECT_EQ(ciphertext, expected);
 }
 
 TEST(TDES_CBC, decrypt) {
     std::string ciphertext = "ee6edc51099b7783bf57f381d620957c";
-    std::string decryptedPlaintext = des3DecryptCBC(ciphertext, nonce, key, key2, key3);
-
+    std::string decryptedPlaintext = decrypt3DESCBC(ciphertext, nonce, key, key2, key3);
     EXPECT_EQ(decryptedPlaintext, plaintext);
 }
 
 TEST(TDES_CBC, multiBlock) {
-	std::string ciphertext = des3EncryptCBC(multiBlockPT, nonce, key, key2, key3);
+	std::string ciphertext = encrypt3DESCBC(multiBlockPT, nonce, key, key2, key3);
 	std::string expected = 
         "bda177e57c5e45bf91b02e7824b9cd8b3b4fa15977ad9c8e01f9679c6c6695a3ae14338de9ef5dc82a55cb65d5b135878e93e3b1b22ee"
         "823c52ed330aaeade44b3d5d09958f75f95f881c5dc189beb2b72422436aca2b2de21edb9c580d365947b5709850b4bc0248b58c770c6"
@@ -147,31 +127,31 @@ TEST(TDES_CBC, multiBlock) {
         "3f024b57dcf1930fcbdcfec724e48a702a87d27a579b96e595b5f5b6c4a56b0727f0b1f530ebff2186d839f1412bcecf3b7a3c4b1e3c";
 	EXPECT_EQ(ciphertext, expected); 
 
-	std::string descryptedPlaintext = des3DecryptCBC(ciphertext, nonce, key, key2, key3);
+	std::string descryptedPlaintext = decrypt3DESCBC(ciphertext, nonce, key, key2, key3);
 	EXPECT_EQ(descryptedPlaintext, multiBlockPT); 
 }
 
 TEST(DES_Erros, singleKeyInvalidSize) {
     std::string smallKey = "abc";
-    EXPECT_THROW(desEncryptECB(plaintext, smallKey), std::invalid_argument);
+    EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
 
     std::string largeKey = "10a58869d74be5a374cf867cfb473859";
-    EXPECT_THROW(desEncryptECB(plaintext, smallKey), std::invalid_argument);
+    EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
 }
 
 TEST(TDES_Erros, invalidKeyArrangement) {
     std::string largeKey = "10a58869d74be5a374cf867cfb473859";
-    EXPECT_THROW(des3EncryptECB(plaintext, largeKey, key2, key3), std::invalid_argument);
-    EXPECT_THROW(des3EncryptECB(plaintext, key, key, key3), std::invalid_argument);
-    EXPECT_THROW(des3EncryptECB(plaintext, key, key2, key2), std::invalid_argument);
-    EXPECT_THROW(des3EncryptECB(plaintext, key, key, key), std::invalid_argument);
+    EXPECT_THROW(encrypt3DESECB(plaintext, largeKey, key2, key3), std::invalid_argument);
+    EXPECT_THROW(encrypt3DESECB(plaintext, key, key, key3), std::invalid_argument);
+    EXPECT_THROW(encrypt3DESECB(plaintext, key, key2, key2), std::invalid_argument);
+    EXPECT_THROW(encrypt3DESECB(plaintext, key, key, key), std::invalid_argument);
 }
 
 class DES_Functions {
 private:
     DES des;
 public:
-    explicit DES_Functions(std::string hexKey) : des(hexKey) {};
+    explicit DES_Functions(const std::string& hexKey) : des(hexKey) {};
 
     std::string getKey(size_t index) { return std::bitset<DES_KEY_SIZE>(des.roundKeys[index]).to_string(); };
     std::string initialPermutation(uint64_t in) { return printIntToBinary(des.permute(in, IP, DES_BLOCK_SIZE, IP_SIZE)); };
@@ -202,8 +182,7 @@ const std::string expectedExpandedKey[16] = {
     "110100110011101000101101001000111000110101101000"
 };
 
-TEST(DES_Functions, keyExpansion)
-{
+TEST(DES_Functions, keyExpansion) {
     DES_Functions tester("752878397493CB70");
 
     for (size_t i = 0; i < 16; i++) {
@@ -211,8 +190,7 @@ TEST(DES_Functions, keyExpansion)
     }
 }
 
-TEST(DES_Functions, encryptBlock)
-{
+TEST(DES_Functions, encryptBlock) {
     DES tester("752878397493CB70");
     uint64_t plaintext = 0x1122334455667788;
     uint64_t ciphertext = tester.encryptBlock(plaintext);
@@ -221,8 +199,7 @@ TEST(DES_Functions, encryptBlock)
     EXPECT_EQ(ciphertext, expected);
 }
 
-TEST(DES_Functions, decryptBlock)
-{
+TEST(DES_Functions, decryptBlock) {
     DES tester("752878397493CB70");
     uint64_t ciphertext = 0xB5219EE81AA7499D;
     uint64_t plaintext = tester.decryptBlock(ciphertext);
@@ -231,8 +208,7 @@ TEST(DES_Functions, decryptBlock)
     EXPECT_EQ(plaintext, expected);
 }
 
-TEST(DES_Functions, initialPermutation)
-{
+TEST(DES_Functions, initialPermutation) {
     DES_Functions tester("752878397493CB70");
     uint64_t input = 0x1122334455667788;
     std::string output =  tester.initialPermutation(input);
@@ -241,8 +217,7 @@ TEST(DES_Functions, initialPermutation)
     EXPECT_EQ(output, expected);
 }
 
-TEST(DES_Functions, expansion)
-{
+TEST(DES_Functions, expansion) {
     DES_Functions tester("752878397493CB70");
     uint32_t input = 0x80668066;
     std::string output =  tester.expansion(input);
@@ -251,41 +226,34 @@ TEST(DES_Functions, expansion)
     EXPECT_EQ(output.substr(16, output.size()), expected);
 }
 
-TEST(DES_Functions, substitution)
-{
+TEST(DES_Functions, substitution) {
     DES_Functions tester("752878397493CB70");
     uint64_t input = 0x78AFE2065547;
     std::string output =  tester.sbox(input);
     std::string expected = "01111011110001101110001001011000";
 
     EXPECT_EQ(output, expected);
-    //EXPECT_EQ(output, expected);
 }
 
-TEST(DES_Functions, permutation)
-{
+TEST(DES_Functions, permutation) {
     DES_Functions tester("752878397493CB70");
     uint32_t input = 0x7BC6E258;
     std::string output =  tester.permutation(input);
     std::string expected = "01001011011111011101001110000010";
 
     EXPECT_EQ(output, expected);
-    //EXPECT_EQ(output, expected);
 }
 
-TEST(DES_Functions, f)
-{
+TEST(DES_Functions, f) {
     DES_Functions tester("752878397493CB70");
     uint32_t input = 0x80668066;
     std::string output =  tester.f(input);
     std::string expected = "01001011011111011101001110000010";
 
     EXPECT_EQ(output, expected);
-    //EXPECT_EQ(output, expected);
 }
 
-TEST(DES_Functions, finalPermutation)
-{
+TEST(DES_Functions, finalPermutation) {
     DES_Functions tester("752878397493CB70");
     uint64_t input = 0x4895A5E3AD2BDC34;
     std::string output =  tester.finalPermutation(input);

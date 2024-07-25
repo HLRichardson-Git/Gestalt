@@ -15,7 +15,7 @@
 #include <gestalt/des.h>
 #include "des/desCore.h"
 
-std::string desEncryptECB(const std::string& plaintext, const std::string& key) {
+std::string encryptDESECB(const std::string& plaintext, const std::string& key) {
     validateKey(key);
     DES des(key);
 
@@ -30,7 +30,7 @@ std::string desEncryptECB(const std::string& plaintext, const std::string& key) 
     return blocksToHexString(encryptedBlocks);
 }
 
-std::string desDecryptECB(const std::string& ciphertext, const std::string& key) {
+std::string decryptDESECB(const std::string& ciphertext, const std::string& key) {
     validateKey(key);
     DES des(key);
 
@@ -46,7 +46,7 @@ std::string desDecryptECB(const std::string& ciphertext, const std::string& key)
     return removePKCS5Padding(decryptedString);
 }
 
-std::string des3EncryptECB(
+std::string encrypt3DESECB(
     const std::string& plaintext, 
     const std::string& key1, 
     const std::string& key2, 
@@ -71,7 +71,7 @@ std::string des3EncryptECB(
     return blocksToHexString(encryptedBlocks);
 }
 
-std::string des3DecryptECB(
+std::string decrypt3DESECB(
     const std::string& ciphertext, 
     const std::string& key1, 
     const std::string& key2, 
@@ -97,7 +97,7 @@ std::string des3DecryptECB(
     return removePKCS5Padding(decryptedString);
 }
 
-std::string desEncryptCBC(const std::string& plaintext, const std::string& iv, const std::string& key) {
+std::string encryptDESCBC(const std::string& plaintext, const std::string& iv, const std::string& key) {
     validateKey(key);
     DES des(key);
 
@@ -118,7 +118,7 @@ std::string desEncryptCBC(const std::string& plaintext, const std::string& iv, c
     return blocksToHexString(encryptedBlocks);
 }
 
-std::string desDecryptCBC(const std::string& ciphertext, const std::string& iv, const std::string& key) {
+std::string decryptDESCBC(const std::string& ciphertext, const std::string& iv, const std::string& key) {
     validateKey(key);
     DES des(key);
 
@@ -139,7 +139,7 @@ std::string desDecryptCBC(const std::string& ciphertext, const std::string& iv, 
     return removePKCS5Padding(decryptedString);
 }
 
-std::string des3EncryptCBC(
+std::string encrypt3DESCBC(
     const std::string& plaintext,
     const std::string& iv, 
     const std::string& key1, 
@@ -172,7 +172,7 @@ std::string des3EncryptCBC(
     return blocksToHexString(encryptedBlocks);
 }
 
-std::string des3DecryptCBC(
+std::string decrypt3DESCBC(
     const std::string& ciphertext,
     const std::string& iv, 
     const std::string& key1, 

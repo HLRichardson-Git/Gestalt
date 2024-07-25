@@ -12,31 +12,31 @@
 
 #pragma once
 
-std::string desEncryptECB(const std::string& plaintext, const std::string& key);
-std::string desDecryptECB(const std::string& ciphertext, const std::string& key);
-std::string des3EncryptECB(
+std::string encryptDESECB(const std::string& plaintext, const std::string& key);
+std::string decryptDESECB(const std::string& ciphertext, const std::string& key);
+std::string encrypt3DESECB(
     const std::string& plaintext, 
     const std::string& key1, 
     const std::string& key2, 
     const std::string& key3
 );
-std::string des3DecryptECB(
+std::string decrypt3DESECB(
     const std::string& ciphertext, 
     const std::string& key1, 
     const std::string& key2, 
     const std::string& key3
 );
 
-std::string desEncryptCBC(const std::string& plaintext, const std::string& iv, const std::string& key);
-std::string desDecryptCBC(const std::string& ciphertext, const std::string& iv, const std::string& key);
-std::string des3EncryptCBC(
+std::string encryptDESCBC(const std::string& plaintext, const std::string& iv, const std::string& key);
+std::string decryptDESCBC(const std::string& ciphertext, const std::string& iv, const std::string& key);
+std::string encrypt3DESCBC(
     const std::string& plaintext,
     const std::string& iv, 
     const std::string& key1, 
     const std::string& key2, 
     const std::string& key3
 );
-std::string des3DecryptCBC(
+std::string decrypt3DESCBC(
     const std::string& ciphertext,
     const std::string& iv, 
     const std::string& key1, 
