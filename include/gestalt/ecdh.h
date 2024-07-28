@@ -32,6 +32,8 @@ private:
     Point peerPublicKey;
 
     std::string keyToString(const Point& point) const;
+
+    friend class ECDH_Test;
 public:
 
     ECDH() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
@@ -46,6 +48,4 @@ public:
     void getPublicKey(const Point& givenPublicKey);
     std::string computeSharedSecret();
     std::string computeSharedSecret(const Point& peerPublicKey);
-
-    friend class TestECDH;
 };

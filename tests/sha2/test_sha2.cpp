@@ -14,7 +14,7 @@
 #include <string>
 
 #include <gestalt/sha2.h>
-#include "vectors/sha2TestVectors.h"
+#include "vectors/vectors_sha2.h"
 
 const bool skipLargeHash = true; // This test can take a bit, so set to false if you'd like to test.
 

@@ -5,7 +5,7 @@
  */
 
 /*
- * eccTests.cpp
+ * test_ecc_functions.cpp
  *
  * This file containts the unit tests for the ECC (Elliptic Curve Cryptography) Gestalt arithmetic functions. 
  * These tests cover various scenarios including point addition, doubling, and multiplication by a scalar.
@@ -13,15 +13,11 @@
  * 
  */
 
+#include "gtest/gtest.h"
+
 #include "ecc/ecc.h"
 
-#include "gtest/gtest.h"
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <tuple>
-
-class TestECC : public ::testing::Test {
+class ECC_Test : public ::testing::Test {
 private:
     ECC ecc;
 protected:
@@ -38,8 +34,7 @@ protected:
     std::string isValidKeyPair(const KeyPair& K) { return ecc.isValidKeyPair(K); };
 };
 
-TEST_F(TestECC, testPointAddition)
-{
+TEST_F(ECC_Test, testPointAddition) {
     Point P("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
             "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
     Point Q("0xd901df95be82c8953b83e569b9b63b0b52e6ee9a2e6fc400e852090e3f6fec69", 
@@ -54,8 +49,7 @@ TEST_F(TestECC, testPointAddition)
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
-TEST_F(TestECC, identityPointAddition)
-{
+TEST_F(ECC_Test, identityPointAddition) {
     Point P("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
             "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
     Point Q("0x0", "0x0");
@@ -69,8 +63,7 @@ TEST_F(TestECC, identityPointAddition)
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
-TEST_F(TestECC, testPointDouble)
-{
+TEST_F(ECC_Test, testPointDouble) {
     Point P("0x1a9b50177520875bf4bdeea006703f39066bf2126a0e19695639ebd71d27890e", 
             "0x4db72d506fb060bca6b2fd5d5806d65e00b675d146cf3f89d93941612bf8dcb9");
 
@@ -83,8 +76,7 @@ TEST_F(TestECC, testPointDouble)
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
-TEST_F(TestECC, testPointMultiplication)
-{
+TEST_F(ECC_Test, testPointMultiplication) {
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
@@ -99,8 +91,7 @@ TEST_F(TestECC, testPointMultiplication)
     EXPECT_TRUE(mpz_cmp(R.y, expected.y) == 0);
 }
 
-TEST_F(TestECC, FieldElementToInteger) 
-{
+TEST_F(ECC_Test, FieldElementToInteger) {
     BigInt result;
     BigInt fieldElement = "0x123456789ABCDEF";
     fieldElementToInteger(fieldElement.n, result.n);
@@ -108,8 +99,7 @@ TEST_F(TestECC, FieldElementToInteger)
     EXPECT_TRUE(mpz_cmp(fieldElement.n, result.n) == 0);
 }
 
-TEST_F(TestECC, isInDomainRange)
-{
+TEST_F(ECC_Test, isInDomainRange) {
     BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
     EXPECT_TRUE(isInDomainRange(P.n));
 
@@ -117,8 +107,7 @@ TEST_F(TestECC, isInDomainRange)
     EXPECT_FALSE(isInDomainRange(Q.n));
 }
 
-TEST_F(TestECC, pointIsIdentiy)
-{
+TEST_F(ECC_Test, pointIsIdentiy) {
     Point P("0x0", "0x0");
     EXPECT_TRUE(isIdentityPoint(P));
 
@@ -126,8 +115,7 @@ TEST_F(TestECC, pointIsIdentiy)
     EXPECT_FALSE(isIdentityPoint(Q));
 }
 
-TEST_F(TestECC, pointIsOnCurve)
-{
+TEST_F(ECC_Test, pointIsOnCurve) {
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
     EXPECT_TRUE(isPointOnCurve(P));
@@ -136,8 +124,7 @@ TEST_F(TestECC, pointIsOnCurve)
     EXPECT_FALSE(isPointOnCurve(Q));
 }
 
-TEST_F(TestECC, isValidPublicKey)
-{
+TEST_F(ECC_Test, isValidPublicKey) {
     Point validPublicKey("0xffc5679a309953b590ef4a3601a5598e83893017527859dd6312ec1177f53749", 
                          "0xe8ba1c3fa2e5c9d3312e93361b08662d81cb540c1b08a7e0e17b1b5651462584");
     std::cout << isValidPublicKey(validPublicKey) << std::endl;
@@ -158,8 +145,7 @@ TEST_F(TestECC, isValidPublicKey)
     EXPECT_EQ(mpz_cmp_ui(result.y, 0), 0);
 }
 
-TEST_F(TestECC, isValidKeyPair)
-{
+TEST_F(ECC_Test, isValidKeyPair) {
     Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair validKeyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
@@ -174,8 +160,7 @@ TEST_F(TestECC, isValidKeyPair)
     EXPECT_TRUE(isValidKeyPair(mismatchKeyPair) == "Error: Pair-wise consistency check failed.");
 }
 
-TEST_F(TestECC, setKeyPair)
-{
+TEST_F(ECC_Test, setKeyPair) {
     // Uninitated is set to 0
     KeyPair uninitializedKeyPair;
     EXPECT_TRUE(isValidKeyPair(uninitializedKeyPair) == "Error: Given Public Key is the Identity element.");
@@ -202,8 +187,7 @@ TEST_F(TestECC, setKeyPair)
     EXPECT_TRUE(true);
 }
 
-TEST(TestECC_Objects, BigIntInitialization)
-{
+TEST(ECC_Objects, BigIntInitialization) {
     // Check Hexidecimal value initialization
     BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
@@ -232,8 +216,7 @@ TEST(TestECC_Objects, BigIntInitialization)
     mpz_clears(t, NULL);
 }
 
-TEST(TestECC_Objects, BigIntAssignmentOperator)
-{
+TEST(ECC_Objects, BigIntAssignmentOperator) {
     BigInt P = "0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577";
 
     BigInt Q = P;
@@ -242,8 +225,7 @@ TEST(TestECC_Objects, BigIntAssignmentOperator)
     EXPECT_TRUE(mpz_cmp(P.n, Q.n) == 0);
 }
 
-TEST(TestECC_Objects, PointInitialization)
-{
+TEST(ECC_Objects, PointInitialization) {
     // Check Hexidecimal value initialization
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
@@ -280,8 +262,7 @@ TEST(TestECC_Objects, PointInitialization)
     mpz_clears(x, y, n, NULL);
 }
 
-TEST(TestECC_Objects, PointAssignmentOperator)
-{
+TEST(ECC_Objects, PointAssignmentOperator) {
     Point P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
             "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 
@@ -291,8 +272,7 @@ TEST(TestECC_Objects, PointAssignmentOperator)
     EXPECT_TRUE(mpz_cmp(P.y, Q.y) == 0);
 }
 
-TEST(TestECC_Objects, KeyPairInitialization)
-{
+TEST(ECC_Objects, KeyPairInitialization) {
     // Check Hexidecimal value initialization
     Point publicKey1("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
@@ -336,8 +316,7 @@ TEST(TestECC_Objects, KeyPairInitialization)
     mpz_clears(x, y, n, NULL);
 }
 
-TEST(TestECC_Objects, KeyPairAssignmentOperator)
-{
+TEST(ECC_Objects, KeyPairAssignmentOperator) {
     Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair P("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
@@ -349,8 +328,7 @@ TEST(TestECC_Objects, KeyPairAssignmentOperator)
     EXPECT_TRUE(mpz_cmp(P.publicKey.y, Q.publicKey.y) == 0);
 }
 
-TEST(TestECC_Objects, SignatureInitialization)
-{
+TEST(ECC_Objects, SignatureInitialization) {
     // Check Hexidecimal value initialization
     Signature P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
                 "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
@@ -387,8 +365,7 @@ TEST(TestECC_Objects, SignatureInitialization)
     mpz_clears(r, s, n, NULL);
 }
 
-TEST(TestECC_Objects, SignatureAssignmentOperator)
-{
+TEST(ECC_Objects, SignatureAssignmentOperator) {
     Signature P("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577", 
                 "0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2");
 

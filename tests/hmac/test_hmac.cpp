@@ -5,7 +5,7 @@
  */
 
 /*
- * hmacTests.cpp
+ * test_hmac.cpp
  *
  * This file contains the unit tests for the HMAC (Keyed Secure Hashing Algorithm) algorithm implementation.
  */
@@ -15,7 +15,7 @@
 
 #include <gestalt/hmac_sha1.h>
 #include <gestalt/hmac_sha2.h>
-#include "vectors/hmacTestVectors.h"
+#include "vectors/vectors_hmac.h"
 
 TEST_P(HMAC_SHA1, KAT) {
     const HMAC_TestVectors &vector = GetParam();
