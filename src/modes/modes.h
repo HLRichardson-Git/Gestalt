@@ -13,10 +13,13 @@
 
 #pragma once
 
+#include <iostream> //debug
+#include "aes/aesCore.h" //debug
 #include <string>
 #include <cstring>
 #include <iomanip>
 #include <sstream>
+#include <vector>
 
 inline std::string toHex(const unsigned char* data, size_t length) {
     std::stringstream ss;
@@ -42,15 +45,40 @@ inline std::string fromHex(const std::string& hex) {
 
     return binary;
 }
+
+inline void printAESBlock(const aesBlock& block) {
+    for (const auto& byte : block) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::dec << std::endl; // Reset to decimal output format
+}
+
 template<typename BlockCipher, typename BlockType>
 using function = void (BlockCipher::*)(BlockType*);
 
-template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
-std::string encryptECB(std::string& msg, std::string key, function<BlockCipher, BlockType> encryptBlock);
-template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
-std::string decryptECB(std::string& hexMsg, std::string key, function<BlockCipher, BlockType> decryptBlock);
+template<
+    typename BlockCipher, 
+    typename BlockType, 
+    size_t BlockSize, 
+    void (BlockCipher::*encryptBlock)(BlockType&), 
+    std::string(*PaddingFunc)(const std::string&), 
+    std::vector<BlockType>(*convertToBlocks)(const std::string&), 
+    std::string(*blocksToHexString)(const std::vector<BlockType>&)
+>
+std::string encryptECB(std::string& msg, std::string key);
 
-template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
-std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher, BlockType> encryptBlock);
-template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
-std::string decryptCBC(std::string& hexMsg, std::string key, std::string iv, function<BlockCipher, BlockType> decryptBlock);
+template<
+    typename BlockCipher, 
+    typename BlockType, 
+    size_t BlockSize, 
+    void (BlockCipher::*decryptBlock)(BlockType&), 
+    std::string(*paddingFunc)(const std::string&), 
+    std::vector<BlockType>(*convertToBlocks)(const std::string&), 
+    std::string(*blocksToByteString)(const std::vector<BlockType>&)
+>
+std::string decryptECB(std::string& hexMsg, std::string key);
+
+//template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+//std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher, BlockType> encryptBlock);
+//template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+//std::string decryptCBC(std::string& hexMsg, std::string key, std::string iv, function<BlockCipher, BlockType> decryptBlock);

@@ -44,8 +44,7 @@
  *
  * In CBC encryption, forward cipher operations cannot be performed in parallel.
  */
-
-template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+/*template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
 std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher, BlockType> encryptBlock) {
     size_t msgLen = msg.length();
 	size_t paddedMsgLen = msgLen + BlockSize - (msgLen % BlockSize);
@@ -68,7 +67,7 @@ std::string encryptCBC(std::string& msg, std::string key, std::string iv, functi
 
 	delete[] input;
 	return hexResult;
-}
+}*/
 
 /*
  * Cipher Block Chaining (CBC) Decryption In-Place:
@@ -93,7 +92,7 @@ std::string encryptCBC(std::string& msg, std::string key, std::string iv, functi
  * In CBC decryption, multiple inverse cipher operations can be performed in parallel.
  */
 
-template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
+/*template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
 std::string decryptCBC(std::string& hexMsg, std::string key, std::string iv, function<BlockCipher, BlockType> decryptBlock) {
 	std::string msg = fromHex(hexMsg);
 
@@ -121,7 +120,7 @@ std::string decryptCBC(std::string& hexMsg, std::string key, std::string iv, fun
 
 	delete[] input;
 	return msg;
-}
+}*/
 
-template std::string encryptCBC<AES, unsigned char, 16, applyPCKS7Padding>(std::string&, std::string, std::string, function<AES, unsigned char>);
-template std::string decryptCBC<AES, unsigned char, 16, removePCKS7Padding>(std::string&, std::string, std::string, function<AES, unsigned char>);
+//template std::string encryptCBC<AES, unsigned char, 16, applyPCKS7Padding>(std::string&, std::string, std::string, function<AES, unsigned char>);
+//template std::string decryptCBC<AES, unsigned char, 16, removePCKS7Padding>(std::string&, std::string, std::string, function<AES, unsigned char>);
