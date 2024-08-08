@@ -25,31 +25,23 @@
 
 #pragma once
 
-#include <vector>
-#include <array>
-
 const size_t AES_BLOCK_SIZE = 16;
-//typedef unsigned char aesBlock[AES_BLOCK_SIZE];
-//using aesBlock = unsigned char[AES_BLOCK_SIZE];
-using aesBlock = std::array<unsigned char, AES_BLOCK_SIZE>;
 
 class AES {
 private:
-	static const unsigned int Nb = 16; // Block size
 	unsigned int Nw = 0; // Number of words in a state
 	unsigned int Nr = 0; // Number of rounds
 
 	unsigned char* roundKey; // Expanded Key
 
-	void subByte(aesBlock& state);
-	void shiftRows(aesBlock& state);
-	void mixColumns(aesBlock& state);
-	void addRoundKey(aesBlock& state, const unsigned char* roundKey);
-	//void addRoundKey(unsigned char state[Nb], const unsigned char* roundKey);
+	void subByte(unsigned char* state);
+	void shiftRows(unsigned char* state);
+	void mixColumns(unsigned char* state);
+	void addRoundKey(unsigned char* state, const unsigned char* roundKey);
 
-	void invSubByte(aesBlock& state);
-	void invShiftRows(aesBlock& state);
-	void invMixColumns(aesBlock& state);
+	void invSubByte(unsigned char* state);
+	void invShiftRows(unsigned char* state);
+	void invMixColumns(unsigned char* state);
 
 	void keyExpansion(const std::string& key, unsigned char* roundKey);
 	void rotWord(unsigned char temp[4]);
@@ -62,45 +54,12 @@ public:
 	explicit AES(const std::string& key);
 	~AES();
 
-	// Copy constructor
     AES(AES& other);
-
-	// Assignment operator
     AES& operator=(const AES& other);
 
-	void encryptBlock(aesBlock& state);
-	void decryptBlock(aesBlock& state);
-};
-
-// Friend class to test components of AES class
-class AES_Functions {
-private:
-	static const unsigned int Nb = 16; // Block size
-	AES aesObject;
-	unsigned char roundKey[Nb * 15]; // Array to hold round key
-public:
-
-	AES_Functions() : aesObject("10a58869d74be5a374cf867cfb473859") {
-        aesObject.keyExpansion("10a58869d74be5a374cf867cfb473859", roundKey);
-    }
-
-	const unsigned char* testKeyExpansion();
-
-    void testSubByte(aesBlock& state);
-	void testShiftRows(aesBlock& state);
-	void testMixColumns(aesBlock& state);
-	void testAddRoundKey(aesBlock& state, const unsigned char* roundKey);
-	//void testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey);
-
-	void testInvSubByte(aesBlock& state);
-	void testInvShiftRows(aesBlock& state);
-	void testInvMixColumns(aesBlock& state);
+	void encryptBlock(unsigned char* state);
+	void decryptBlock(unsigned char* state);
 };
 
 std::string applyPKCS7Padding(const std::string& data);
-std::vector<aesBlock> convertToAESBlocks(const std::string& str);
-std::string aesBlocksToHexString(const std::vector<aesBlock>& blocks);
-
-//void removePCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);
 std::string removePKCS7Padding(const std::string& data);
-std::string aesBlocksToBytesString(const std::vector<aesBlock>& blocks);

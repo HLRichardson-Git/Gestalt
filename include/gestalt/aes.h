@@ -12,8 +12,8 @@
 
 #pragma once
 
-std::string encryptAESECB(std::string msg, std::string key);
-std::string decryptAESECB(std::string msg, std::string key);
+std::string encryptAESECB(const std::string& msg, std::string key);
+std::string decryptAESECB(const std::string& hexMsg, std::string key);
 
-std::string encryptAESCBC(std::string msg, std::string iv, std::string key);
-std::string decryptAESCBC(std::string msg, std::string iv, std::string key);
+std::string encryptAESCBC(const std::string& msg, std::string iv, std::string key);
+std::string decryptAESCBC(const std::string& hexMsg, std::string iv, std::string key);

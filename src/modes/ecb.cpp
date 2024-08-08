@@ -40,7 +40,7 @@
  *
  * In ECB encryption, multiple forward cipher functions can be computed in parallel.
  */
-template<
+/*template<
     typename BlockCipher, 
     typename BlockType, 
     size_t BlockSize, 
@@ -53,6 +53,7 @@ std::string encryptECB(std::string& msg, std::string key) {
     BlockCipher cipher(key);
 
     std::string paddedPlaintext = paddingFunc(msg);
+    std::cout << "msg length: " << paddedPlaintext.length() << std::endl;
     std::vector<BlockType> blocks = convertToBlocks(paddedPlaintext);
 
     std::vector<BlockType> encryptedBlocks;
@@ -62,7 +63,7 @@ std::string encryptECB(std::string& msg, std::string key) {
     }
 
     return blocksToHexString(encryptedBlocks);
-}
+}*/
 
 /*
  * Electronic Codebook (ECB) Decryption In-Place:
@@ -82,7 +83,7 @@ std::string encryptECB(std::string& msg, std::string key) {
  *
  * In ECB decryption, multiple inverse cipher functions can be computed in parallel.
  */
-template<
+/*template<
     typename BlockCipher, 
     typename BlockType, 
     size_t BlockSize, 
@@ -103,7 +104,6 @@ std::string decryptECB(std::string& hexMsg, std::string key) {
     }
 
     std::string decryptedMessage = blocksToBytesString(decryptedBlocks);
-
 
     return paddingFunc(decryptedMessage);
 }
@@ -127,5 +127,5 @@ template std::string decryptECB<
     convertToAESBlocks, 
     aesBlocksToBytesString
 >(std::string&, std::string);
-
+*/
 //template std::string encryptECB<DES, uint64_t, 8, applyPKCS5Padding>(std::string&, std::string, function<DES, uint64_t>);

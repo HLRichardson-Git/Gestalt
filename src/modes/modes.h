@@ -46,14 +46,7 @@ inline std::string fromHex(const std::string& hex) {
     return binary;
 }
 
-inline void printAESBlock(const aesBlock& block) {
-    for (const auto& byte : block) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
-    }
-    std::cout << std::dec << std::endl; // Reset to decimal output format
-}
-
-template<typename BlockCipher, typename BlockType>
+/*template<typename BlockCipher, typename BlockType>
 using function = void (BlockCipher::*)(BlockType*);
 
 template<
@@ -76,7 +69,7 @@ template<
     std::vector<BlockType>(*convertToBlocks)(const std::string&), 
     std::string(*blocksToByteString)(const std::vector<BlockType>&)
 >
-std::string decryptECB(std::string& hexMsg, std::string key);
+std::string decryptECB(std::string& hexMsg, std::string key);*/
 
 //template<typename BlockCipher, typename BlockType, size_t BlockSize, void(*PaddingFunc)(BlockType*, size_t, size_t)>
 //std::string encryptCBC(std::string& msg, std::string key, std::string iv, function<BlockCipher, BlockType> encryptBlock);

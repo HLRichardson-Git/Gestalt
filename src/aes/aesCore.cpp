@@ -18,7 +18,7 @@
  * This implementation follows the specifications outlined in the FIPS 197 standard,
  * which defines the AES algorithm. AES operates on blocks of data, each consisting
  * of a 4x4 matrix of bytes, known as the "state" in AES terminology. In this implementation,
- * the state is represented by the `unsigned char state[Nb]` array, where `Nb` is the block size
+ * the state is represented by the `unsigned char state[AES_BLOCK_SIZE]` array, where `AES_BLOCK_SIZE` is the block size
  * for AES, which is 16.
  * 
  * The state matrix is structured as follows:
@@ -43,13 +43,7 @@
  * defined in the AES standard.
  */
 
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <cstring>
 #include <sstream>
-#include <vector>
-#include <algorithm>
 
 #include "aesCore.h"
 #include "aesConstants.h"
@@ -90,7 +84,7 @@ AES::AES(const std::string& key) {
     }
 
     // Allocate memory for round keys and perform key expansion
-    roundKey = new unsigned char[Nb * (Nr + 1)];
+    roundKey = new unsigned char[AES_BLOCK_SIZE * (Nr + 1)];
     keyExpansion(key, roundKey);
 }
 
@@ -103,8 +97,8 @@ AES::~AES() {
 AES::AES(AES& other) {
     Nw = other.Nw;
     Nr = other.Nr;
-    roundKey = new unsigned char[Nb * (Nr + 1)];
-    std::copy(other.roundKey, other.roundKey + Nb * (Nr + 1), roundKey);
+    roundKey = new unsigned char[AES_BLOCK_SIZE * (Nr + 1)];
+    std::copy(other.roundKey, other.roundKey + AES_BLOCK_SIZE * (Nr + 1), roundKey);
 }
 
 // Assignment operator
@@ -113,8 +107,8 @@ AES& AES::operator=(const AES& other) {
         delete[] roundKey;
         Nw = other.Nw;
         Nr = other.Nr;
-        roundKey = new unsigned char[Nb * (Nr + 1)];
-        std::copy(other.roundKey, other.roundKey + Nb * (Nr + 1), roundKey);
+        roundKey = new unsigned char[AES_BLOCK_SIZE * (Nr + 1)];
+        std::copy(other.roundKey, other.roundKey + AES_BLOCK_SIZE * (Nr + 1), roundKey);
     }
     return *this;
 }
@@ -122,57 +116,41 @@ AES& AES::operator=(const AES& other) {
 /*
  * Encrypts a single AES block (16 bytes) in place.
  *
- * @param input A pointer to the input block to be encrypted.
+ * @param state A pointer to the input block to be encrypted.
  */
-void AES::encryptBlock(aesBlock& state) {
-    // Initialize state with the input block
-    //unsigned char state[Nb];
-    //memcpy(state, input, Nb);
-
-    // Perform AES encryption rounds
+void AES::encryptBlock(unsigned char* state) {
     addRoundKey(state, roundKey);
     size_t round = 1;
     while (round < Nr) {
         subByte(state);
         shiftRows(state);
         mixColumns(state);
-        addRoundKey(state, roundKey + (Nb * round));
+        addRoundKey(state, roundKey + (AES_BLOCK_SIZE * round));
         round++;
     }
     subByte(state);
     shiftRows(state);
-    addRoundKey(state, roundKey + Nr * Nb);
-
-    // Copy the encrypted state back to the input block
-    //memcpy(input, state, Nb);
+    addRoundKey(state, roundKey + Nr * AES_BLOCK_SIZE);
 }
 
 /*
  * Decrypts a single AES block (16 bytes) in place.
  *
- * @param input A pointer to the input block to be decrypted.
+ * @param state A pointer to the input block to be decrypted.
  */
-void AES::decryptBlock(aesBlock& state) {
-    // Initialize state with the input block
-    //unsigned char state[Nb];
-    //memcpy(state, input, Nb);
-
-    // Perform AES decryption rounds
-    addRoundKey(state, roundKey + Nr * Nb);
+void AES::decryptBlock(unsigned char* state) {
+    addRoundKey(state, roundKey + Nr * AES_BLOCK_SIZE);
     size_t round = Nr - 1;
     while (round > 0) {
         invShiftRows(state);
         invSubByte(state);
-        addRoundKey(state, roundKey + (Nb * round));
+        addRoundKey(state, roundKey + (AES_BLOCK_SIZE * round));
         invMixColumns(state);
         round--;
     }
     invShiftRows(state);
     invSubByte(state);
     addRoundKey(state, roundKey);
-
-    // Copy the decrypted state back to the input block
-    //memcpy(input, state, Nb);
 }
 
 /*
@@ -180,10 +158,23 @@ void AES::decryptBlock(aesBlock& state) {
  *
  * @param state The state array to be transformed.
  */
-void AES::subByte(aesBlock& state) {
-    for (size_t i = 0; i < Nb; i++) {
-        state[i] = SBOX[state[i]];
-    }
+void AES::subByte(unsigned char* state) {
+    state[0] = SBOX[state[0]];
+    state[1] = SBOX[state[1]];
+    state[2] = SBOX[state[2]];
+    state[3] = SBOX[state[3]];
+    state[4] = SBOX[state[4]];
+    state[5] = SBOX[state[5]];
+    state[6] = SBOX[state[6]];
+    state[7] = SBOX[state[7]];
+    state[8] = SBOX[state[8]];
+    state[9] = SBOX[state[9]];
+    state[10] = SBOX[state[10]];
+    state[11] = SBOX[state[11]];
+    state[12] = SBOX[state[12]];
+    state[13] = SBOX[state[13]];
+    state[14] = SBOX[state[14]];
+    state[15] = SBOX[state[15]];
 }
 
 /*
@@ -191,8 +182,8 @@ void AES::subByte(aesBlock& state) {
  *
  * @param state The state array to be transformed.
  */
-void AES::shiftRows(aesBlock& state) {
-    unsigned char tmp[Nb];
+void AES::shiftRows(unsigned char* state) {
+    unsigned char tmp[AES_BLOCK_SIZE];
 
 	/* Column 1 */
 	tmp[0] = state[0];
@@ -218,9 +209,7 @@ void AES::shiftRows(aesBlock& state) {
 	tmp[14] = state[6];
 	tmp[15] = state[11];
 
-    //memcpy(state, tmp, Nb);
-    //std::copy(std::begin(state), std::end(state), tmp.begin());
-    std::memcpy(state.data(), tmp, sizeof(tmp));
+    memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -228,8 +217,8 @@ void AES::shiftRows(aesBlock& state) {
  *
  * @param state The state array to be transformed.
  */
-void AES::mixColumns(aesBlock& state) {
-    unsigned char tmp[Nb];
+void AES::mixColumns(unsigned char* state) {
+    unsigned char tmp[AES_BLOCK_SIZE];
 
     tmp[0] = GF_MUL_TABLE[2][state[0]] ^ GF_MUL_TABLE[3][state[1]] ^ state[2] ^ state[3];
     tmp[1] = state[0] ^ GF_MUL_TABLE[2][state[1]] ^ GF_MUL_TABLE[3][state[2]] ^ state[3];
@@ -251,8 +240,7 @@ void AES::mixColumns(aesBlock& state) {
     tmp[14] = state[12] ^ state[13] ^ GF_MUL_TABLE[2][state[14]] ^ GF_MUL_TABLE[3][state[15]];
     tmp[15] = GF_MUL_TABLE[3][state[12]] ^ state[13] ^ state[14] ^ GF_MUL_TABLE[2][state[15]];
 
-    //memcpy(state, tmp, Nb);
-    std::memcpy(state.data(), tmp, sizeof(tmp));
+    memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -261,27 +249,47 @@ void AES::mixColumns(aesBlock& state) {
  * @param state The state array to which the round key is added.
  * @param roundKey Pointer to the round key array.
  */
-void AES::addRoundKey(aesBlock& state, const unsigned char* roundKey) {
-    for (int i = 0; i < 16; i++) {
-		state[i] ^= roundKey[i];
-	}
+void AES::addRoundKey(unsigned char* state, const unsigned char* roundKey) {
+    state[0] ^= roundKey[0];
+    state[1] ^= roundKey[1];
+    state[2] ^= roundKey[2];
+    state[3] ^= roundKey[3];
+    state[4] ^= roundKey[4];
+    state[5] ^= roundKey[5];
+    state[6] ^= roundKey[6];
+    state[7] ^= roundKey[7];
+    state[8] ^= roundKey[8];
+    state[9] ^= roundKey[9];
+    state[10] ^= roundKey[10];
+    state[11] ^= roundKey[11];
+    state[12] ^= roundKey[12];
+    state[13] ^= roundKey[13];
+    state[14] ^= roundKey[14];
+    state[15] ^= roundKey[15];
 }
-
-/*void AES::addRoundKey(unsigned char state[Nb], const unsigned char* roundKey) {
-    for (int i = 0; i < 16; i++) {
-		state[i] ^= roundKey[i];
-	}
-}*/
 
 /*
  * Performs invSubBytes operation on each byte of the state using the inverse S-box lookup table.
  *
  * @param state The state array to be transformed.
  */
-void AES::invSubByte(aesBlock& state) {
-    for (size_t i = 0; i < Nb; i++) {
-        state[i] = INVSBOX[state[i]];
-    }
+void AES::invSubByte(unsigned char state[AES_BLOCK_SIZE]) {
+    state[0] = INVSBOX[state[0]];
+    state[1] = INVSBOX[state[1]];
+    state[2] = INVSBOX[state[2]];
+    state[3] = INVSBOX[state[3]];
+    state[4] = INVSBOX[state[4]];
+    state[5] = INVSBOX[state[5]];
+    state[6] = INVSBOX[state[6]];
+    state[7] = INVSBOX[state[7]];
+    state[8] = INVSBOX[state[8]];
+    state[9] = INVSBOX[state[9]];
+    state[10] = INVSBOX[state[10]];
+    state[11] = INVSBOX[state[11]];
+    state[12] = INVSBOX[state[12]];
+    state[13] = INVSBOX[state[13]];
+    state[14] = INVSBOX[state[14]];
+    state[15] = INVSBOX[state[15]];
 }
 
 /*
@@ -289,8 +297,8 @@ void AES::invSubByte(aesBlock& state) {
  *
  * @param state The state array to be transformed.
  */
-void AES::invShiftRows(aesBlock& state) {
-    unsigned char tmp[Nb];
+void AES::invShiftRows(unsigned char state[AES_BLOCK_SIZE]) {
+    unsigned char tmp[AES_BLOCK_SIZE];
 
 	/* Column 1 */
 	tmp[0] = state[0];
@@ -316,8 +324,7 @@ void AES::invShiftRows(aesBlock& state) {
 	tmp[14] = state[6];
 	tmp[15] = state[3];
 
-    //memcpy(state, tmp, Nb);
-    std::memcpy(state.data(), tmp, sizeof(tmp));
+    memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -325,8 +332,8 @@ void AES::invShiftRows(aesBlock& state) {
  *
  * @param state The state array to be transformed.
  */
-void AES::invMixColumns(aesBlock& state) {
-    unsigned char tmp[Nb];
+void AES::invMixColumns(unsigned char state[AES_BLOCK_SIZE]) {
+    unsigned char tmp[AES_BLOCK_SIZE];
 
     tmp[0]  = GF_MUL_TABLE[14][state[0]] ^ GF_MUL_TABLE[11][state[1]] ^ GF_MUL_TABLE[13][state[2]] ^ GF_MUL_TABLE[9][state[3]];
     tmp[1]  = GF_MUL_TABLE[9][state[0]] ^ GF_MUL_TABLE[14][state[1]] ^ GF_MUL_TABLE[11][state[2]] ^ GF_MUL_TABLE[13][state[3]];
@@ -348,8 +355,7 @@ void AES::invMixColumns(aesBlock& state) {
     tmp[14] = GF_MUL_TABLE[13][state[12]] ^ GF_MUL_TABLE[9][state[13]] ^ GF_MUL_TABLE[14][state[14]] ^ GF_MUL_TABLE[11][state[15]];
     tmp[15] = GF_MUL_TABLE[11][state[12]] ^ GF_MUL_TABLE[13][state[13]] ^ GF_MUL_TABLE[9][state[14]] ^ GF_MUL_TABLE[14][state[15]];
 
-    //memcpy(state, tmp, Nb);
-    std::memcpy(state.data(), tmp, sizeof(tmp));
+    memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -375,7 +381,7 @@ void AES::keyExpansion(const std::string& key, unsigned char* roundKey) {
     }
 
     i = 4 * Nw;
-    while (i < Nb * (Nr + 1)) {
+    while (i < AES_BLOCK_SIZE * (Nr + 1)) {
         temp[0] = roundKey[i - 4 + 0];
         temp[1] = roundKey[i - 4 + 1];
         temp[2] = roundKey[i - 4 + 2];
@@ -432,58 +438,12 @@ void AES::rcon(unsigned char temp[4], int round) {
     temp[0] ^= RCON[round];
 }
 
-// Gets roundKey from testAesFunctions class
-const unsigned char* AES_Functions::testKeyExpansion() {
-    return this->roundKey;
-}
-
-// Uses subByte function from AES for testing
-void AES_Functions::testSubByte(aesBlock& state) {
-    this->aesObject.subByte(state);
-}
-
-// Uses shiftRows function from AES for testing
-void AES_Functions::testShiftRows(aesBlock& state) {
-    this->aesObject.shiftRows(state);
-}
-
-// Uses mixColumns function from AES for testing
-void AES_Functions::testMixColumns(aesBlock& state) {
-    this->aesObject.mixColumns(state);
-}
-
-void AES_Functions::testAddRoundKey(aesBlock& state, const unsigned char* roundKey) {
-    this->aesObject.addRoundKey(state, roundKey);
-}
-
-// Uses addRoundKey function from AES for testing
-/*void AES_Functions::testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey) {
-    this->aesObject.addRoundKey(state, roundKey);
-}*/
-
-// Uses invSubByte function from AES for testing
-void AES_Functions::testInvSubByte(aesBlock& state) {
-    this->aesObject.invSubByte(state);
-}
-
-// Uses invShiftRows function from AES for testing
-void AES_Functions::testInvShiftRows(aesBlock& state) {
-    this->aesObject.invShiftRows(state);
-}
-
-// Uses invMixColumns function from AES for testing
-void AES_Functions::testInvMixColumns(aesBlock& state) {
-    this->aesObject.invMixColumns(state);
-}
-
 /*
  * Applies PKCS7 padding to the input message.
  * PKCS7 padding is a method used to pad messages to a multiple of the block size.
  * The padding value is the number of bytes added, each byte being equal to the number of bytes added.
  *
- * @param input Pointer to the input message buffer.
- * @param origMsgLen The original length of the message in bytes.
- * @param paddedMsgLen The length of the padded message buffer.
+ * @param data String which padding should be applied too.
  */
 std::string applyPKCS7Padding(const std::string& data) {
     size_t blockSize = 16;
@@ -493,42 +453,13 @@ std::string applyPKCS7Padding(const std::string& data) {
     return paddedData;
 }
 
-std::vector<aesBlock> convertToAESBlocks(const std::string& str) {
-    std::vector<aesBlock> blocks;
-    size_t blockSize = AES_BLOCK_SIZE;  // Assuming AES_BLOCK_SIZE is defined as 16
-    
-    for (size_t i = 0; i < str.size(); i += blockSize) {
-        aesBlock block = {0};  // Initialize the block with zeros to avoid uninitialized data
-        std::memcpy(block.data(), str.data() + i,  std::min(blockSize, str.size() - i));
-        blocks.push_back(block);
-    }
-    
-    return blocks;
-}
-
-std::string aesBlocksToHexString(const std::vector<aesBlock>& blocks) {
-    std::ostringstream oss;
-    size_t blockSize = AES_BLOCK_SIZE;  // Assuming AES_BLOCK_SIZE is defined as 16
-
-    for (const auto& block : blocks) {
-        for (size_t i = 0; i < blockSize; ++i) {
-            oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(block[i]);
-        }
-    }
-
-    return oss.str();
-}
-
-
 /*
  * Removes PKCS7 padding from the input message.
  * PKCS7 padding is removed by examining the last byte of the padded message,
  * which indicates the number of bytes added as padding. This value is used
  * to determine how many bytes to remove from the end of the message.
  *
- * @param input Pointer to the padded message buffer.
- * @param origMsgLen The original length of the message in bytes.
- * @param paddedMsgLen The length of the padded message buffer.
+ * @param data String which padding should be removed from.
  */
 std::string removePKCS7Padding(const std::string& data) {
     if (data.empty()) {
@@ -539,15 +470,4 @@ std::string removePKCS7Padding(const std::string& data) {
         throw std::runtime_error("Invalid padding length.");
     }
     return data.substr(0, data.size() - paddingLength);
-}
-
-std::string aesBlocksToBytesString(const std::vector<aesBlock>& blocks) {
-    std::string result;
-    result.reserve(blocks.size() * AES_BLOCK_SIZE);
-
-    for (const auto& block : blocks) {
-        result.insert(result.end(), block.begin(), block.end());
-    }
-
-    return result;
 }
