@@ -5,25 +5,37 @@ include(GoogleTest)
 set (This tests)
 
 set (Sources
-    aesTests.cpp
-    desTests.cpp
-    sha1Tests.cpp
-    sha2Tests.cpp
-    hmacTests.cpp
-    eccTests.cpp
-    ecdsaTests.cpp
-    ecdhTests.cpp
+    aes/test_aes_ecb.cpp
+    aes/test_aes_cbc.cpp
+    aes/test_aes_functions.cpp
+    des/test_des_ecb.cpp
+    des/test_tdes_ecb.cpp
+    des/test_des_cbc.cpp
+    des/test_tdes_cbc.cpp
+    des/test_des_functions.cpp
+    ecc/test_ecc_functions.cpp
+    ecc/test_ecdsa.cpp
+    ecc/test_ecdsa_functions.cpp
+    ecc/test_ecdh.cpp
+    ecc/test_ecdh_functions.cpp
+    hmac/test_hmac.cpp
+    sha1/test_sha1.cpp
+    sha1/test_sha1_functions.cpp
+    sha2/test_sha2.cpp
 )
 
 add_executable (${This} ${Sources})
 
-target_include_directories(${This} PRIVATE ${PROJECT_SOURCE_DIR}/src)
-target_include_directories(${This} PRIVATE ${MPIR_INCLUDE_DIR})
+target_include_directories(${This}
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/tools
+)
 
-target_link_libraries (${This} PRIVATE
-    GTest::gtest_main
-    ${MPIR_LIBRARY}
-    Gestalt
+target_link_libraries (${This} 
+    PRIVATE
+        GTest::gtest_main
+        Gestalt
 )
 
 add_test (

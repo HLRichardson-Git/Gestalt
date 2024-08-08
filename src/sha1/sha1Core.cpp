@@ -180,12 +180,3 @@ void SHA1::applySha1Padding(std::string& in) {
         in += (char)((messageLength >> (i * 8)) & 0xFF);
     }
 }
-
-void testSHA1Functions::testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE]) {
-    SHA1Object.applySha1Padding(in);
-    this->SHA1Object.fillBlock(in, computedW);
-}
-
-void testSHA1Functions::testSHA1Padding(std::string& in) {
-    this->SHA1Object.applySha1Padding(in);
-}

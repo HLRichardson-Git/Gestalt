@@ -31,3 +31,5 @@ std::string generateRandomData(size_t sizeInMB);
 void xorBlock(unsigned char* a, const std::string& b, size_t blockIndex);
 std::string printIntToBinary(uint64_t in);
 std::string printIntToBinary(uint32_t in);
+std::string toHex(const unsigned char* data, size_t length);
+std::string fromHex(const std::string& hex);

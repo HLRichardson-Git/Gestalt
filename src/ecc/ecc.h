@@ -46,6 +46,7 @@ private:
 
     friend class ECDSA;
     friend class ECDH;
+    friend class ECC_Test;
 public:
 
     ECC(StandardCurve curve = StandardCurve::secp256k1) : ellipticCurve(getCurveParams(curve)) {}
@@ -58,6 +59,4 @@ public:
     void setKeyPair(const std::string& strKey);
     void setCurve(StandardCurve curveType) { ellipticCurve = getCurveParams(curveType); }
     KeyPair getKeyPair() const { return keyPair; }
-
-    friend class TestECC;
 };

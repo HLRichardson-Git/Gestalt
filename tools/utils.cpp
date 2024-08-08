@@ -203,3 +203,28 @@ std::string printIntToBinary(uint64_t in) {
 std::string printIntToBinary(uint32_t in) {
     return std::bitset<32>(in).to_string();
 }
+
+std::string toHex(const unsigned char* data, size_t length) {
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (size_t i = 0; i < length; ++i) {
+        ss << std::setw(2) << static_cast<int>(data[i]);
+    }
+    return ss.str();
+}
+
+std::string fromHex(const std::string& hex) {
+    if (hex.length() % 2 != 0) {
+        throw std::invalid_argument("Hex string must have an even length");
+    }
+
+    std::string binary;
+    binary.reserve(hex.length() / 2);
+    
+    for (size_t i = 0; i < hex.length(); i += 2) {
+        unsigned char byte = static_cast<unsigned char>(std::stoi(hex.substr(i, 2), nullptr, 16));
+        binary.push_back(byte);
+    }
+
+    return binary;
+}

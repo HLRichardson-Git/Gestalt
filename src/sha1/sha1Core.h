@@ -40,24 +40,11 @@ private:
     void fillBlock(std::string in, uint32_t w[BLOCK_SIZE]);
     void applySha1Padding(std::string& in);
 
+    friend class SHA1_Test;
 public:
 
 	SHA1();
 	~SHA1() {}
 
     std::string hash(std::string in);
-
-    friend class testSHA1Functions;
-};
-
-// Friend class to test components of SHA1 class
-class testSHA1Functions {
-private:
-
-    static const unsigned int BLOCK_SIZE = 80;
-    SHA1 SHA1Object;
-public:
-
-    void testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE]);
-    void testSHA1Padding(std::string& in);
 };

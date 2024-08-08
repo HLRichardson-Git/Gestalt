@@ -21,6 +21,13 @@ Gestalt Releases
  Gestalt 0.6
 -----------
 
+### Changes between 0.6 and 0.6.1 [8 Aug 2024]
+
+ * Refactors unit tests
+ * Removes block cipher modes of operation general templates
+ * Adds tailored block cipher modes of operation for each block cipher
+ * Improves performance of AES functions
+
 ### Changes between 0.5 and 0.6 [24 Jul 2024]
 
  * Adds DES-ECB/CBC

@@ -35,6 +35,8 @@ private:
     bool isInvalidSignature(Signature S);
 
     Signature generateSignature(const mpz_t& e, mpz_t& k);
+
+    friend class ECDSA_Test;
 public:
 
     ECDSA() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
@@ -48,6 +50,4 @@ public:
     Signature signMessage(const std::string& messageHash);
     Signature signMessage(const std::string& messageHash, BigInt& K);
     bool verifySignature(const std::string& messageHash, const Signature signature);
-
-    friend class TestECDSA;
 };

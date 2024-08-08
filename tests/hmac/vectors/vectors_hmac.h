@@ -5,7 +5,7 @@
  */
 
 /*
- * hmacTestVectors.h
+ * vectors_hmac.h
  *
  * This file contains the test vectors to be used in ../hmacTests.cpp unit tests
  */

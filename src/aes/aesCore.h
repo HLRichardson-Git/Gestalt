@@ -25,22 +25,23 @@
 
 #pragma once
 
+const size_t AES_BLOCK_SIZE = 16;
+
 class AES {
 private:
-	static const unsigned int Nb = 16; // Block size
 	unsigned int Nw = 0; // Number of words in a state
 	unsigned int Nr = 0; // Number of rounds
 
 	unsigned char* roundKey; // Expanded Key
 
-	void subByte(unsigned char state[Nb]);
-	void shiftRows(unsigned char state[Nb]);
-	void mixColumns(unsigned char state[Nb]);
-	void addRoundKey(unsigned char state[Nb], const unsigned char* roundKey);
+	void subByte(unsigned char* state);
+	void shiftRows(unsigned char* state);
+	void mixColumns(unsigned char* state);
+	void addRoundKey(unsigned char* state, const unsigned char* roundKey);
 
-	void invSubByte(unsigned char state[Nb]);
-	void invShiftRows(unsigned char state[Nb]);
-	void invMixColumns(unsigned char state[Nb]);
+	void invSubByte(unsigned char* state);
+	void invShiftRows(unsigned char* state);
+	void invMixColumns(unsigned char* state);
 
 	void keyExpansion(const std::string& key, unsigned char* roundKey);
 	void rotWord(unsigned char temp[4]);
@@ -53,39 +54,12 @@ public:
 	explicit AES(const std::string& key);
 	~AES();
 
-	// Copy constructor
     AES(AES& other);
-
-	// Assignment operator
     AES& operator=(const AES& other);
 
-	void encryptBlock(unsigned char* input);
-	void decryptBlock(unsigned char* input);
+	void encryptBlock(unsigned char* state);
+	void decryptBlock(unsigned char* state);
 };
 
-// Friend class to test components of AES class
-class AES_Functions {
-private:
-	static const unsigned int Nb = 16; // Block size
-	AES aesObject;
-	unsigned char roundKey[Nb * 15]; // Array to hold round key
-public:
-
-	AES_Functions() : aesObject("10a58869d74be5a374cf867cfb473859") {
-        aesObject.keyExpansion("10a58869d74be5a374cf867cfb473859", roundKey);
-    }
-
-	const unsigned char* testKeyExpansion();
-
-    void testSubByte(unsigned char state[Nb]);
-	void testShiftRows(unsigned char state[Nb]);
-	void testMixColumns(unsigned char state[Nb]);
-	void testAddRoundKey(unsigned char state[Nb], const unsigned char* roundKey);
-
-	void testInvSubByte(unsigned char state[Nb]);
-	void testInvShiftRows(unsigned char state[Nb]);
-	void testInvMixColumns(unsigned char state[Nb]);
-};
-
-void applyPCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);
-void removePCKS7Padding(unsigned char* input, size_t origMsgLen, size_t paddedMsgLen);
+std::string applyPKCS7Padding(const std::string& data);
+std::string removePKCS7Padding(const std::string& data);
