@@ -12,60 +12,7 @@
  */
 #pragma once
 
-//#include "standardCurves.h"
-
-#include <string>
-#include <gmp.h>
-
-inline void stringToGMP(const std::string& str, mpz_t& result) {
-    if (str.substr(0, 2) == "0x") {
-        std::string truncatedStr = str.substr(2, str.length());
-        mpz_set_str(result, truncatedStr.c_str(), 16);
-    } else {
-        mpz_set_str(result, str.c_str(), 10);
-    }
-}
-
-class BigInt {
-public:
-    mpz_t n;
-
-    BigInt() { mpz_init(n); }
-        BigInt(const std::string& strN) {
-        mpz_init(n);
-        stringToGMP(strN, n);
-    }
-    
-    BigInt(const BigInt& other) {
-        mpz_init_set(n, other.n);
-    }
-
-    BigInt(const char* strN) {
-        mpz_init(n);
-        stringToGMP(strN, n);
-    }
-
-    BigInt& operator=(const BigInt& other) {
-        if (this != &other) {
-            mpz_set(n, other.n);
-        }
-        return *this;
-    }
-
-    BigInt& operator=(const std::string& strN) {
-        stringToGMP(strN, n);
-        return *this;
-    }
-
-    BigInt& operator=(const char* strN) {
-        stringToGMP(strN, n);
-        return *this;
-    }
-
-    ~BigInt() {
-        mpz_clear(n);
-    }
-};
+#include "bigInt/bigInt.h"
 
 class Point {
 public:
