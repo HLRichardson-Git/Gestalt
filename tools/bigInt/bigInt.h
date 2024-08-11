@@ -48,6 +48,10 @@ public:
         stringToGMP(strN, n);
     }
 
+    BigInt(const mpz_t& mpzN) {
+        mpz_init_set(n, mpzN);
+    }
+
     BigInt& operator=(const BigInt& other) {
         if (this != &other) {
             mpz_set(n, other.n);
@@ -60,8 +64,18 @@ public:
         return *this;
     }
 
+    BigInt& operator=(int intN) {
+        mpz_set_si(n, intN);
+        return *this;
+    }
+
     BigInt& operator=(const char* strN) {
         stringToGMP(strN, n);
+        return *this;
+    }
+
+    BigInt& operator=(const mpz_t& mpzN) {
+        mpz_set(n, mpzN);
         return *this;
     }
 

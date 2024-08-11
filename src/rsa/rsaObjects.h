@@ -12,13 +12,14 @@
 # pragma once
 
 #include "bigInt/bigInt.h"
+#include "prime_generation/prime_generation.h"
 
 enum class RSA_SECURITY_STRENGTH {
-   bits_1024,
-   bits_2048,
-   bits_3072,
-   bits_7680,
-   bits_15360 
+   bits_1024 = 80,
+   bits_2048 = 112,
+   bits_3072 = 128,
+   bits_7680 = 192,
+   bits_15360 = 256
 };
 
 enum class RANDOM_PRIME_METHOD {
@@ -42,8 +43,8 @@ enum class SIGNATURE_PADDING_SCHEME {
 };
 
 struct RSAKeyGenOptions {
-    RSA_SECURITY_STRENGTH = RSA_SECURITY_STRENGTH::bits_2048;
-    RANDOM_PRIME_METHOD = RANDOM_PRIME_METHOD::provable;
+    RSA_SECURITY_STRENGTH securityStrenght = RSA_SECURITY_STRENGTH::bits_2048;
+    RANDOM_PRIME_METHOD primeMethod = RANDOM_PRIME_METHOD::provable;
 };
 
 struct RSAPrivateKey {
@@ -61,13 +62,19 @@ private:
     RSAPublicKey publicKey;
     RSAKeyGenOptions keyGenOptions;
 
-    void generateKeyPair(RSAKeyGenOptions options);
+    bool isValidThreshold(const BigInt& value, const BigInt& minThreshold, const BigInt& maxThreshold);
+
+    void getSeed(RSA_SECURITY_STRENGTH securityStrength, mpz_t& result);
+
+    void generatePrimes(RSAKeyGenOptions keyGenOptions, const BigInt& e, const mpz_t& seed, mpz_t& pResult, mpz_t& qResult);
+    //void generateKeyPair(RSAKeyGenOptions options);
 
     friend class RSA;
+    friend class RSA_Test;
 public:
 
     RSAKeyPair() : keyGenOptions() { 
-        generateKeyPair(keyGenOptions); 
+        //generateKeyPair(keyGenOptions); 
     };
     RSAKeyPair(const BigInt& d, const BigInt& n) : privateKey{d}, publicKey{n}, keyGenOptions() {}
     RSAKeyPair(const BigInt& d, const BigInt& n, const BigInt& e) : privateKey{d}, publicKey{n, e}, keyGenOptions() {}
@@ -81,4 +88,4 @@ public:
         publicKey.n = otherModulus;
         publicKey.e = otherExponent;
     };
-}
+};
