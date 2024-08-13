@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "bigInt/bigInt.h"
 
 enum Status {
@@ -30,8 +32,11 @@ struct ShaweTaylorRandomPrimeRoutineResult {
     Status status;
     BigInt prime;
     BigInt primeSeed;
-    BigInt PrimeGenCounter;
+    BigInt primeGenCounter;
 };
+
+std::vector<int> sieveProcedure(int limit);
+bool isPrimeTrialDivision(unsigned int c);
 
 ShaweTaylorRandomPrimeRoutineResult shawneTaylorRandomPrime (unsigned int length, const BigInt& inputSeed);
 

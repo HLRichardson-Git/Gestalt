@@ -19,6 +19,7 @@ set (Sources
     ecc/test_ecdh.cpp
     ecc/test_ecdh_functions.cpp
     rsa/test_rsa_functions.cpp
+    rsa/test_rsa_prime_generation.cpp
     hmac/test_hmac.cpp
     sha1/test_sha1.cpp
     sha1/test_sha1_functions.cpp

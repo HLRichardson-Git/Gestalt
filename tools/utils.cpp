@@ -228,3 +228,19 @@ std::string fromHex(const std::string& hex) {
 
     return binary;
 }
+
+unsigned int xorHexStrings(const std::string& hexStr1, const std::string& hexStr2) {
+    unsigned int num1;
+    std::stringstream ss1;
+    ss1 << std::hex << hexStr1;
+    ss1 >> num1;
+
+    unsigned int num2;
+    std::stringstream ss2;
+    ss2 << std::hex << hexStr2;
+    ss2 >> num2;
+
+    unsigned int result = num1 ^ num2;
+
+    return result;
+}

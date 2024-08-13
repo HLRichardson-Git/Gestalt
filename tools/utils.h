@@ -33,3 +33,4 @@ std::string printIntToBinary(uint64_t in);
 std::string printIntToBinary(uint32_t in);
 std::string toHex(const unsigned char* data, size_t length);
 std::string fromHex(const std::string& hex);
+unsigned int xorHexStrings(const std::string& hexStr1, const std::string& hexStr2);
