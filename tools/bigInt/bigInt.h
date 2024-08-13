@@ -79,7 +79,24 @@ public:
         return *this;
     }
 
+    BigInt operator+(int intN) const {
+        BigInt result;
+        mpz_add_ui(result.n, this->n, intN);
+        return result;
+    }
+
     ~BigInt() {
         mpz_clear(n);
+    }
+
+    std::string toHexString() const {
+        char* hexStr = mpz_get_str(nullptr, 16, n);
+        std::string result(hexStr);
+
+        void (*freeFunc)(void*, size_t);
+        mp_get_memory_functions(nullptr, nullptr, &freeFunc);
+        freeFunc(hexStr, strlen(hexStr) + 1);
+
+        return result;
     }
 };
