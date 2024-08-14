@@ -17,17 +17,20 @@ class RSA_Test : public ::testing::Test {
 private:
     RSAKeyPair rsa;
 protected:
-    void getSeed(RSA_SECURITY_STRENGTH securityStrength, mpz_t& result) { rsa.getSeed(securityStrength, result); }
+    void generateKeyPair(RSAKeyGenOptions options) { rsa.generateKeyPair(options); }
 };
 
-TEST_F(RSA_Test, testGetSeed) {
-    mpz_t seed;
-    mpz_init(seed);
+TEST(RSA_Test, testKeyGen) {
+    RSAKeyPair rsa({RSA_SECURITY_STRENGTH::RSA_2048, RANDOM_PRIME_METHOD::probable});
 
-    getSeed(RSA_SECURITY_STRENGTH::bits_3072, seed);
+    RSAPrivateKey privateKey = rsa.getPrivateKey();
+    RSAPublicKey publicKey = rsa.getPublicKey();
 
-    int seedBitLength = mpz_sizeinbase(seed, 2);
-    EXPECT_EQ(seedBitLength, 256);  // 2 * 128 bits (security strength of 3072-bit modulus)
+    unsigned int expected_bit_length = 2048;
+    unsigned int n_bit_length = mpz_sizeinbase(publicKey.n.n, 2);
+    ASSERT_GE(n_bit_length, expected_bit_length - 1) << "Public modulus n has an incorrect bit length";
+    ASSERT_LE(n_bit_length, expected_bit_length) << "Public modulus n exceeds the expected bit length";
 
-    mpz_clear(seed);
+    unsigned int d_bit_length = mpz_sizeinbase(privateKey.d.n, 2);
+    ASSERT_LE(d_bit_length, n_bit_length) << "Private exponent d has a bit length greater than n";
 }

@@ -15,35 +15,12 @@
 
 #include "bigInt/bigInt.h"
 
-enum Status {
-    SUCCESS,
-    FAILURE
+enum class RANDOM_PRIME_METHOD {
+    provable,
+    probable
+    //provableWithProvableAux,
+    //probableWithProvableAux,
+    //probableWithProbableAux
 };
 
-struct ProvablePrimeConstructionResult {
-    Status status;
-    BigInt p; // The required prime p
-    BigInt p1; // p1 having the property that p1 divides p - 1
-    BigInt p2; // p2 having the property that p2 divides p + 1
-    BigInt pSeed;
-};
-
-struct ShaweTaylorRandomPrimeRoutineResult {
-    Status status;
-    BigInt prime;
-    BigInt primeSeed;
-    BigInt primeGenCounter;
-};
-
-std::vector<int> sieveProcedure(int limit);
-bool isPrimeTrialDivision(unsigned int c);
-
-ShaweTaylorRandomPrimeRoutineResult shawneTaylorRandomPrime (unsigned int length, const BigInt& inputSeed);
-
-ProvablePrimeConstructionResult provablePrimeConstruction (
-    unsigned int L, 
-    unsigned int N1,
-    unsigned int N2,
-    const BigInt& firstSeed,
-    const BigInt& e
-);
+void generateLargePrime(mpz_t prime, unsigned int bits, RANDOM_PRIME_METHOD method);
