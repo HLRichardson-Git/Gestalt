@@ -13,43 +13,41 @@
 
 #include "rsaObjects.h"
 
-bool RSAKeyPair::isValidThreshold(const BigInt& value, const BigInt& minThreshold, const BigInt& maxThreshold) {
-    return (mpz_cmp(value.n, minThreshold.n) <= 0) || (mpz_cmp(value.n, maxThreshold.n) >= 0);
+bool RSAKeyPair::validatePrivateKey(RSAPrivateKey privateKeyCandidate) {
+    // TODO: do the thing
+    return true;
 }
 
-void RSAKeyPair::getSeed(RSA_SECURITY_STRENGTH securityStrength, mpz_t& result) {
-    int seedLength = static_cast<int>(securityStrength) * 2;
-    mpz_t n;
-    mpz_init_set_si(n, seedLength);
-
-    gmp_randstate_t state;
-    gmp_randinit_default(state);
-
-    mpz_rrandomb(result, state, seedLength);
-
-    gmp_randclear(state);
+bool RSAKeyPair::validatePublicKey(RSAPublicKey publicKeyCandidate) {
+    // TODO: do the thing
+    return true;
 }
 
-void RSAKeyPair::generatePrimes(RSAKeyGenOptions keyGenOptions, const BigInt& e, const mpz_t& seed, mpz_t& pResult, mpz_t& qResult) {
-    BigInt minThreshold = "65536";  // 2^16
-    BigInt maxThreshold = "1152921504606846976"; // 2^256
-    if (!isValidThreshold(e, minThreshold, maxThreshold)) {
-        mpz_set_ui(pResult, 0);
-        mpz_set_ui(qResult, 0);
-        throw std::invalid_argument("Error: Public exponent is out of valid range.");
+void RSAKeyPair::computePrivateExponent(mpz_t d, const mpz_t e, const mpz_t phi_n) {
+    if (mpz_invert(d, e, phi_n) == 0) {
+        std::cerr << "Error: e has no modular inverse with respect to phi(n)" << std::endl;
+        exit(1);
     }
+}
 
-    minThreshold = "0";
-    maxThreshold = static_cast<int>(keyGenOptions.securityStrenght) * 2;
+void RSAKeyPair::generateKeyPair(RSAKeyGenOptions options) {
+    mpz_t p, q, n;
+    mpz_inits(p, q, n, NULL);
 
-    if (isValidThreshold(mpz_sizeinbase(seed, 2), minThreshold, maxThreshold)) {
-        mpz_set_ui(pResult, 0);
-        mpz_set_ui(qResult, 0);
-        throw std::invalid_argument("Error: Seed for generating primes is to small.");
-    }
+    generateLargePrime(p, static_cast<unsigned int>(options.securityStrength) / 2, options.primeMethod);
+    generateLargePrime(q, static_cast<unsigned int>(options.securityStrength) / 2, options.primeMethod);
 
-    unsigned int L = 3072/2; // Need to figure out how to get this from RSAKeyGenOtions
-    unsigned int N1 = 0, N2 = 1;
-    BigInt workingSeed = seed;
-    ProvablePrimeConstructionResult results = provablePrimeConstruction(L, N1, N2, workingSeed, e);
+    mpz_mul(n, p, q);
+
+    // Calculate phi(n) = (p-1) * (q-1)
+    mpz_t p_minus_1, q_minus_1, phi_n;
+    mpz_inits(p_minus_1, q_minus_1, phi_n, NULL);
+    mpz_sub_ui(p_minus_1, p, 1);
+    mpz_sub_ui(q_minus_1, q, 1);
+    mpz_mul(phi_n, p_minus_1, q_minus_1);
+
+    computePrivateExponent(privateKey.d.n, publicKey.e.n, phi_n);
+    publicKey.n = n;
+
+    mpz_clears(p, q, n, phi_n, p_minus_1, q_minus_1, NULL);
 }
