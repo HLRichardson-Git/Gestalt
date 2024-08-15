@@ -85,6 +85,14 @@ public:
         return result;
     }
 
+    bool operator==(const BigInt& other) {
+        return mpz_cmp(n, other.n) == 0;
+    }
+
+    bool operator!=(const BigInt& other) {
+        return mpz_cmp(n, other.n) != 0;
+    }
+
     ~BigInt() {
         mpz_clear(n);
     }

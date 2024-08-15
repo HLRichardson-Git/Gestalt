@@ -60,7 +60,7 @@ private:
     void generateKeyPair(RSAKeyGenOptions options);
 
     friend class RSA;
-    friend class RSA_Test;
+    friend class RSA_KeyPair_Test;
 public:
 
     RSAKeyPair() : keyGenOptions() { 
@@ -69,6 +69,7 @@ public:
     RSAKeyPair(RSAKeyGenOptions options) : keyGenOptions(options) { 
         generateKeyPair(options);
     };
+    
     RSAKeyPair(RSAPrivateKey privateKeyCandidate, RSAPublicKey publicKeyCandidate) {
         setPrivateKey(privateKeyCandidate);
         setPublicKey(publicKeyCandidate);
@@ -88,9 +89,8 @@ public:
     RSAPrivateKey getPrivateKey() const { return privateKey; };
     RSAPublicKey getPublicKey() const { return publicKey; };
 
-    // TODO: All these still need implementation
-    bool validateKeyPair() const; // allow user to validate keypair
-    void regenerateKeyPair(const RSAKeyGenOptions& options); // allow user to regenerate
-    unsigned int getModulusBitLength() const; // allow user to validate their pub key size
-    unsigned int getPrivateExponentBitLength() const; // allow user to valide their priv key size
+    bool validateKeyPair();
+    void regenerateKeyPair(const RSAKeyGenOptions& options);
+    unsigned int getModulusBitLength() const;
+    unsigned int getPrivateExponentBitLength() const;
 };

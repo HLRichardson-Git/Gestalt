@@ -1,0 +1,21 @@
+/*
+ * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See the file LICENSE for the full text.
+ */
+
+/*
+ * vectors_rsa.h
+ *
+ */
+
+#pragma once
+
+#include "rsa/rsaObjects.h"
+
+BigInt d = "0x154daf2400b8dff9ba7e320b34bd641fc8d1c7dc368e52b8e86cff26c1f580d67431b9fa8e928263ad1265cf5d69adbe1598b60c86f3c1f1200edf64a28d4d406547d46177d5d1ebd0077aa0b1ee7bd2cbacb8b398a5fa3fcf5a7d163ac40a965845a6a644f7dd87e1e2d7ef4ab39733a8498e4f42442b160421985ec8fdf9aa842000d1ce4a5756723fa4e03c72535601141c0d62ca2cbc611620079065";
+BigInt n = "0x5a07c8e527cdb6c70a2b68fdb2e6fff1d9370a208df93b622f34011d60fd5a4ec2d0abfc0b9af384747c5fdba4a275e9393190f6f7a74468047966e20add3941740cd996f9f22b287634081e29930b78aaa3963964f62105ac91689ef54dcc6c0a1d154daf2400b8dff9ba7e320b34bd641fc8d1c7dc368e52b8e86cff26c1f580d67431b9fa8e928263ad1265cf5d69adbe1598b60c86f3c1f1200edf64a28d4d406547d46177d5d1ebd0077aa0b1ee7bd2cbacb8b398a5fa3fcf5a7d163ac40a965845a6a644f7dd87e1e2d7ef4ab39733a8498e4f42442b160421985ec8fdf9aa842000d1ce4a5756723fa4e03c72535601141c0d62ca2cbc611620079065";
+BigInt e = "65537";
+
+RSAPrivateKey privateKeyVector = { d };
+RSAPublicKey publicKeyVector = { n, e };

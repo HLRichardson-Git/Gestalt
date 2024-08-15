@@ -23,4 +23,4 @@ enum class RANDOM_PRIME_METHOD {
     //probableWithProbableAux
 };
 
-void generateLargePrime(mpz_t prime, unsigned int bits, RANDOM_PRIME_METHOD method);
+void generateLargePrime(mpz_t prime, unsigned int bits, RANDOM_PRIME_METHOD method, gmp_randstate_t& state);
