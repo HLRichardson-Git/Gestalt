@@ -11,6 +11,8 @@
 
 # pragma once
 
+#include <iostream>
+
 #include "bigInt/bigInt.h"
 #include "prime_generation/prime_generation.h"
 
@@ -70,10 +72,14 @@ public:
         generateKeyPair(options);
     };
     
-    RSAKeyPair(RSAPrivateKey privateKeyCandidate, RSAPublicKey publicKeyCandidate) {
-        setPrivateKey(privateKeyCandidate);
-        setPublicKey(publicKeyCandidate);
-    }
+    RSAKeyPair(const RSAPrivateKey& privateKeyCandidate, const RSAPublicKey& publicKeyCandidate) {
+        if (validatePrivateKey(privateKeyCandidate) && validatePublicKey(publicKeyCandidate)) {
+            privateKey = privateKeyCandidate;
+            publicKey = publicKeyCandidate;
+        } else {
+            throw std::invalid_argument("Invalid private or public key provided.");
+        }
+    };
 
     void setPrivateKey(RSAPrivateKey privateKeyCandidate) { 
         if (validatePrivateKey(privateKeyCandidate)) {

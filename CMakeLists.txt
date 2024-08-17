@@ -30,6 +30,7 @@ set (Sources
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
     src/ecc/ecdh/ecdh.cpp
+    src/rsa/rsa.cpp
     src/rsa/rsaObjects.cpp
     src/rsa/prime_generation/prime_generation.cpp
     tools/utils.cpp
