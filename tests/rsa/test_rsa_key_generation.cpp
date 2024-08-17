@@ -12,7 +12,7 @@
 #include "gtest/gtest.h"
 
 #include "rsa/rsaObjects.h"
-#include "vectors/vectors_rsa.h"
+//#include "vectors/vectors_rsa.h"
 
 const bool skipRSAKeyGen = true; // RSA key gen can take awhile, so set to false if you'd like to test RSA keyGen
 
@@ -20,9 +20,6 @@ TEST(RSA_KeyPair_Test, testKeyGen) {
     if(skipRSAKeyGen) GTEST_SKIP();
 
     RSAKeyPair rsa;
-
-    RSAPrivateKey privateKey = rsa.getPrivateKey();
-    RSAPublicKey publicKey = rsa.getPublicKey();
 
     EXPECT_TRUE(rsa.validateKeyPair()) << "Generated key pair was invalid";
 }
