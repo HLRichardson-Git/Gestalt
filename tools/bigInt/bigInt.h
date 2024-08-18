@@ -85,6 +85,36 @@ public:
         return result;
     }
 
+    BigInt operator+(const BigInt& other) const {
+        BigInt result;
+        mpz_add(result.n, this->n, other.n);
+        return result;
+    }
+
+    BigInt operator-(int intN) const {
+        BigInt result;
+        mpz_sub_ui(result.n, this->n, intN);
+        return result;
+    }
+
+    BigInt operator-(const BigInt& other) const {
+        BigInt result;
+        mpz_sub(result.n, this->n, other.n);
+        return result;
+    }
+
+    BigInt operator*(const BigInt& other) const {
+        BigInt result;
+        mpz_mul(result.n, this->n, other.n);
+        return result;
+    }
+
+    BigInt operator%(const BigInt& other) const {
+        BigInt result;
+        mpz_mod(result.n, this->n, other.n);
+        return result;
+    }
+
     bool operator==(const BigInt& other) {
         return mpz_cmp(n, other.n) == 0;
     }
@@ -104,6 +134,18 @@ public:
         void (*freeFunc)(void*, size_t);
         mp_get_memory_functions(nullptr, nullptr, &freeFunc);
         freeFunc(hexStr, strlen(hexStr) + 1);
+
+        return result;
+    }
+
+    std::string toDecimalString() const {
+        char* decimalStr = mpz_get_str(nullptr, 10, n);
+        std::string result(decimalStr);
+
+        // Free the memory allocated by mpz_get_str
+        void (*freeFunc)(void*, size_t);
+        mp_get_memory_functions(nullptr, nullptr, &freeFunc);
+        freeFunc(decimalStr, strlen(decimalStr) + 1);
 
         return result;
     }

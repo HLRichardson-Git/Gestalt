@@ -42,7 +42,30 @@ struct RSAKeyGenOptions {
 };
 
 struct RSAPrivateKey {
-    BigInt d;
+    BigInt d;      // Private exponent
+    BigInt p;      // First prime factor
+    BigInt q;      // Second prime factor
+    BigInt dP;     // d mod (p-1)
+    BigInt dQ;     // d mod (q-1)
+    BigInt qInv;   // q^(-1) mod p
+
+    RSAPrivateKey() = default;
+    RSAPrivateKey(const BigInt& d) : d(d) {}
+    RSAPrivateKey(const BigInt& d, const BigInt& p, const BigInt& q)
+        : d(d), p(p), q(q) {
+        calculateCRTComponents();
+    }
+
+    void calculateCRTComponents() {
+        BigInt pMinus1 = p - 1;
+        BigInt qMinus1 = q - 1;
+        dP = d % pMinus1;
+        dQ = d % qMinus1;
+        if (mpz_invert(qInv.n, q.n, p.n) == 0) {
+            // If the return value is 0, it means the inverse doesn't exist (q and p are not coprime)
+            throw std::runtime_error("q and p are not coprime, modular inverse does not exist.");
+        }
+    }
 };
 
 struct RSAPublicKey {

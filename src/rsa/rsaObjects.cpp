@@ -67,6 +67,10 @@ void RSAKeyPair::generateKeyPair(RSAKeyGenOptions options) {
     mpz_mul(phi_n, p_minus_1, q_minus_1);
 
     computePrivateExponent(privateKey.d.n, publicKey.e.n, phi_n);
+    mpz_set(privateKey.p.n, p);
+    mpz_set(privateKey.q.n, q);
+    privateKey.calculateCRTComponents();
+    
     publicKey.n = n;
 
     mpz_clears(p, q, n, phi_n, p_minus_1, q_minus_1, NULL);
