@@ -22,19 +22,26 @@ BigInt RSA::encrypt(const std::string& plaintext, ENCRYPTION_PADDING_SCHEME padd
 
 BigInt RSA::decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
     BigInt y = ciphertext;
-    BigInt result;
+    BigInt m1, m2, h, result;
     // TODO: Use atleast v5 GMP for this secure function
-    //mpz_powm_sec(result.n, y.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
-    // TODO: implement CRT
-    mpz_powm(result.n, y.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
+    //mpz_powm_sec(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
+    //mpz_powm_sec(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
+    mpz_powm(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
+    mpz_powm(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
+    h = (keyPair.privateKey.qInv * (m1 - m2)) % keyPair.privateKey.p;
+    result = m2 + (h * keyPair.privateKey.q);
+    
     return result;
 }
 
 BigInt RSA::decrypt(const BigInt& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
-    BigInt result;
+    BigInt m1, m2, h, result;
     // TODO: Use atleast v5 GMP for this secure function
-    //mpz_powm_sec(result.n, y.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
-    // TODO: implement CRT
-    mpz_powm(result.n, ciphertext.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
+    //mpz_powm_sec(m1.n, ciphertext.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
+    //mpz_powm_sec(m2.n, ciphertext.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
+    mpz_powm(m1.n, ciphertext.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
+    mpz_powm(m2.n, ciphertext.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
+    h = (keyPair.privateKey.qInv * (m1 - m2)) % keyPair.privateKey.p;
+    result = m2 + (h * keyPair.privateKey.q);
     return result;
 }
