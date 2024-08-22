@@ -10,10 +10,27 @@
  */
 
 #include <gestalt/rsa.h>
+#include "padding_schemes/oaep/oaep.h"
 
 BigInt RSA::encrypt(const std::string& plaintext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
-    BigInt x = plaintext;
+    //BigInt x = plaintext;
+    std::string label = "";
+    BigInt x;
     BigInt result;
+
+    switch (paddingScheme) {
+        case ENCRYPTION_PADDING_SCHEME::NO_PADDING:
+            x = plaintext;
+            break;
+        case ENCRYPTION_PADDING_SCHEME::OAEP:
+            x = applyOAEP_Padding(plaintext, label, keyPair.getModulusBitLength() / 8);
+            break;
+        case ENCRYPTION_PADDING_SCHEME::PKCS1v15:
+            x = plaintext; // TODO
+            break;
+        default:
+            throw std::invalid_argument("Unsupported padding scheme");
+    }
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
     mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
