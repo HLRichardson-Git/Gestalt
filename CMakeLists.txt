@@ -32,6 +32,8 @@ set (Sources
     src/ecc/ecdh/ecdh.cpp
     src/rsa/rsa.cpp
     src/rsa/rsaObjects.cpp
+    src/rsa/padding_schemes/oaep/oaep.cpp
+    src/rsa/padding_schemes/rsa_padding.cpp
     src/rsa/prime_generation/prime_generation.cpp
     tools/utils.cpp
 )

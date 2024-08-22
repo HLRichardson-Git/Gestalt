@@ -19,6 +19,7 @@ set (Sources
     ecc/test_ecdh.cpp
     ecc/test_ecdh_functions.cpp
     rsa/test_rsa.cpp
+    rsa/test_rsa_padding.cpp
     rsa/test_rsa_key_generation.cpp
     rsa/test_rsa_prime_generation.cpp
     hmac/test_hmac.cpp
