@@ -9,33 +9,46 @@
  *
  */
 
-#include <gestalt/rsa.h>
-#include "padding_schemes/oaep/oaep.h"
+#include <iostream> // for debugging
 
-BigInt RSA::encrypt(const std::string& plaintext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
-    //BigInt x = plaintext;
-    std::string label = "";
-    BigInt x;
+#include <gestalt/rsa.h>
+#include "utils.h"
+
+BigInt RSA::encrypt(const std::string& plaintext) {
+    BigInt x = plaintext;
     BigInt result;
 
-    switch (paddingScheme) {
-        case ENCRYPTION_PADDING_SCHEME::NO_PADDING:
-            x = plaintext;
-            break;
-        case ENCRYPTION_PADDING_SCHEME::OAEP:
-            x = applyOAEP_Padding(plaintext, label, keyPair.getModulusBitLength() / 8);
-            break;
-        case ENCRYPTION_PADDING_SCHEME::PKCS1v15:
-            x = plaintext; // TODO
-            break;
-        default:
-            throw std::invalid_argument("Unsupported padding scheme");
-    }
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
     mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
     return result;
 }
+
+BigInt RSA::encrypt(const std::string& plaintext, const OAEPParams& parameters) {
+    BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, keyPair.getModulusBitLength() / 8));
+    std::cout << "EM: " << x.toHexString() << std::endl;
+    BigInt result;
+
+    // TODO: Use atleast v5 GMP for this secure function
+    //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
+    mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
+    return result;
+}
+
+/*BigInt RSA::encryptTest(const std::string& plaintext, ENCRYPTION_PADDING_SCHEME paddingScheme, const std::string& label, const std::string& seed) {
+    //BigInt x;
+    std::string temp = "0x" + convertToHex(applyOAEP_Padding(plaintext, label, keyPair.getModulusBitLength() / 8, seed));
+    BigInt x = temp;
+    BigInt result;
+    //std::string temp = "";
+
+    // TODO: Use atleast v5 GMP for this secure function
+    //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
+
+    std::cout << "x: " << x.toHexString() << std::endl;
+    mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
+    return result;
+}*/
 
 BigInt RSA::decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
     BigInt y = ciphertext;

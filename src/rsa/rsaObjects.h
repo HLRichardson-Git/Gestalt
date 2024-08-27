@@ -66,6 +66,15 @@ struct RSAPrivateKey {
             throw std::runtime_error("q and p are not coprime, modular inverse does not exist.");
         }
     }
+
+    void debugCRTComponents() const {
+        std::cout << "d: " << d.toHexString() << std::endl;
+        std::cout << "p: " << p.toHexString() << std::endl;
+        std::cout << "q: " << q.toHexString() << std::endl;
+        std::cout << "dP: " << dP.toHexString() << std::endl;
+        std::cout << "dQ: " << dQ.toHexString() << std::endl;
+        std::cout << "qInv: " << qInv.toHexString() << std::endl;
+    }
 };
 
 struct RSAPublicKey {
@@ -117,6 +126,7 @@ public:
     };
     RSAPrivateKey getPrivateKey() const { return privateKey; };
     RSAPublicKey getPublicKey() const { return publicKey; };
+    unsigned int getModulusSize() const { return static_cast<unsigned int>(keyGenOptions.securityStrength); }
 
     bool validateKeyPair();
     void regenerateKeyPair(const RSAKeyGenOptions& options);
