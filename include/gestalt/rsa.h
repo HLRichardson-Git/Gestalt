@@ -12,6 +12,7 @@
 # pragma once
 
 #include "rsa/rsaObjects.h"
+#include "rsa/padding_schemes/oaep/oaep.h"
 
 class RSA { 
 private:
@@ -25,7 +26,9 @@ public:
     RSAPrivateKey getPrivateKey() const { return keyPair.getPrivateKey(); };
     RSAPublicKey getPublicKey() const { return keyPair.getPublicKey(); };
 
-    BigInt encrypt(const std::string& plaintext, ENCRYPTION_PADDING_SCHEME paddingScheme);
+    BigInt encrypt(const std::string& plaintext);
+    BigInt encrypt(const std::string& plaintext, const OAEPParams& parameters);
+    //BigInt encryptTest(const std::string& plaintext, const OAEPParams& parameters);
     BigInt decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme);
     BigInt decrypt(const BigInt& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme);
 
