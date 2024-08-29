@@ -11,6 +11,8 @@
 
 # pragma once
 
+#include <iostream>
+
 #include "../rsa_padding.h"
 
 class OAEPParams {
