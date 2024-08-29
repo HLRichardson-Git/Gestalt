@@ -39,7 +39,7 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
 
     std::string seed = params.seed;
     if (seed.empty()) {
-        //seed = generateRandomBytes(h);
+        seed = generateRandomHexData(hashLength);
     }
 
     std::string dbMask = hexToBytes(mgf1(hexToBytes(seed), modulusSizeBytes - hashLength - 1, params.hashFunc));
@@ -54,7 +54,7 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
 
     std::string seedMask = hexToBytes(mgf1(maskedDB, hashLength, params.hashFunc));
     std::cout << "seedMask = MGF(maskedDB, length(seed)): " << convertToHex(seedMask) << std::endl;   
-
+    std::cout << "seed: " << seed << std::endl;
     std::string maskedSeed;
     seed = hexToBytes(seed);
     for (size_t i = 0; i < hashLength; ++i) {

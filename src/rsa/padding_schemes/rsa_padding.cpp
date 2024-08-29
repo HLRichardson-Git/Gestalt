@@ -20,8 +20,10 @@ std::string hash(const std::string& input, RSA_ENCRYPTION_HASH_FUNCTIONS hashFun
     switch (hashFunc) {
         case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA1:
             return hashSHA1(input);
+            break;
         case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256:
             return hashSHA256(input);
+            break;
         /*case HashFunction::SHA512:
             return hashSHA512(input);
         case HashFunction::SHAKE128:
