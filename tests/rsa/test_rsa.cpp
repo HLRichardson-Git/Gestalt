@@ -63,6 +63,8 @@ TEST_P(RSA_OAEP_Test, encrypt) {
 
     RSA rsa(test.privateKey, test.publicKey);
     BigInt computedCiphertext = rsa.encrypt(hexToBytes(test.pt), test.parameters);
+    std::string output = computedCiphertext.toHexString();
+    std::cout << "Output: " << output << std::endl;
 
-    EXPECT_TRUE(computedCiphertext.toHexString() == test.ct);
+    EXPECT_TRUE(output == test.ct);
 }
