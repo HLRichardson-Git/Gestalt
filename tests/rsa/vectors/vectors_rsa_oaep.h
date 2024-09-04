@@ -80,6 +80,7 @@ static RSAPublicKey publicKeyVector7 = { "0x00c2c4a860236d3c9096a076d6ba5107e0f7
 
 static const struct RSA_OAEP_TestVectors {
   std::string name;
+  RSA_SECURITY_STRENGTH keySecurityStrength;
   RSAPrivateKey privateKey;
   RSAPublicKey publicKey;
   OAEPParams parameters;
@@ -88,6 +89,7 @@ static const struct RSA_OAEP_TestVectors {
 } kRSA_OAEP_TestVectors[] = {
     {   // Source [1]
         "OAEP_1024_SHA1",
+        RSA_SECURITY_STRENGTH::RSA_1024,
         privateKeyVector1,
         publicKeyVector1,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA1, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "18b776ea21069d69776a33e96bad48e1dda0a5ef"),
@@ -96,6 +98,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [1]
         "OAEP_2048_SHA1",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector2,
         publicKeyVector2,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA1, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "47e1ab7119fee56c95ee5eaad86f40d0aa63bd33"),
@@ -104,6 +107,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA224_1",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector3,
         publicKeyVector3,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA224, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "00000000000000000000000000000000000000000000000000000000"),
@@ -112,6 +116,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA224_2",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector3,
         publicKeyVector3,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA224, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
@@ -120,6 +125,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA256_1",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector4,
         publicKeyVector4,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "0000000000000000000000000000000000000000000000000000000000000000"),
@@ -128,6 +134,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA256_2",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector4,
         publicKeyVector4,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
@@ -136,6 +143,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_3072_SHA256_1",
+        RSA_SECURITY_STRENGTH::RSA_3072,
         privateKeyVector5,
         publicKeyVector5,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "0000000000000000000000000000000000000000000000000000000000000000"),
@@ -144,6 +152,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_3072_SHA256_2",
+        RSA_SECURITY_STRENGTH::RSA_3072,
         privateKeyVector5,
         publicKeyVector5,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
@@ -152,6 +161,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA384_1",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector6,
         publicKeyVector6,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA384, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
@@ -160,6 +170,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA384_2",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector6,
         publicKeyVector6,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA384, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
@@ -168,6 +179,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA512_1",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector7,
         publicKeyVector7,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA512, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
@@ -176,6 +188,7 @@ static const struct RSA_OAEP_TestVectors {
     },
     {   // Source [2]
         "OAEP_2048_SHA512_2",
+        RSA_SECURITY_STRENGTH::RSA_2048,
         privateKeyVector7,
         publicKeyVector7,
         OAEPParams( RSA_ENCRYPTION_HASH_FUNCTIONS::SHA512, RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, "", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),

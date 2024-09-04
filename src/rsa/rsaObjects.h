@@ -20,7 +20,7 @@ enum class RSA_SECURITY_STRENGTH : unsigned int{
    RSA_1024 = 1024, // 80
    RSA_2048 = 2048, // 112
    RSA_3072 = 3072, // 128
-   RSA_7680 = 7960, // 192
+   RSA_7680 = 7680, // 192
    RSA_15360 = 15360 // 256 
 };
 
@@ -55,6 +55,9 @@ struct RSAPrivateKey {
         : d(d), p(p), q(q) {
         calculateCRTComponents();
     }
+    RSAPrivateKey(const BigInt& d, const BigInt& p, const BigInt& q, 
+              const BigInt& dP, const BigInt& dQ, const BigInt& qInv)
+    : d(d), p(p), q(q), dP(dP), dQ(dQ), qInv(qInv) {}
 
     void calculateCRTComponents() {
         BigInt pMinus1 = p - 1;
@@ -65,15 +68,6 @@ struct RSAPrivateKey {
             // If the return value is 0, it means the inverse doesn't exist (q and p are not coprime)
             throw std::runtime_error("q and p are not coprime, modular inverse does not exist.");
         }
-    }
-
-    void debugCRTComponents() const {
-        std::cout << "d: " << d.toHexString() << std::endl;
-        std::cout << "p: " << p.toHexString() << std::endl;
-        std::cout << "q: " << q.toHexString() << std::endl;
-        std::cout << "dP: " << dP.toHexString() << std::endl;
-        std::cout << "dQ: " << dQ.toHexString() << std::endl;
-        std::cout << "qInv: " << qInv.toHexString() << std::endl;
     }
 };
 
@@ -86,7 +80,7 @@ class RSAKeyPair {
 private:
     RSAPrivateKey privateKey;
     RSAPublicKey publicKey;
-    RSAKeyGenOptions keyGenOptions;
+    RSA_SECURITY_STRENGTH specifiedStrength;
 
     bool validatePrivateKey(RSAPrivateKey privateKeyCandidate);
     bool validatePublicKey(RSAPublicKey publicKeyCandidate);
@@ -97,19 +91,25 @@ private:
     friend class RSA_KeyPair_Test;
 public:
 
-    RSAKeyPair() : keyGenOptions() { 
-        generateKeyPair(keyGenOptions); 
+    RSAKeyPair() { 
+        generateKeyPair({RSA_SECURITY_STRENGTH::RSA_2048, RANDOM_PRIME_METHOD::probable}); 
     };
-    RSAKeyPair(RSAKeyGenOptions options) : keyGenOptions(options) { 
+    RSAKeyPair(RSAKeyGenOptions options) { 
         generateKeyPair(options);
     };
     
-    RSAKeyPair(const RSAPrivateKey& privateKeyCandidate, const RSAPublicKey& publicKeyCandidate) {
-        if (validatePrivateKey(privateKeyCandidate) && validatePublicKey(publicKeyCandidate)) {
+    RSAKeyPair(RSA_SECURITY_STRENGTH specifiedStrength, 
+               const RSAPrivateKey& privateKeyCandidate, 
+               const RSAPublicKey& publicKeyCandidate)   
+        : specifiedStrength(specifiedStrength) {
+        try {
+            validatePrivateKey(privateKeyCandidate);  // Throws if invalid
+            validatePublicKey(publicKeyCandidate);    // Throws if invalid
             privateKey = privateKeyCandidate;
             publicKey = publicKeyCandidate;
-        } else {
-            throw std::invalid_argument("Invalid private or public key provided.");
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Key validation error: " << e.what() << std::endl;
+            throw; // Re-throw the exception to signal the error to the caller
         }
     };
 
@@ -126,7 +126,6 @@ public:
     };
     RSAPrivateKey getPrivateKey() const { return privateKey; };
     RSAPublicKey getPublicKey() const { return publicKey; };
-    unsigned int getModulusSize() const { return static_cast<unsigned int>(keyGenOptions.securityStrength); }
 
     bool validateKeyPair();
     void regenerateKeyPair(const RSAKeyGenOptions& options);

@@ -139,7 +139,7 @@ TEST(DES_Functions, finalPermutation) {
     EXPECT_EQ(output, expected);
 }
 
-TEST(DES_Erros, singleKeyInvalidSize) {
+TEST(DES_Errors, singleKeyInvalidSize) {
     std::string smallKey = "abc";
     EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
 
@@ -147,7 +147,7 @@ TEST(DES_Erros, singleKeyInvalidSize) {
     EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
 }
 
-TEST(TDES_Erros, invalidKeyArrangement) {
+TEST(TDES_Errors, invalidKeyArrangement) {
     std::string largeKey = "10a58869d74be5a374cf867cfb473859";
     EXPECT_THROW(encrypt3DESECB(plaintext, largeKey, key2, key3), std::invalid_argument);
     EXPECT_THROW(encrypt3DESECB(plaintext, key, key, key3), std::invalid_argument);
