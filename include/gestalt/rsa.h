@@ -20,8 +20,8 @@ private:
 
 public:
     RSA() {};
-    RSA(const RSAPrivateKey& privateKey, const RSAPublicKey& publicKey) 
-        : keyPair(privateKey, publicKey) {}
+    RSA(RSA_SECURITY_STRENGTH specifiedStength, const RSAPrivateKey& privateKey, const RSAPublicKey& publicKey) 
+        : keyPair(specifiedStength, privateKey, publicKey) {}
 
     RSAPrivateKey getPrivateKey() const { return keyPair.getPrivateKey(); };
     RSAPublicKey getPublicKey() const { return keyPair.getPublicKey(); };
