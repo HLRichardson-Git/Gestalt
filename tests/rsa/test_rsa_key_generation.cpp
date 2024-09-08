@@ -11,7 +11,8 @@
 
 #include "gtest/gtest.h"
 
-#include "rsa/rsaObjects.h"
+#include "rsa/rsa_key_generation/rsaKeyGen.h"
+#include "vectors/vectors_rsa_key_gen.h"
 //#include "vectors/vectors_rsa.h"
 
 const bool skipRSAKeyGen = true; // RSA key gen can take awhile, so set to false if you'd like to test RSA keyGen
@@ -41,6 +42,47 @@ TEST(RSA_KeyPair_Test, testKeyReGen) {
     EXPECT_FALSE(publicKey1.n == publicKey2.n) << "Both generated public keys are the same";
 }
 
+TEST(RSA_KeyPair_Test, customKeyPairInitialization) {
+    RSAPrivateKey privateKey(d, p, q);
+    RSAPublicKey publicKey(n, e);
+
+    RSAKeyPair rsa(RSA_SECURITY_STRENGTH::RSA_2048, privateKey, publicKey);
+
+    EXPECT_TRUE(rsa.getPrivateKey().d == privateKey.d) << "Custom private exponent intialization failed";
+    EXPECT_TRUE(rsa.getPublicKey().n == publicKey.n) << "Custom public modulus intialization failed";
+    EXPECT_TRUE(rsa.getPublicKey().e == publicKey.e) << "Custom public exponent intialization failed";
+}
+
+TEST(RSA_KeyPair_Test, invalidKeyPairInitialization) {
+    BigInt invalidP = "4";  // Non-prime number
+    BigInt invalidQ = "6";  // Non-prime number
+
+    EXPECT_THROW({
+        RSAPrivateKey invalidPrivateKey(BigInt("123"), invalidP, invalidQ);
+        RSAKeyPair invalidKeyPair(RSA_SECURITY_STRENGTH::RSA_2048, invalidPrivateKey, RSAPublicKey());
+    }, std::runtime_error);
+}
+
+TEST(RSA_KeyPair_Test, specifiedWrongSecurityStrength) {
+    RSAPrivateKey privateKey(d);
+    RSAPublicKey publicKey(n, e);
+
+    EXPECT_THROW({
+        // The keys are intialized with components that are 2048-bits
+        RSAKeyPair invalidKeyPair(RSA_SECURITY_STRENGTH::RSA_3072, privateKey, publicKey);
+    }, std::invalid_argument) << "Private key bit length validation failed";
+}
+
+TEST(RSA_KeyPair_Test, smallPublicExponent) {
+    RSAPrivateKey privateKey(d, p, q);
+    RSAPublicKey publicKey(n, "3");
+
+    EXPECT_THROW({
+        RSAKeyPair rsa(RSA_SECURITY_STRENGTH::RSA_2048, privateKey, publicKey);
+    }, std::invalid_argument) << "Failed to set a small public exponent";
+}
+
+
 TEST(RSA_KeyPair_Test, modulusBitLength) {
     if(skipRSAKeyGen) GTEST_SKIP();
     RSAKeyPair rsa;
@@ -54,30 +96,9 @@ TEST(RSA_KeyPair_Test, privateExponentBitLength) {
 }
 
 TEST(RSA_KeyPair_Test, CRTComponents) {
-    RSAPrivateKey privateKey;
-    RSAPublicKey publicKey;
-    BigInt p = "119030086907066530967391494492175681033756248840948525994731889903895707572509153976362357872678775505961191582135690512327685145263224050525990665688128190663118112168657933987266429097425882345017750557709181522487778727131452976578109051112774115712047592275028397122790329686930804252629176724198825009447";
-    BigInt q = "127364456340339528906073577788044091171452477069008665044690001322420957733938177304175320339886642266063111604958694749031364935575486524581368096018991417792957842767002745688420207082679287259977907444091007719800580619090565972187141471546922861957660222292639774601403257148721499979045428895063950702153";
-    mpz_mul(publicKey.n.n, p.n, q.n);
+    RSAPrivateKey privateKey(d, p, q);
 
-    // Calculate phi(n) = (p-1) * (q-1)
-    mpz_t p_minus_1, q_minus_1, phi_n;
-    mpz_inits(p_minus_1, q_minus_1, phi_n, NULL);
-    mpz_sub_ui(p_minus_1, p.n, 1);
-    mpz_sub_ui(q_minus_1, q.n, 1);
-    mpz_mul(phi_n, p_minus_1, q_minus_1);
-
-    mpz_invert(privateKey.d.n, publicKey.e.n, phi_n);
-    privateKey.p = p;
-    privateKey.q = q;
-    privateKey.calculateCRTComponents();
-    //privateKey.debugCRTComponents();
-
-    BigInt expectedDp = "7702619872329663515765252119280972019838568310030405705840333629589723298518566947125330114866879578265428895125462921140450626379927875830152836003835263387129162361830390436547246987231383295317458536631897078549074104425965364201409287666040176155985074672908363705963864507107031765802528930029253961351";
-    BigInt expectedDq = "40568427393756010588130154513105885274029486531509771317086588913217533495520995029138651633354191636847390859415486715687775501321975085839084166263277932258540900068071201248848311989424754284633700320359488321876758478775585770929499034416314673289380916739534237069202023177435056717008305662213100552473";
-    BigInt expectedQinv = "101275626289598259990650894780533652606010264518543762007795927726276065357417212760628527278807842290798369020603917549940933726819321572279641090553084111850320310977119683264271505115530766512822818605976442904137565875765125279742612101887769579111988805629377414700373267277450036784726835079044632508246";
-
-    EXPECT_TRUE(privateKey.dP == expectedDp);
-    EXPECT_TRUE(privateKey.dQ == expectedDq);
-    EXPECT_TRUE(privateKey.qInv == expectedQinv);
+    EXPECT_TRUE(privateKey.dP == dP);
+    EXPECT_TRUE(privateKey.dQ == dQ);
+    EXPECT_TRUE(privateKey.qInv == qInv);
 }

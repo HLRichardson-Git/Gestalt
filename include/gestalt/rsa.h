@@ -11,6 +11,7 @@
 
 # pragma once
 
+#include "rsa/rsa_key_generation/rsaKeyGen.h"
 #include "rsa/rsaObjects.h"
 #include "rsa/padding_schemes/oaep/oaep.h"
 
