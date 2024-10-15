@@ -23,7 +23,7 @@ static std::string ct = "0x2eab1c8d5315c5094fcc5ed524c312f5bb30bc8516f080f3f10a8
 
 TEST(RSA, encrypt) {
     RSA rsa(RSA_SECURITY_STRENGTH::RSA_2048, privateKeyVector, publicKeyVector);
-    BigInt computedCiphertext = rsa.encrypt(pt);
+    BigInt computedCiphertext = rsa.encrypt(pt, publicKeyVector);
     EXPECT_TRUE("0x" + computedCiphertext.toHexString() == ct);
 }
 
@@ -62,7 +62,7 @@ TEST_P(RSA_OAEP_Test, encrypt) {
     SCOPED_TRACE(test.name);
 
     RSA rsa(test.keySecurityStrength, test.privateKey, test.publicKey);
-    BigInt computedCiphertext = rsa.encrypt(hexToBytes(test.pt), test.parameters);
+    BigInt computedCiphertext = rsa.encrypt(hexToBytes(test.pt), test.publicKey, test.parameters);
     std::string output = computedCiphertext.toHexString();
     std::cout << "Output: " << output << std::endl;
 

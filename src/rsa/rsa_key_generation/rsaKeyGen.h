@@ -65,6 +65,8 @@ struct RSAPublicKey {
     RSAPublicKey() = default;
     RSAPublicKey(const BigInt& n, const BigInt& e)
     : n(n), e(e) {}
+
+    unsigned int getPublicModulusBitLength() const;
 };
 
 class RSAKeyPair {

@@ -14,24 +14,24 @@
 #include <gestalt/rsa.h>
 #include "utils.h"
 
-BigInt RSA::encrypt(const std::string& plaintext) {
+BigInt RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
     BigInt x = plaintext;
     BigInt result;
 
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
-    mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
+    mpz_powm(result.n, x.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
     return result;
 }
 
-BigInt RSA::encrypt(const std::string& plaintext, const OAEPParams& parameters) {
-    BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, keyPair.getModulusBitLength() / 8));
+BigInt RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
+    BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, recipientPublicKey.getPublicModulusBitLength() / 8));
     std::cout << "EM: " << x.toHexString() << std::endl;
     BigInt result;
 
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
-    mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
+    mpz_powm(result.n, x.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
     return result;
 }
 

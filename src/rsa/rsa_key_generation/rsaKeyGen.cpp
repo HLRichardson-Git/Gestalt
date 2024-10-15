@@ -11,6 +11,10 @@
 
 #include "rsaKeyGen.h"
 
+unsigned int RSAPublicKey::getPublicModulusBitLength() const {
+    return mpz_sizeinbase(n.n, 2);
+}
+
 bool RSAKeyPair::isPrime(const BigInt& number) {
     if (mpz_cmp_ui(number.n, 0) == 0) {
         return false;  // Handle the case where number is 0
