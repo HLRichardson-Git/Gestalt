@@ -30,3 +30,4 @@ public:
 };
 
 std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes);
+std::string removeOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes);

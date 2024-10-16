@@ -41,7 +41,7 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
     if (seed.empty()) {
         seed = generateRandomHexData(hashLength);
     }
-
+    std::cout << "seed: " << seed << std::endl;
     std::string dbMask = hexToBytes(mgf1(hexToBytes(seed), modulusSizeBytes - hashLength - 1, params.hashFunc));
     std::cout << "dbMask = MGF(seed, length(DB)): " << convertToHex(dbMask) << std::endl;
     //std::cout << "dbMask length: " << dbMask.length() << std::endl;
@@ -63,4 +63,63 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
     std::cout << "maskedSeed = seed xor seedMask: " << convertToHex(maskedSeed) << std::endl;
 
     return std::string(1, 0x00) + maskedSeed + maskedDB; // EM
+}
+
+std::string removeOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes) {
+    if (static_cast<unsigned char>(input[0]) != 0x00) {
+        throw std::invalid_argument("Given OAEP message does not begin with 0x00");
+    }
+    std::string lhash = hexToBytes(hash(params.label, params.hashFunc));
+    std::cout << "lhash = " << convertToHex(lhash) << std::endl;
+
+    std::cout << "input = " << convertToHex(input) << std::endl;
+    unsigned int hashLength = static_cast<unsigned int>(params.hashFunc);
+    std::string maskedSeed = input.substr(1, hashLength);
+    std::cout << "maskedSeed = " << convertToHex(maskedSeed) << std::endl;
+
+    std::string maskedDB = input.substr(hashLength + 1, input.length());
+    std::cout << "maskedDB = " << convertToHex(maskedDB) << std::endl;
+
+    std::string seedMask = hexToBytes(mgf1(maskedDB, hashLength, params.hashFunc));
+    std::cout << "seedMask = MGF(maskedDB, length(seed)): " << convertToHex(seedMask) << std::endl; 
+
+    std::string seed = "";
+    for (size_t i = 0; i < seedMask.length(); ++i) {
+        seed += maskedSeed[i] ^ seedMask[i];
+    }
+    std::cout << "seed = maskedSeed xor seedMask: " << convertToHex(seed) << std::endl;
+
+    std::string dbMask = hexToBytes(mgf1(seed, modulusSizeBytes - hashLength - 1, params.hashFunc));
+    std::cout << "dbMask = MGF(seed, length(DB)): " << convertToHex(dbMask) << std::endl;
+
+    std::string DB;
+    for (size_t i = 0; i < maskedDB.length(); ++i) {
+        DB += maskedDB[i] ^ dbMask[i];
+    }
+    std::cout << "DB = maskedDB xor dbMask: " << convertToHex(DB) << std::endl;
+    std::cout << "lhash from DB = " << convertToHex(DB.substr(0, hashLength)) << std::endl;
+    std::cout << "lhash = " << convertToHex(lhash) << std::endl;
+    if (DB.substr(0, hashLength) != lhash) {
+        throw std::invalid_argument("OAEP Decode Error: The encoded lhash and computed lhash are not the same.");
+    }
+    std::cout << "GOt here? " << std::endl;
+    // Compute the length of PS
+    int psStartPos = hashLength + 1;  // Padding starts after lhash and the 0x01 delimiter
+    int psEndPos = DB.find(0x01, psStartPos);  // Look for the 0x01 byte which ends PS
+
+    if (psEndPos == std::string::npos || psEndPos <= psStartPos) {
+        throw std::invalid_argument("OAEP Decode Error: Padding 0x01 byte not found.");
+    }
+
+    // Ensure all bytes from psStartPos to psEndPos-1 are zero (the PS)
+    for (int i = psStartPos; i < psEndPos; i++) {
+        if (DB[i] != 0x00) {
+            throw std::invalid_argument("OAEP Decode Error: Non-zero byte found in padding (PS).");
+        }
+    }
+    std::cout << "GOt here? 3" << std::endl;
+    std::string message = DB.substr(psEndPos + 1, DB.length());
+    std::cout << "Message = " << convertToHex(message) << std::endl;
+
+    return message;
 }

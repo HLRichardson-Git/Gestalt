@@ -205,4 +205,4 @@ inline std::string CustomNameGenerator(const testing::TestParamInfo<RSA_OAEP_Tes
 }
 class RSA_OAEP_Test : public testing::TestWithParam<RSA_OAEP_TestVectors> {};
 
-INSTANTIATE_TEST_SUITE_P(All, RSA_OAEP_Test, testing::ValuesIn(kRSA_OAEP_TestVectors), CustomNameGenerator);
+INSTANTIATE_TEST_SUITE_P(RSA_Padding_Encryption, RSA_OAEP_Test, testing::ValuesIn(kRSA_OAEP_TestVectors), CustomNameGenerator);
