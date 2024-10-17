@@ -68,3 +68,16 @@ TEST_P(RSA_OAEP_Test, encrypt) {
 
     EXPECT_TRUE(output == test.ct);
 }
+
+TEST_P(RSA_OAEP_Test, decrypt) {
+    const RSA_OAEP_TestVectors &test = GetParam();
+    SCOPED_TRACE(test.name);
+
+    RSA rsa(test.keySecurityStrength, test.privateKey, test.publicKey);
+    std::cout << "ct: " << test.ct << std::endl;
+    BigInt computedPlaintext = rsa.decrypt("0x" + test.ct, test.parameters);
+    std::string output = computedPlaintext.toHexString();
+    std::cout << "Output: " << output << std::endl;
+    std::cout << "pt: " << test.pt << std::endl;
+    EXPECT_TRUE(output == test.pt);
+}

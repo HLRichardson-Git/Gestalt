@@ -76,9 +76,9 @@ std::string convertToHex(const std::string& input) {
     hexStream << std::hex << std::setfill('0');
     
     // Iterate over each character in the input string
-    for (char c : input) {
-        // Convert the character to its hexadecimal representation
-        hexStream << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+    for (unsigned char c : input) {
+        // Convert each byte to its hexadecimal representation with leading zeros
+        hexStream << std::setw(2) << static_cast<int>(c);
     }
     
     // Return the hexadecimal representation as a string

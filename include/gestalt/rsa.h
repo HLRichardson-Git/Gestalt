@@ -31,6 +31,7 @@ public:
     BigInt encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters);
     //BigInt encryptTest(const std::string& plaintext, const OAEPParams& parameters);
     BigInt decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme);
+    BigInt decrypt(const std::string& ciphertext, const OAEPParams& parameters);
     BigInt decrypt(const BigInt& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme);
 
     BigInt signMessage(const std::string& message, SIGNATURE_PADDING_SCHEME paddingScheme);
