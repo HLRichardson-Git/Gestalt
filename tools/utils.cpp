@@ -21,6 +21,122 @@
 #include <thread>
 #include <bitset>
 
+std::string hexToBytes(const std::string& hex) {
+    std::string bytes;
+    for (size_t i = 0; i < hex.length(); i += 2) {
+        std::string byteString = hex.substr(i, 2);
+        uint8_t byte = static_cast<uint8_t>(std::stoi(byteString, nullptr, 16));
+        bytes.push_back(byte);
+    }
+    return bytes;
+}
+
+std::string hexToBits(const std::string& hex) {
+    std::string bits;
+    for (size_t i = 0; i < hex.length(); i += 2) {
+        std::string byteString = hex.substr(i, 2);
+        uint8_t byte = static_cast<uint8_t>(std::stoi(byteString, nullptr, 16));
+        std::bitset<8> bitset(byte);
+        bits.append(bitset.to_string());
+    }
+    return bits;
+}
+
+std::string bytesToHex(const std::string& bytes) {
+    std::stringstream hexStream;
+    hexStream << std::hex << std::setfill('0');
+    
+    // Iterate over each character in the input string
+    for (char c : bytes) {
+        // Convert the character to its hexadecimal representation
+        hexStream << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+    }
+    
+    // Return the hexadecimal representation as a string
+    return hexStream.str();
+}
+
+std::string bytesToBits(const std::string& bytes) {
+    std::string bits;
+    for (unsigned char byte : bytes) {
+        std::bitset<8> bitset(byte);
+        bits.append(bitset.to_string());
+    }
+    return bits;
+}
+
+std::string bitsToBytes(const std::string& bits) {
+    std::string bytes;
+    for (size_t i = 0; i < bits.length(); i += 8) {
+        std::bitset<8> bitset;
+        std::string byteString = bits.substr(i, 8);
+        if (byteString.length() < 8) {
+            // Handle padding if the last byte is incomplete
+            byteString = std::string(8 - byteString.length(), '0') + byteString;
+        }
+        bitset = std::bitset<8>(byteString);
+        bytes.push_back(static_cast<uint8_t>(bitset.to_ulong()));
+    }
+    return bytes;
+}
+
+std::string bitsToHex(const std::string& bits) {
+    std::string hex;
+    for (size_t i = 0; i < bits.length(); i += 8) {
+        std::bitset<8> bitset;
+        std::string byteString = bits.substr(i, 8);
+        if (byteString.length() < 8) {
+            // Handle padding if the last byte is incomplete
+            byteString = std::string(8 - byteString.length(), '0') + byteString;
+        }
+        bitset = std::bitset<8>(byteString);
+        uint8_t byte = static_cast<uint8_t>(bitset.to_ulong());
+        hex += (byte < 0x10 ? "0" : "") + std::to_string(byte);
+    }
+    return hex;
+}
+
+std::string convertToBytes(const std::string& input) {
+    // Determine the format and call the appropriate function
+    if (input.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos) {
+        // Hexadecimal format
+        return hexToBytes(input);
+    } else if (input.find_first_not_of("01") == std::string::npos) {
+        // Binary format
+        return bitsToBytes(input);
+    } else {
+        // Assuming byte format (could also add more checks here)
+        return input;
+    }
+}
+
+std::string convertToHex(const std::string& input) {
+    std::stringstream hexStream;
+    hexStream << std::hex << std::setfill('0');
+    
+    // Iterate over each character in the input string
+    for (char c : input) {
+        // Convert the character to its hexadecimal representation
+        hexStream << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+    }
+    
+    // Return the hexadecimal representation as a string
+    return hexStream.str();
+}
+
+std::string convertToBits(const std::string& input) {
+    if (input.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos) {
+        // Hexadecimal format
+        return hexToBits(input);
+    } else if (input.find_first_not_of("01") == std::string::npos) {
+        // Binary format
+        return input;
+    } else {
+        // Byte format
+        return bytesToBits(input);
+    }
+}
+
 bool isHex(std::string in) {
     if (in.substr(0, 2) == "0x")
         return true;
@@ -31,7 +147,7 @@ std::string trimHexStr(const std::string& hex) {
     return hex.substr(2, hex.length());
 }
 
-std::string hexToBytes(std::string hex) {
+/*std::string hexToBytes(std::string hex) {
     std::string res;
     res.reserve(hex.size() / 2);
     for (int i = 0; i < hex.size(); i += 2)
@@ -42,7 +158,7 @@ std::string hexToBytes(std::string hex) {
         res += static_cast<char>(temp);
     }
     return res;
-}
+}*/
 
 std::vector<unsigned char> hexStringToBytesVec(const std::string& hexStr)
 {
@@ -71,7 +187,7 @@ void hexStringToBytes(const std::string& hexString, unsigned char* output) {
     }
 }
 
-std::string convertToHex(const std::string& input) {
+/*std::string convertToHex(const std::string& input) {
     std::stringstream hexStream;
     hexStream << std::hex << std::setfill('0');
     
@@ -83,7 +199,7 @@ std::string convertToHex(const std::string& input) {
     
     // Return the hexadecimal representation as a string
     return hexStream.str();
-}
+}*/
 
 std::string decimalToBinary(int num)
 {

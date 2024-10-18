@@ -27,12 +27,11 @@ public:
     RSAPrivateKey getPrivateKey() const { return keyPair.getPrivateKey(); };
     RSAPublicKey getPublicKey() const { return keyPair.getPublicKey(); };
 
-    BigInt encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey);
-    BigInt encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters);
-    //BigInt encryptTest(const std::string& plaintext, const OAEPParams& parameters);
-    BigInt decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme);
-    BigInt decrypt(const std::string& ciphertext, const OAEPParams& parameters);
-    BigInt decrypt(const BigInt& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme);
+    std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey);
+    std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters);
+
+    std::string decrypt(const std::string& ciphertext);
+    std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
 
     BigInt signMessage(const std::string& message, SIGNATURE_PADDING_SCHEME paddingScheme);
     bool signMessage(const std::string& message, const BigInt& signature, SIGNATURE_PADDING_SCHEME paddingScheme);

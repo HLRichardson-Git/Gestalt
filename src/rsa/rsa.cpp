@@ -14,43 +14,27 @@
 #include <gestalt/rsa.h>
 #include "utils.h"
 
-BigInt RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
+std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
     BigInt x = plaintext;
     BigInt result;
 
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
     mpz_powm(result.n, x.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
-    return result;
+    return result.toHexString();
 }
 
-BigInt RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
+std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
     BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, recipientPublicKey.getPublicModulusBitLength() / 8));
-    std::cout << "EM: " << x.toHexString() << std::endl;
     BigInt result;
 
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
     mpz_powm(result.n, x.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
-    return result;
+    return result.toHexString();
 }
 
-/*BigInt RSA::encryptTest(const std::string& plaintext, ENCRYPTION_PADDING_SCHEME paddingScheme, const std::string& label, const std::string& seed) {
-    //BigInt x;
-    std::string temp = "0x" + convertToHex(applyOAEP_Padding(plaintext, label, keyPair.getModulusBitLength() / 8, seed));
-    BigInt x = temp;
-    BigInt result;
-    //std::string temp = "";
-
-    // TODO: Use atleast v5 GMP for this secure function
-    //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
-
-    std::cout << "x: " << x.toHexString() << std::endl;
-    mpz_powm(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
-    return result;
-}*/
-
-BigInt RSA::decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
+std::string RSA::decrypt(const std::string& ciphertext) {
     BigInt y = ciphertext;
     BigInt m1, m2, h, result;
     // TODO: Use atleast v5 GMP for this secure function
@@ -61,10 +45,10 @@ BigInt RSA::decrypt(const std::string& ciphertext, ENCRYPTION_PADDING_SCHEME pad
     h = (keyPair.privateKey.qInv * (m1 - m2)) % keyPair.privateKey.p;
     result = m2 + (h * keyPair.privateKey.q);
     
-    return result;
+    return result.toHexString();
 }
 
-BigInt RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters) {
+std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters) {
     BigInt y = ciphertext;
     BigInt result;
 
@@ -100,33 +84,6 @@ BigInt RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters)
         // Pad with leading zeros
         hexString = std::string(expectedHexLength - hexStringLength, '0') + hexString;
     }
-    
-    std::cout << "got here?"<< std::endl;
-    BigInt decodedPlaintext = "0x" + convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));
 
-    return decodedPlaintext;
-}
-
-BigInt RSA::decrypt(const BigInt& ciphertext, ENCRYPTION_PADDING_SCHEME paddingScheme) {
-    BigInt m1, m2, h, result;
-    // Check if CRT values are available (e.g., dP, dQ, p, q)
-    if (mpz_sgn(keyPair.privateKey.dP.n) != 0 && mpz_sgn(keyPair.privateKey.dQ.n) != 0 &&
-        mpz_sgn(keyPair.privateKey.p.n) != 0 && mpz_sgn(keyPair.privateKey.q.n) != 0) {
-
-        // CRT-based decryption
-        // TODO: Use atleast v5 GMP for this secure function
-        //mpz_powm_sec(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
-        //mpz_powm_sec(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
-        mpz_powm(m1.n, ciphertext.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
-        mpz_powm(m2.n, ciphertext.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
-        h = (keyPair.privateKey.qInv * (m1 - m2)) % keyPair.privateKey.p;
-        result = m2 + (h * keyPair.privateKey.q);
-    } else {
-        // Standard RSA decryption without CRT
-        // TODO: Use atleast v5 GMP for this secure function
-        //mpz_powm_sec(result.n, y.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
-        mpz_powm(result.n, ciphertext.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
-    }
-
-    return result;
+    return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));;
 }
