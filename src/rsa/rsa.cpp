@@ -14,42 +14,15 @@
 #include <gestalt/rsa.h>
 #include "utils.h"
 
-std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
-    BigInt x = plaintext;
+BigInt RSA::rawEncrypt(const BigInt& plaintext, const RSAPublicKey& recipientPublicKey) const {
     BigInt result;
-
     // TODO: Use atleast v5 GMP for this secure function
     //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
-    mpz_powm(result.n, x.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
-    return result.toHexString();
+    mpz_powm(result.n, plaintext.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
+    return result;
 }
 
-std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
-    BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, recipientPublicKey.getPublicModulusBitLength() / 8));
-    BigInt result;
-
-    // TODO: Use atleast v5 GMP for this secure function
-    //mpz_powm_sec(result.n, x.n, keyPair.publicKey.e.n, keyPair.publicKey.n.n);
-    mpz_powm(result.n, x.n, recipientPublicKey.e.n, recipientPublicKey.n.n);
-    return result.toHexString();
-}
-
-std::string RSA::decrypt(const std::string& ciphertext) {
-    BigInt y = ciphertext;
-    BigInt m1, m2, h, result;
-    // TODO: Use atleast v5 GMP for this secure function
-    //mpz_powm_sec(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
-    //mpz_powm_sec(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
-    mpz_powm(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
-    mpz_powm(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
-    h = (keyPair.privateKey.qInv * (m1 - m2)) % keyPair.privateKey.p;
-    result = m2 + (h * keyPair.privateKey.q);
-    
-    return result.toHexString();
-}
-
-std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters) {
-    BigInt y = ciphertext;
+BigInt RSA::rawDecrypt(const BigInt& ciphertext) const {
     BigInt result;
 
     // Check if CRT values are available (e.g., dP, dQ, p, q)
@@ -61,29 +34,63 @@ std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parame
         // TODO: Use atleast v5 GMP for this secure function
         //mpz_powm_sec(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
         //mpz_powm_sec(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
-        mpz_powm(m1.n, y.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
-        mpz_powm(m2.n, y.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
+        mpz_powm(m1.n, ciphertext.n, keyPair.privateKey.dP.n, keyPair.privateKey.p.n);
+        mpz_powm(m2.n, ciphertext.n, keyPair.privateKey.dQ.n, keyPair.privateKey.q.n);
         h = (keyPair.privateKey.qInv * (m1 - m2)) % keyPair.privateKey.p;
         result = m2 + (h * keyPair.privateKey.q);
     } else {
         // Standard RSA decryption without CRT
         // TODO: Use atleast v5 GMP for this secure function
         //mpz_powm_sec(result.n, y.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
-        mpz_powm(result.n, y.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
+        mpz_powm(result.n, ciphertext.n, keyPair.privateKey.d.n, keyPair.publicKey.n.n);
     }
 
-    // Get the modulus size in bytes (key size)
+    return result;
+}
+
+BigInt RSA::rawSignatureGen(const BigInt& messageHash, const RSAPrivateKey& privateKey) const {
+    // Signature generation is the same as raw decryption using the private key.
+    return rawDecrypt(messageHash);
+}
+
+BigInt RSA::rawSignatureVer(const BigInt& signature, const RSAPublicKey& recipientPublicKey) const {
+    // Signature verification is the same as raw encryption using the public key.
+    return rawEncrypt(signature, recipientPublicKey);
+}
+
+std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
+    BigInt x = plaintext;
+    return rawEncrypt(x, recipientPublicKey).toHexString();
+}
+
+std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
-    
-    // Convert result to hex and ensure it is padded to the correct length
+    BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, modulusSizeInBytes));
+    return rawEncrypt(x, recipientPublicKey).toHexString();
+}
+
+std::string RSA::decrypt(const std::string& ciphertext) {
+    BigInt y = ciphertext;
+    return rawDecrypt(y).toHexString();
+}
+
+std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters) {
+    BigInt y = ciphertext;
+    BigInt result = rawDecrypt(y);
+
+    /* 
+     * GMP which is the library providing multiple precision numbers and maths operations strips leading zeros
+     * so the following segement of code corrects this if needed.
+     */
+    size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
     std::string hexString = result.toHexString();
     size_t hexStringLength = hexString.length();
     size_t expectedHexLength = modulusSizeInBytes * 2; // 2 hex digits per byte
     
+    // Pad with leading zeros
     if (hexStringLength < expectedHexLength) {
-        // Pad with leading zeros
         hexString = std::string(expectedHexLength - hexStringLength, '0') + hexString;
     }
 
-    return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));;
+    return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));
 }

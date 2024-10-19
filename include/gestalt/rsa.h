@@ -19,6 +19,12 @@ class RSA {
 private:
     RSAKeyPair keyPair; 
 
+    BigInt rawEncrypt(const BigInt& plaintext, const RSAPublicKey& recipientPublicKey) const;
+    BigInt rawDecrypt(const BigInt& ciphertext) const;
+
+    BigInt rawSignatureGen(const BigInt& messageHash, const RSAPrivateKey& privateKey) const;
+    BigInt rawSignatureVer(const BigInt& signature, const RSAPublicKey& recipientPublicKey) const;
+
 public:
     RSA() {};
     RSA(RSA_SECURITY_STRENGTH specifiedStength, const RSAPrivateKey& privateKey, const RSAPublicKey& publicKey) 
@@ -33,6 +39,6 @@ public:
     std::string decrypt(const std::string& ciphertext);
     std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
 
-    BigInt signMessage(const std::string& message, SIGNATURE_PADDING_SCHEME paddingScheme);
+    std::string signMessage(const std::string& message, SIGNATURE_PADDING_SCHEME paddingScheme);
     bool signMessage(const std::string& message, const BigInt& signature, SIGNATURE_PADDING_SCHEME paddingScheme);
 };
