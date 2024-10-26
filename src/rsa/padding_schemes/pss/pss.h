@@ -33,5 +33,5 @@ public:
 
 std::size_t calculateEmLen(std::size_t emBits);
 
-std::string applyPSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes);
-std::string removePSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes);
+std::string encodePSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes);
+bool verifyPSS_Padding(const std::string& EM, const std::string& message, const PSSParams& params, unsigned int modulusSizeBytes);

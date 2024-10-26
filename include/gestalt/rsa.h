@@ -40,7 +40,9 @@ public:
     std::string decrypt(const std::string& ciphertext);
     std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
 
-    std::string signMessage(const std::string& message, SIGNATURE_PADDING_SCHEME paddingScheme);
-    std::string signMessage(const std::string& message, const PSSParams& parameters);
-    bool signMessage(const std::string& message, const BigInt& signature, SIGNATURE_PADDING_SCHEME paddingScheme);
+    std::string signMessage(const std::string& messageHash, SIGNATURE_PADDING_SCHEME paddingScheme);
+    std::string signMessage(const std::string& messageHash, const PSSParams& parameters);
+
+    bool verifySignature(const std::string& messageHash, const std::string& signature, SIGNATURE_PADDING_SCHEME paddingScheme);
+    bool verifySignature(const std::string& messageHash, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters);
 };

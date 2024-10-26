@@ -95,8 +95,19 @@ std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parame
     return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));
 }
 
-std::string RSA::signMessage(const std::string& message, const PSSParams& parameters) {
+std::string RSA::signMessage(const std::string& messageHash, const PSSParams& parameters) {
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
-    BigInt x = "0x" + convertToHex(applyPSS_Padding(message, parameters, modulusSizeInBytes));
+    BigInt x = "0x" + convertToHex(encodePSS_Padding(messageHash, parameters, modulusSizeInBytes));
     return rawSignatureGen(x).toHexString();
+}
+
+bool RSA::verifySignature(const std::string& messageHash, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters) {
+    BigInt sigInt = BigInt("0x" + signature);
+    BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
+    std::string decryptedHashBytes = hexToBytes(decryptedHash.toHexString());
+
+    size_t modulusSizeInBytes = recipientPublicKey.getPublicModulusBitLength() / 8;
+    bool result = verifyPSS_Padding(decryptedHashBytes, messageHash, parameters, modulusSizeInBytes);
+
+    return result;
 }
