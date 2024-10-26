@@ -14,6 +14,7 @@
 #include "rsa/rsa_key_generation/rsaKeyGen.h"
 #include "rsa/rsaObjects.h"
 #include "rsa/padding_schemes/oaep/oaep.h"
+#include "rsa/padding_schemes/pss/pss.h"
 
 class RSA { 
 private:
@@ -22,7 +23,7 @@ private:
     BigInt rawEncrypt(const BigInt& plaintext, const RSAPublicKey& recipientPublicKey) const;
     BigInt rawDecrypt(const BigInt& ciphertext) const;
 
-    BigInt rawSignatureGen(const BigInt& messageHash, const RSAPrivateKey& privateKey) const;
+    BigInt rawSignatureGen(const BigInt& messageHash) const;
     BigInt rawSignatureVer(const BigInt& signature, const RSAPublicKey& recipientPublicKey) const;
 
 public:
@@ -40,5 +41,6 @@ public:
     std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
 
     std::string signMessage(const std::string& message, SIGNATURE_PADDING_SCHEME paddingScheme);
+    std::string signMessage(const std::string& message, const PSSParams& parameters);
     bool signMessage(const std::string& message, const BigInt& signature, SIGNATURE_PADDING_SCHEME paddingScheme);
 };

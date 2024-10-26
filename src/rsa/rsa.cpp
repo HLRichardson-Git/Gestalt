@@ -48,7 +48,7 @@ BigInt RSA::rawDecrypt(const BigInt& ciphertext) const {
     return result;
 }
 
-BigInt RSA::rawSignatureGen(const BigInt& messageHash, const RSAPrivateKey& privateKey) const {
+BigInt RSA::rawSignatureGen(const BigInt& messageHash) const {
     // Signature generation is the same as raw decryption using the private key.
     return rawDecrypt(messageHash);
 }
@@ -93,4 +93,10 @@ std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parame
     }
 
     return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));
+}
+
+std::string RSA::signMessage(const std::string& message, const PSSParams& parameters) {
+    size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
+    BigInt x = "0x" + convertToHex(applyPSS_Padding(message, parameters, modulusSizeInBytes));
+    return rawSignatureGen(x).toHexString();
 }
