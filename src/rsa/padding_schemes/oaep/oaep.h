@@ -18,11 +18,11 @@
 class OAEPParams {
 public:
     std::string label;
-    RSA_ENCRYPTION_HASH_FUNCTIONS hashFunc;  // Enum for available hash functions
+    RSA_HASH_FUNCTIONS hashFunc;  // Enum for available hash functions
     RSA_ENCRYPTION_MGF_FUNCTIONS mgfFunc;  // Enum for MGF1 with specific hash functions
     std::string seed; // Should only be set for testing purposes
 
-    OAEPParams(RSA_ENCRYPTION_HASH_FUNCTIONS hash = RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256, 
+    OAEPParams(RSA_HASH_FUNCTIONS hash = RSA_HASH_FUNCTIONS::SHA256, 
                RSA_ENCRYPTION_MGF_FUNCTIONS mgf = RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, 
                const std::string& label = "",
                const std::string& seed = "")

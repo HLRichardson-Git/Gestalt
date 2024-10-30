@@ -16,21 +16,21 @@
 #include <gestalt/sha1.h>
 #include <gestalt/sha2.h>
 
-std::string hash(const std::string& input, RSA_ENCRYPTION_HASH_FUNCTIONS hashFunc) {
+std::string hash(const std::string& input, RSA_HASH_FUNCTIONS hashFunc) {
     switch (hashFunc) {
-        case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA1:
+        case RSA_HASH_FUNCTIONS::SHA1:
             return hashSHA1(input);
             break;
-        case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA224:
+        case RSA_HASH_FUNCTIONS::SHA224:
             return hashSHA224(input);
             break;
-        case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA256:
+        case RSA_HASH_FUNCTIONS::SHA256:
             return hashSHA256(input);
             break;
-        case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA384:
+        case RSA_HASH_FUNCTIONS::SHA384:
             return hashSHA384(input);
             break;
-        case RSA_ENCRYPTION_HASH_FUNCTIONS::SHA512:
+        case RSA_HASH_FUNCTIONS::SHA512:
             return hashSHA512(input);
         /*case HashFunction::SHAKE128:
             return shake128(input);
@@ -42,7 +42,7 @@ std::string hash(const std::string& input, RSA_ENCRYPTION_HASH_FUNCTIONS hashFun
 }
 
 
-std::string mgf1(const std::string& seed, unsigned int maskLen, RSA_ENCRYPTION_HASH_FUNCTIONS hashFunc) {
+std::string mgf1(const std::string& seed, unsigned int maskLen, RSA_HASH_FUNCTIONS hashFunc) {
     unsigned int hashLength = static_cast<unsigned int>(hashFunc);
     std::string mask = "";
     unsigned char C[4];

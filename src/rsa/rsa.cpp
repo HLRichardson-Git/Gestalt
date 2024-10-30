@@ -104,9 +104,19 @@ std::string RSA::signMessage(const std::string& messageHash, const PSSParams& pa
 bool RSA::verifySignature(const std::string& messageHash, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters) {
     BigInt sigInt = BigInt("0x" + signature);
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
-    std::string decryptedHashBytes = hexToBytes(decryptedHash.toHexString());
 
-    size_t modulusSizeInBytes = recipientPublicKey.getPublicModulusBitLength() / 8;
+    size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
+    std::string hexString = decryptedHash.toHexString();
+    size_t hexStringLength = hexString.length();
+    size_t expectedHexLength = modulusSizeInBytes * 2; // 2 hex digits per byte
+    
+    // Pad with leading zeros
+    if (hexStringLength < expectedHexLength) {
+        hexString = std::string(expectedHexLength - hexStringLength, '0') + hexString;
+    }
+
+    std::string decryptedHashBytes = hexToBytes(hexString);
+
     bool result = verifyPSS_Padding(decryptedHashBytes, messageHash, parameters, modulusSizeInBytes);
 
     return result;
