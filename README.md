@@ -146,7 +146,10 @@ int main() {
     std::string messageHash = hashSHA256(message);
 
     Signature signature = ecdsa.signMessage(messageHash);
-    bool signatureStatus = ecdsa.verifySignature(messageHash, signature);
+
+    Point peerPublicKey("0x60fed4ba255a9d31c961eb74c6356d68c049b8923b61fa6ce669622e60f29fb6"
+                        "0x7903fe1008b8bc99a41ae9e95628bc64f2f1b20c2d7e9f5177a3c294d4462299");
+    bool signatureStatus = ecdsa.verifySignature(messageHash, peerPublicKey, signature);
 
     if (signatureStatus) std::cout << "Valid!" << std::endl;
 

@@ -42,7 +42,7 @@ TEST_P(ECDSASignatureVerTest, sigVer) {
 
     Signature signature(test.expected_r, test.expected_s); 
 
-    bool verify = ecdsa.verifySignature(test.msg, signature);
+    bool verify = ecdsa.verifySignature(test.msg, ecdsa.getPublicKey(), signature);
 
     EXPECT_TRUE(verify);
 }
@@ -53,7 +53,7 @@ TEST(ECDSA, PWCT)  {
     BigInt k = "0x94A1BBB14B906A61A280F245F9E93C7F3B4A6247824F5D33B9670787642A68DE";
 
     std::string digest = "44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56";
-
+    
     Signature signature = ecdsa.signMessage(digest, k);
 
     Signature expected("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC", 
@@ -62,7 +62,7 @@ TEST(ECDSA, PWCT)  {
     EXPECT_TRUE(mpz_cmp(signature.r, expected.r) == 0);
     EXPECT_TRUE(mpz_cmp(signature.s, expected.s) == 0);
 
-    bool verify = ecdsa.verifySignature(digest, signature);
+    bool verify = ecdsa.verifySignature(digest, ecdsa.getPublicKey(), signature);
 
     EXPECT_TRUE(verify);
 }
@@ -75,7 +75,7 @@ TEST(ECDSA, inducedFailureVerification) {
     Signature signature = ecdsa.signMessage(digest);
 
     digest= "1AC6";
-    bool verify = ecdsa.verifySignature(digest, signature);
+    bool verify = ecdsa.verifySignature(digest, ecdsa.getPublicKey(), signature);
 
     EXPECT_TRUE(!verify);
 }

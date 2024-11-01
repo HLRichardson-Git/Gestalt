@@ -47,7 +47,9 @@ public:
 
 	~ECDSA() {}
 
+    Point getPublicKey() const { return keyPair.publicKey; };
+
     Signature signMessage(const std::string& messageHash);
     Signature signMessage(const std::string& messageHash, BigInt& K);
-    bool verifySignature(const std::string& messageHash, const Signature signature);
+    bool verifySignature(const std::string& messageHash, const Point& peerPublicKey, const Signature signature);
 };

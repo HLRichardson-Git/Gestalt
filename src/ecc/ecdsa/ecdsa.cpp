@@ -112,7 +112,7 @@ Signature ECDSA::generateSignature(const mpz_t& e, mpz_t& k) {
     return signature;
 }
 
-bool ECDSA::verifySignature(const std::string& message, const Signature signature) {
+bool ECDSA::verifySignature(const std::string& message, const Point& peerPublicKey, const Signature signature) {
     mpz_t e;
     mpz_init(e);
     prepareMessage(message, e);
@@ -135,7 +135,7 @@ bool ECDSA::verifySignature(const std::string& message, const Signature signatur
 
     // Calculate P = u1*G + u2*publicKey
     Point P = addPoints(scalarMultiplyPoints(u1, ellipticCurve.generator), 
-                        scalarMultiplyPoints(u2, keyPair.publicKey));
+                        scalarMultiplyPoints(u2, peerPublicKey));
 
     // Take the x-coordiante of R and make sure it is a valid integer.
     mpz_t xCoordinateOfP;
