@@ -40,9 +40,11 @@ TEST_P(ECDSASignatureVerTest, sigVer) {
     
     ECDSA ecdsa(test.curve, test.privateKey);
 
-    Signature signature(test.expected_r, test.expected_s); 
+    Signature signature(test.expected_r, test.expected_s);
 
-    bool verify = ecdsa.verifySignature(test.msg, ecdsa.getPublicKey(), signature);
+    ECDSAPublicKey peerPublicKey(ecdsa.getPublicKey().getPublicKey(), test.curve);
+
+    bool verify = ecdsa.verifySignature(test.msg, peerPublicKey, signature);
 
     EXPECT_TRUE(verify);
 }

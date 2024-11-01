@@ -30,7 +30,7 @@ protected:
     bool isInDomainRange(const mpz_t& k) { return ecc.isInDomainRange(k); };
     bool isIdentityPoint(const Point& P) { return ecc.isIdentityPoint(P); };
     bool isPointOnCurve(const Point& P) { return ecc.isPointOnCurve(P); };
-    std::string isValidPublicKey(const Point& P) { return ecc.isValidPublicKey(P); };
+    std::string isValidPublicKey(const ECDSAPublicKey& P) { return ecc.isValidPublicKey(P); };
     std::string isValidKeyPair(const KeyPair& K) { return ecc.isValidKeyPair(K); };
 };
 
@@ -125,28 +125,28 @@ TEST_F(ECC_Test, pointIsOnCurve) {
 }
 
 TEST_F(ECC_Test, isValidPublicKey) {
-    Point validPublicKey("0xffc5679a309953b590ef4a3601a5598e83893017527859dd6312ec1177f53749", 
+    ECDSAPublicKey validPublicKey("0xffc5679a309953b590ef4a3601a5598e83893017527859dd6312ec1177f53749", 
                          "0xe8ba1c3fa2e5c9d3312e93361b08662d81cb540c1b08a7e0e17b1b5651462584");
     std::cout << isValidPublicKey(validPublicKey) << std::endl;
     EXPECT_TRUE(isValidPublicKey(validPublicKey).empty());
 
 
-    Point pointNotOnCurve("-1000", "56");
+    ECDSAPublicKey pointNotOnCurve("-1000", "56");
     EXPECT_TRUE(isValidPublicKey(pointNotOnCurve) == "Error: Given Public Key is not on the curve.");
 
-    Point pointIsIdentityPoint("0", "0");
+    ECDSAPublicKey pointIsIdentityPoint("0", "0");
     EXPECT_TRUE(isValidPublicKey(pointIsIdentityPoint) == "Error: Given Public Key is the Identity element.");
 
-    Point resultIsIdentity("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey resultIsIdentity("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                            "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     BigInt modulus = "0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141";
-    Point result = scalarMultiplyPoints(modulus.n, resultIsIdentity);
+    Point result = scalarMultiplyPoints(modulus.n, resultIsIdentity.getPublicKey());
     EXPECT_EQ(mpz_cmp_ui(result.x, 0), 0);
     EXPECT_EQ(mpz_cmp_ui(result.y, 0), 0);
 }
 
 TEST_F(ECC_Test, isValidKeyPair) {
-    Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair validKeyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
     EXPECT_TRUE(isValidKeyPair(validKeyPair).empty());
@@ -154,7 +154,7 @@ TEST_F(ECC_Test, isValidKeyPair) {
     KeyPair invalidPrivateKey("-1000", publicKey);
     EXPECT_TRUE(isValidKeyPair(invalidPrivateKey) == "Error: Given Private Key is not in range [1, n - 1].");
 
-    Point pubKeyIsNotPair("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey pubKeyIsNotPair("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                           "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair mismatchKeyPair("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2", pubKeyIsNotPair);
     EXPECT_TRUE(isValidKeyPair(mismatchKeyPair) == "Error: Pair-wise consistency check failed.");
@@ -165,7 +165,7 @@ TEST_F(ECC_Test, setKeyPair) {
     KeyPair uninitializedKeyPair;
     EXPECT_TRUE(isValidKeyPair(uninitializedKeyPair) == "Error: Given Public Key is the Identity element.");
 
-    Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair validKeyPair("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
 
@@ -175,10 +175,10 @@ TEST_F(ECC_Test, setKeyPair) {
     KeyPair result = eccObject.getKeyPair();
 
     EXPECT_TRUE(mpz_cmp(validKeyPair.privateKey, result.privateKey) == 0);
-    EXPECT_TRUE(mpz_cmp(validKeyPair.publicKey.x, result.publicKey.x) == 0);
-    EXPECT_TRUE(mpz_cmp(validKeyPair.publicKey.y, result.publicKey.y) == 0);
+    EXPECT_TRUE(mpz_cmp(validKeyPair.getPublicKey().x, result.getPublicKey().x) == 0);
+    EXPECT_TRUE(mpz_cmp(validKeyPair.getPublicKey().y, result.getPublicKey().y) == 0);
 
-    Point pubKeyIsNotPair("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey pubKeyIsNotPair("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                           "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair mismatchKeyPair("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2", pubKeyIsNotPair);
 
@@ -274,7 +274,7 @@ TEST(ECC_Objects, PointAssignmentOperator) {
 
 TEST(ECC_Objects, KeyPairInitialization) {
     // Check Hexidecimal value initialization
-    Point publicKey1("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey publicKey1("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair P("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey1);
 
@@ -284,11 +284,11 @@ TEST(ECC_Objects, KeyPairInitialization) {
     mpz_init_set_str(y, "EFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD", 16);
 
     EXPECT_TRUE(mpz_cmp(P.privateKey, priv) == 0);
-    EXPECT_TRUE(mpz_cmp(P.publicKey.x, x) == 0);
-    EXPECT_TRUE(mpz_cmp(P.publicKey.y, y) == 0);
+    EXPECT_TRUE(mpz_cmp(P.getPublicKey().x, x) == 0);
+    EXPECT_TRUE(mpz_cmp(P.getPublicKey().y, y) == 0);
 
     // Check decimal value initialization
-    Point publicKey2("41508913618560943505682868066484155222795806420711968987006339848963526306366", 
+    ECDSAPublicKey publicKey2("41508913618560943505682868066484155222795806420711968987006339848963526306366", 
                     "47779048823291371033741797327759287667537405354646831765410899091079836405219");
     KeyPair Q("10528738585638442885886470026673783468944086105714080698941011408558582127129", publicKey2);
 
@@ -297,12 +297,12 @@ TEST(ECC_Objects, KeyPairInitialization) {
     mpz_set_str(y,    "47779048823291371033741797327759287667537405354646831765410899091079836405219", 10);
 
     EXPECT_TRUE(mpz_cmp(Q.privateKey, priv) == 0);
-    EXPECT_TRUE(mpz_cmp(Q.publicKey.x, x) == 0);
-    EXPECT_TRUE(mpz_cmp(Q.publicKey.y, y) == 0);
+    EXPECT_TRUE(mpz_cmp(Q.getPublicKey().x, x) == 0);
+    EXPECT_TRUE(mpz_cmp(Q.getPublicKey().y, y) == 0);
 
     // Make sure keyPair1 != keyPair2
-    EXPECT_TRUE(mpz_cmp(P.publicKey.x, Q.publicKey.x) != 0);
-    EXPECT_TRUE(mpz_cmp(P.publicKey.y, Q.publicKey.y) != 0);
+    EXPECT_TRUE(mpz_cmp(P.getPublicKey().x, Q.getPublicKey().x) != 0);
+    EXPECT_TRUE(mpz_cmp(P.getPublicKey().y, Q.getPublicKey().y) != 0);
 
     // Check proper NULL initialization
     KeyPair T;
@@ -310,22 +310,22 @@ TEST(ECC_Objects, KeyPairInitialization) {
     mpz_init(n);
 
     EXPECT_TRUE(mpz_cmp(T.privateKey, n) == 0);
-    EXPECT_TRUE(mpz_cmp(T.publicKey.x, n) == 0);
-    EXPECT_TRUE(mpz_cmp(T.publicKey.y, n) == 0);
+    EXPECT_TRUE(mpz_cmp(T.getPublicKey().x, n) == 0);
+    EXPECT_TRUE(mpz_cmp(T.getPublicKey().y, n) == 0);
 
     mpz_clears(x, y, n, NULL);
 }
 
 TEST(ECC_Objects, KeyPairAssignmentOperator) {
-    Point publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
+    ECDSAPublicKey publicKey("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE", 
                     "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD");
     KeyPair P("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464", publicKey);
 
     KeyPair Q = P;
 
     EXPECT_TRUE(mpz_cmp(P.privateKey, Q.privateKey) == 0);
-    EXPECT_TRUE(mpz_cmp(P.publicKey.x, Q.publicKey.x) == 0);
-    EXPECT_TRUE(mpz_cmp(P.publicKey.y, Q.publicKey.y) == 0);
+    EXPECT_TRUE(mpz_cmp(P.getPublicKey().x, Q.getPublicKey().x) == 0);
+    EXPECT_TRUE(mpz_cmp(P.getPublicKey().y, Q.getPublicKey().y) == 0);
 }
 
 TEST(ECC_Objects, SignatureInitialization) {

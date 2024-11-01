@@ -28,9 +28,6 @@
 
 class ECDH : public ECC {
 private:
-
-    Point peerPublicKey;
-
     std::string keyToString(const Point& point) const;
 
     friend class ECDH_Test;
@@ -44,8 +41,6 @@ public:
 
 	~ECDH() {}
 
-    Point givePublicKey() const;
-    void getPublicKey(const Point& givenPublicKey);
-    std::string computeSharedSecret();
-    std::string computeSharedSecret(const Point& peerPublicKey);
+    ECDHPublicKey getPublicKey() const { return keyPair.getPublicKey(); };
+    std::string computeSharedSecret(const ECDHPublicKey& peerPublicKey);
 };
