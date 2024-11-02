@@ -26,6 +26,25 @@
 #include <gmp.h>
 
 #include <gestalt/ecdsa.h>
+#include <gestalt/sha1.h>
+#include <gestalt/sha2.h>
+
+std::function<std::string(const std::string&)> ECDSA::getHashFunction(HashAlgorithm hashAlg) {
+    switch (hashAlg) {
+        case HashAlgorithm::SHA1:
+            return hashSHA1;
+        case HashAlgorithm::SHA224:
+            return hashSHA224;
+        case HashAlgorithm::SHA256:
+            return hashSHA256;
+        case HashAlgorithm::SHA384:
+            return hashSHA384;
+        case HashAlgorithm::SHA512:
+            return hashSHA512;
+        default:
+            throw std::invalid_argument("Unsupported hash function");
+    }
+}
 
 void ECDSA::prepareMessage(const std::string& messageHash, mpz_t& result) {
     std::string hashWithoutPrefix = messageHash;
@@ -48,7 +67,9 @@ bool ECDSA::isInvalidSignature(Signature S) {
     return (mpz_cmp_ui(S.r, 0) == 0 || mpz_cmp_ui(S.s, 0) == 0);
 }
 
-Signature ECDSA::signMessage(const std::string& messageHash) {
+Signature ECDSA::signMessage(const std::string& message, HashAlgorithm hashAlg) {
+    std::string messageHash = getHashFunction(hashAlg)(message);
+
     mpz_t e;
     mpz_init(e);
     prepareMessage(messageHash, e);
@@ -68,7 +89,9 @@ Signature ECDSA::signMessage(const std::string& messageHash) {
     return signature;
 }
 
-Signature ECDSA::signMessage(const std::string& messageHash, BigInt& K) {
+Signature ECDSA::signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg) {
+    std::string messageHash = getHashFunction(hashAlg)(message);
+
     mpz_t e;
     mpz_init(e);
     prepareMessage(messageHash, e);
@@ -112,10 +135,12 @@ Signature ECDSA::generateSignature(const mpz_t& e, mpz_t& k) {
     return signature;
 }
 
-bool ECDSA::verifySignature(const std::string& message, const Signature signature) {
+bool ECDSA::verifySignature(const std::string& message, const Signature& signature, HashAlgorithm hashAlg) {
+    std::string messageHash = getHashFunction(hashAlg)(message);
+
     mpz_t e;
     mpz_init(e);
-    prepareMessage(message, e);
+    prepareMessage(messageHash, e);
 
     mpz_t sInverse;
     mpz_init(sInverse);
