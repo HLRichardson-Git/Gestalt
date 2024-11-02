@@ -57,7 +57,9 @@ public:
 
 	~ECDSA() {}
 
+    ECDSAPublicKey getPublicKey() const { return keyPair.publicKey; };
+
     Signature signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
     Signature signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
-    bool verifySignature(const std::string& message, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const std::string& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

@@ -12,6 +12,8 @@
  */
 #pragma once
 
+//#include "standardCurves.h"
+
 #include <string>
 #include <gmp.h>
 
@@ -94,19 +96,73 @@ public:
     Point setPoint(const std::string& strX, const std::string& strY) { return Point(strX, strY); };
 };
 
+#include "standardCurves.h"
+
+class PublicKey {
+private:
+    Point point;
+    StandardCurve curve;
+
+    StandardCurve guessCurve(const Point& point) {
+        size_t sizeInBytes = (mpz_sizeinbase(point.x, 2) + 7) / 8;
+        if (sizeInBytes == 32) {
+            return StandardCurve::P256;
+        } else if (sizeInBytes == 48) {
+            return StandardCurve::P384;
+        } else if (sizeInBytes == 66) {
+            return StandardCurve::P521;
+        } else {
+            return StandardCurve::secp256k1;
+        }
+    }
+
+public:
+    // Constructors
+    PublicKey() : curve(StandardCurve::P256) {}
+    PublicKey(const std::string& strX, const std::string& strY) : point(Point(strX, strY)) {
+        curve = guessCurve(point);
+    }
+    PublicKey(const Point& publicKey) : point(publicKey) {
+        curve = guessCurve(publicKey);
+    }
+    PublicKey(const Point& publicKey, const StandardCurve& curve) : point(publicKey), curve(curve) {}
+
+    // Accessors
+    Point getPublicKey() const { return point; }
+    StandardCurve getPublicKeyCurve() const { return curve; }
+
+    void setCurve(const StandardCurve& givenCurve) { curve = givenCurve; }
+};
+
+class ECDSAPublicKey : public PublicKey{
+public:
+    ECDSAPublicKey() : PublicKey() {}
+    ECDSAPublicKey(const std::string& strX, const std::string& strY) : PublicKey(strX, strY) {}
+    ECDSAPublicKey(const Point& point) : PublicKey(point) {}
+    ECDSAPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
+};
+
+class ECDHPublicKey : public PublicKey{
+public:
+    ECDHPublicKey() : PublicKey() {}
+    ECDHPublicKey(const std::string& strX, const std::string& strY) : PublicKey(strX, strY) {}
+    ECDHPublicKey(const Point& point) : PublicKey(point) {}
+    ECDHPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
+};
+
 class KeyPair {
 public:
     mpz_t privateKey;
-    Point publicKey;
+    ECDSAPublicKey publicKey;
 
     KeyPair() { mpz_init(privateKey); }
-    KeyPair(const mpz_t& gmpPriv, const Point& strPub) {
+    KeyPair(const mpz_t& gmpPriv, const ECDSAPublicKey& strPub) {
         mpz_init(privateKey);
         mpz_set(privateKey, gmpPriv);
         publicKey = strPub;
     }
 
-    KeyPair(const std::string& strPriv, const Point& strPub) {
+    KeyPair(const std::string& strPriv, const ECDSAPublicKey& strPub) {
         mpz_init(privateKey);
         stringToGMP(strPriv, privateKey);
         publicKey = strPub;
@@ -123,6 +179,8 @@ public:
     } 
 
     ~KeyPair() { mpz_clear(privateKey); }
+
+    Point getPublicKey() const { return publicKey.getPublicKey(); };
 };
 
 class Signature {

@@ -24,7 +24,6 @@
 #pragma once
 
 #include "eccObjects.h"
-#include "standardCurves.h"
 
 class ECC {
 private:
@@ -41,7 +40,7 @@ private:
     bool isInDomainRange(const mpz_t k);
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
-    std::string isValidPublicKey(const Point P);
+    std::string isValidPublicKey(const ECDSAPublicKey P);
     std::string isValidKeyPair(const KeyPair& K);
 
     friend class ECDSA;
@@ -49,7 +48,9 @@ private:
     friend class ECC_Test;
 public:
 
-    ECC(StandardCurve curve = StandardCurve::secp256k1) : ellipticCurve(getCurveParams(curve)) {}
+    ECC(StandardCurve curve = StandardCurve::secp256k1) : ellipticCurve(getCurveParams(curve)) {
+        keyPair.publicKey.setCurve(curve);
+    }
 
     ~ECC() {}
 
@@ -57,6 +58,9 @@ public:
 
     void setKeyPair(const KeyPair& newKeyPair);
     void setKeyPair(const std::string& strKey);
-    void setCurve(StandardCurve curveType) { ellipticCurve = getCurveParams(curveType); }
+    void setCurve(StandardCurve curveType) { 
+        ellipticCurve = getCurveParams(curveType);
+        keyPair.publicKey.setCurve(curveType); 
+    }
     KeyPair getKeyPair() const { return keyPair; }
 };

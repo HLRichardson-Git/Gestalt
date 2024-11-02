@@ -182,12 +182,12 @@ bool ECC::isPointOnCurve(Point P) {
     return (isInDomainRange(P.x)) && (isInDomainRange(P.y));
 }
 
-std::string ECC::isValidPublicKey(const Point P) {
-    if (!isPointOnCurve(P)) return "Error: Given Public Key is not on the curve.";
-    if (isIdentityPoint(P)) return "Error: Given Public Key is the Identity element.";
+std::string ECC::isValidPublicKey(const ECDSAPublicKey P) {
+    if (!isPointOnCurve(P.getPublicKey())) return "Error: Given Public Key is not on the curve.";
+    if (isIdentityPoint(P.getPublicKey())) return "Error: Given Public Key is the Identity element.";
 
     // Check n*P = identity
-    Point result = scalarMultiplyPoints(ellipticCurve.n, P);
+    Point result = scalarMultiplyPoints(ellipticCurve.n, P.getPublicKey());
     if (!isIdentityPoint(result)) {
         return "Error: Given Public key multiplied by curve modulus is not Identity Element.";
     }
@@ -202,7 +202,7 @@ std::string ECC::isValidKeyPair(const KeyPair& K) {
 
     // Check d*G = pubKey
     Point result = scalarMultiplyPoints(K.privateKey, ellipticCurve.generator);
-    if (mpz_cmp(result.x, K.publicKey.x) != 0 || mpz_cmp(result.y, K.publicKey.y) != 0) {
+    if (mpz_cmp(result.x, K.publicKey.getPublicKey().x) != 0 || mpz_cmp(result.y, K.publicKey.getPublicKey().y) != 0) {
         return "Error: Pair-wise consistency check failed.";
     }
 
@@ -246,7 +246,7 @@ void ECC::setKeyPair(const std::string& givenKey) {
     stringToGMP(givenKey, n);
 
     KeyPair result(n, scalarMultiplyPoints(n, ellipticCurve.generator));
-    if(isIdentityPoint(result.publicKey)) throw 
+    if(isIdentityPoint(result.publicKey.getPublicKey())) throw 
         std::invalid_argument("Error: Given Private Key derives identity public key.");
 
     mpz_clear(n);
