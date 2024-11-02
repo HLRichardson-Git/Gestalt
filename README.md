@@ -135,7 +135,6 @@ int main() {
 
 ```cpp
 #include <gestalt/ecdsa.h>
-#include <gestalt/sha2.h>
 #include <iostream>
 
 int main() {
@@ -143,10 +142,9 @@ int main() {
     ECDSA ecdsa(StandardCurve::P256, privateKey);
 
     std::string message = "Hello, Gestalt!";
-    std::string messageHash = hashSHA256(message);
 
-    Signature signature = ecdsa.signMessage(messageHash);
-    bool signatureStatus = ecdsa.verifySignature(messageHash, signature);
+    Signature signature = ecdsa.signMessage(message, HashAlgorithm::SHA256);
+    bool signatureStatus = ecdsa.verifySignature(message, signature, HashAlgorithm::SHA256);
 
     if (signatureStatus) std::cout << "Valid!" << std::endl;
 
