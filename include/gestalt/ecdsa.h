@@ -29,6 +29,7 @@
 #include "../src/ecc/ecc.h"
 
 enum class HashAlgorithm {
+    None,   // No hash function
     SHA1,
     SHA224,
     SHA256,
@@ -56,7 +57,7 @@ public:
 
 	~ECDSA() {}
 
-    Signature signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::SHA256);
-    Signature signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::SHA256);
-    bool verifySignature(const std::string& message, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::SHA256);
+    Signature signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
+    Signature signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const std::string& message, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

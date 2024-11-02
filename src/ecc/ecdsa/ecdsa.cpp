@@ -31,6 +31,8 @@
 
 std::function<std::string(const std::string&)> ECDSA::getHashFunction(HashAlgorithm hashAlg) {
     switch (hashAlg) {
+        case HashAlgorithm::None:
+            return [](const std::string& in) { return in; };
         case HashAlgorithm::SHA1:
             return hashSHA1;
         case HashAlgorithm::SHA224:
