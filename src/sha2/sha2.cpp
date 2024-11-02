@@ -12,6 +12,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <climits>
 
 #include <gestalt/sha2.h>
 #include "sha2Constants.h"
