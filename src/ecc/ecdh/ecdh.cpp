@@ -26,32 +26,13 @@
 
 #include <gestalt/ecdh.h>
 
-Point ECDH::givePublicKey() const {
-    return keyPair.publicKey;
-}
-
-void ECDH::getPublicKey(const Point& givenPublicKey) {
-    std::string validationError = isValidPublicKey(givenPublicKey);
-    if (!validationError.empty()) {
-        throw std::invalid_argument(validationError);
-    }
-    peerPublicKey = givenPublicKey;
-}
-
-std::string ECDH::computeSharedSecret() {
-    Point sharedPoint = scalarMultiplyPoints(keyPair.privateKey, peerPublicKey);
-    if(isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
-    fieldElementToInteger(sharedPoint.x, sharedPoint.x);
-    return keyToString(sharedPoint);
-}
-
-std::string ECDH::computeSharedSecret(const Point& givenPeerPublicKey) {
-    std::string validationError = isValidPublicKey(givenPeerPublicKey);
+std::string ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
+    std::string validationError = isValidPublicKey(givenPeerPublicKey.getPublicKey());
     if (!validationError.empty()) {
         throw std::invalid_argument(validationError);
     }
 
-    Point sharedPoint = scalarMultiplyPoints(keyPair.privateKey, givenPeerPublicKey);
+    Point sharedPoint = scalarMultiplyPoints(keyPair.privateKey, givenPeerPublicKey.getPublicKey());
     if(isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
     fieldElementToInteger(sharedPoint.x, sharedPoint.x);
     return keyToString(sharedPoint);

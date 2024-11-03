@@ -26,7 +26,17 @@
 
 #pragma once
 
+#include <functional>
 #include "../src/ecc/ecc.h"
+
+enum class HashAlgorithm {
+    None,   // No hash function
+    SHA1,
+    SHA224,
+    SHA256,
+    SHA384,
+    SHA512
+};
 
 class ECDSA : public ECC {
 private:
@@ -35,6 +45,7 @@ private:
     bool isInvalidSignature(Signature S);
 
     Signature generateSignature(const mpz_t& e, mpz_t& k);
+    std::function<std::string(const std::string&)> getHashFunction(HashAlgorithm hashAlg);
 
     friend class ECDSA_Test;
 public:
@@ -47,7 +58,9 @@ public:
 
 	~ECDSA() {}
 
-    Signature signMessage(const std::string& messageHash);
-    Signature signMessage(const std::string& messageHash, BigInt& K);
-    bool verifySignature(const std::string& messageHash, const Signature signature);
+    ECDSAPublicKey getPublicKey() const { return keyPair.publicKey; };
+
+    Signature signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
+    Signature signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const std::string& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

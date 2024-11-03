@@ -1,4 +1,4 @@
-Gestalt was designed and developed by Hunter RIchardson.
+Gestalt was designed and developed by Hunter Richardson.
 
 ### Current Maintainers
 
@@ -10,7 +10,6 @@ Gestalt was designed and developed by Hunter RIchardson.
 
 ## Thanks
 
-Special thanks to the following extraordinary individuals, without whom
-Gestalt would not be possible:
+Special thanks to the following extraordinary individuals, without whom Gestalt would not be possible:
 
-*
+* Morteza Mirzaei | mirzaim

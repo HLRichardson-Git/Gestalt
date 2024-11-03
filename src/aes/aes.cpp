@@ -11,6 +11,7 @@
  */
 
 #include <string>
+#include <cstring>
 #include <iostream>
 
 #include <gestalt/aes.h>

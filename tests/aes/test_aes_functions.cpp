@@ -9,6 +9,8 @@
  *
  */
 
+#include <cstring>
+
 #include "gtest/gtest.h"
 
 #include "aes/aesCore.h"

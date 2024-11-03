@@ -26,6 +26,27 @@
 #include <gmp.h>
 
 #include <gestalt/ecdsa.h>
+#include <gestalt/sha1.h>
+#include <gestalt/sha2.h>
+
+std::function<std::string(const std::string&)> ECDSA::getHashFunction(HashAlgorithm hashAlg) {
+    switch (hashAlg) {
+        case HashAlgorithm::None:
+            return [](const std::string& in) { return in; };
+        case HashAlgorithm::SHA1:
+            return hashSHA1;
+        case HashAlgorithm::SHA224:
+            return hashSHA224;
+        case HashAlgorithm::SHA256:
+            return hashSHA256;
+        case HashAlgorithm::SHA384:
+            return hashSHA384;
+        case HashAlgorithm::SHA512:
+            return hashSHA512;
+        default:
+            throw std::invalid_argument("Unsupported hash function");
+    }
+}
 
 void ECDSA::prepareMessage(const std::string& messageHash, mpz_t& result) {
     std::string hashWithoutPrefix = messageHash;
@@ -48,7 +69,9 @@ bool ECDSA::isInvalidSignature(Signature S) {
     return (mpz_cmp_ui(S.r, 0) == 0 || mpz_cmp_ui(S.s, 0) == 0);
 }
 
-Signature ECDSA::signMessage(const std::string& messageHash) {
+Signature ECDSA::signMessage(const std::string& message, HashAlgorithm hashAlg) {
+    std::string messageHash = getHashFunction(hashAlg)(message);
+
     mpz_t e;
     mpz_init(e);
     prepareMessage(messageHash, e);
@@ -68,7 +91,9 @@ Signature ECDSA::signMessage(const std::string& messageHash) {
     return signature;
 }
 
-Signature ECDSA::signMessage(const std::string& messageHash, BigInt& K) {
+Signature ECDSA::signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg) {
+    std::string messageHash = getHashFunction(hashAlg)(message);
+
     mpz_t e;
     mpz_init(e);
     prepareMessage(messageHash, e);
@@ -112,30 +137,34 @@ Signature ECDSA::generateSignature(const mpz_t& e, mpz_t& k) {
     return signature;
 }
 
-bool ECDSA::verifySignature(const std::string& message, const Signature signature) {
+bool ECDSA::verifySignature(const std::string& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg) {
+    std::string messageHash = getHashFunction(hashAlg)(message);
+
     mpz_t e;
     mpz_init(e);
-    prepareMessage(message, e);
+    prepareMessage(messageHash, e);
+
+    Curve peerCurve = getCurveParams(peerPublicKey.getPublicKeyCurve());
 
     mpz_t sInverse;
     mpz_init(sInverse);
-    mpz_invert(sInverse, signature.s, ellipticCurve.n);
+    mpz_invert(sInverse, signature.s, peerCurve.n);
 
     // Calculate u1 = sInverse * e mod n
     mpz_t u1;
     mpz_init(u1);
     mpz_mul(u1, sInverse, e);
-    mpz_mod(u1, u1, ellipticCurve.n);
+    mpz_mod(u1, u1, peerCurve.n);
 
     // Calculate u2 = sInverse * r mod n
     mpz_t u2;
     mpz_init(u2);
     mpz_mul(u2, sInverse, signature.r);
-    mpz_mod(u2, u2, ellipticCurve.n);
+    mpz_mod(u2, u2, peerCurve.n);
 
     // Calculate P = u1*G + u2*publicKey
-    Point P = addPoints(scalarMultiplyPoints(u1, ellipticCurve.generator), 
-                        scalarMultiplyPoints(u2, keyPair.publicKey));
+    Point P = addPoints(scalarMultiplyPoints(u1, peerCurve.generator), 
+                        scalarMultiplyPoints(u2, peerPublicKey.getPublicKey()));
 
     // Take the x-coordiante of R and make sure it is a valid integer.
     mpz_t xCoordinateOfP;
@@ -145,7 +174,7 @@ bool ECDSA::verifySignature(const std::string& message, const Signature signatur
     // Calculate P.x mod n
     mpz_t P_mod_n;
     mpz_init(P_mod_n);
-    mpz_mod(P_mod_n, xCoordinateOfP, ellipticCurve.n);
+    mpz_mod(P_mod_n, xCoordinateOfP, peerCurve.n);
 
     // Compare r with P.x mod n
     bool verified = (mpz_cmp(signature.r, P_mod_n) == 0);
