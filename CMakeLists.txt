@@ -34,6 +34,7 @@ set (Sources
     src/rsa/rsaObjects.cpp
     src/rsa/padding_schemes/oaep/oaep.cpp
     src/rsa/padding_schemes/pss/pss.cpp
+    src/rsa/padding_schemes/pkcs1v15/pkcs1v15.cpp
     src/rsa/padding_schemes/rsa_padding.cpp
     src/rsa/prime_generation/prime_generation.cpp
     src/rsa/rsa_key_generation/rsaKeyGen.cpp
