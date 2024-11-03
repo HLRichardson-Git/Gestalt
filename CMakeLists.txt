@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 # Project setup
-project (Gestalt VERSION 0.6.1 LANGUAGES C CXX)
+project (Gestalt VERSION 0.6.2 LANGUAGES C CXX)
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)

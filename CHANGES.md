@@ -21,6 +21,14 @@ Gestalt Releases
  Gestalt 0.6
 -----------
 
+### Changes between 0.6.1 and 0.6.2 [3 Nov 2024]
+
+ * Adds `peerPublicKey` as parameter for ECDSA signature verification
+ * Adds `ECDSAPublicKey` and `ECDHPublicKey` to be used for ECC public keys in place of old `Point` class
+ * Adds `HashAlgorithm` enum as parameter to ECDSA signature generation/ verification to select hash to be used
+ * Refactors ECDH to force user to pass `ECDHPublicKey` as parameter to compute shared secret for simplicity
+ * Implements CI/CD GitHub action workflow to run unit tests on push/PR to main or release branches
+
 ### Changes between 0.6 and 0.6.1 [8 Aug 2024]
 
  * Refactors unit tests
