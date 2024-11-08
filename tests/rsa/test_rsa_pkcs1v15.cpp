@@ -25,6 +25,6 @@ const std::string expectedSignature =
 TEST(RSA_PKCS1v15, encodeForSigning) {
     GTEST_SKIP(); // Currently Failing as GMP strips leading zeros of the encoded message with PKCS#1v1.5
     RSA rsa(RSA_SECURITY_STRENGTH::RSA_1024, privateKeyVector, publicKeyVector);
-    std::string computedSignature = rsa.signMessage(hexToBytes(inputMsg), RSA_HASH_FUNCTIONS::SHA1);
+    std::string computedSignature = rsa.signMessage(hexToBytes(inputMsg), HashAlgorithm::SHA1);
     EXPECT_EQ(computedSignature, expectedSignature);
 }

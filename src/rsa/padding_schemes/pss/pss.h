@@ -26,13 +26,13 @@ const size_t PADDING1_SIZE = 8;
 
 class PSSParams {
 public:
-    RSA_HASH_FUNCTIONS hashFunc;  // Enum for available hash functions
-    RSA_ENCRYPTION_MGF_FUNCTIONS mgfFunc;  // Enum for MGF1 with specific hash functions
+    HashAlgorithm hashFunc;  // Enum for available hash functions
+    RSA_MGF_FUNCTIONS mgfFunc;  // Enum for MGF1 with specific hash functions
     size_t sLen;
     std::string salt; // Should only be set for testing purposes
 
-    PSSParams(RSA_HASH_FUNCTIONS hash = RSA_HASH_FUNCTIONS::SHA256, 
-              RSA_ENCRYPTION_MGF_FUNCTIONS mgf = RSA_ENCRYPTION_MGF_FUNCTIONS::MGF1, 
+    PSSParams(HashAlgorithm hash = HashAlgorithm::SHA256, 
+              RSA_MGF_FUNCTIONS mgf = RSA_MGF_FUNCTIONS::MGF1, 
               size_t sLen = 0,
               const std::string& salt = "")
         : hashFunc(hash), mgfFunc(mgf), sLen(sLen), salt(salt) {}

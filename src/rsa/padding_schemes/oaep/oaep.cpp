@@ -31,7 +31,7 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
     // because it is doing it correctly, but since the output of hashSHA256 is in hex, and the length of DB
     // is expected as bytes its "counting the byte twice", so its adding 32 to the length
     // Maybe this is an overall flaw of the SHA implementations I have...
-    std::string DB = hexToBytes(hash(params.label, params.hashFunc)) + PS + "\x01" + input;
+    std::string DB = hexToBytes(hash(params.hashFunc)(params.label)) + PS + "\x01" + input;
 
     std::string seed = params.seed;
     if (seed.empty()) {
@@ -77,7 +77,7 @@ std::string removeOAEP_Padding(const std::string& input, const OAEPParams& param
         DB += maskedDB[i] ^ dbMask[i];
     }
 
-    std::string lhash = hexToBytes(hash(params.label, params.hashFunc));
+    std::string lhash = hexToBytes(hash(params.hashFunc)(params.label));
     if (DB.substr(0, hashLength) != lhash) {
         throw std::invalid_argument("OAEP Decode Error: The encoded lhash and computed lhash are not the same.");
     }

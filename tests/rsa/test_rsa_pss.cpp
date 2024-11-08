@@ -24,7 +24,7 @@ const std::string expectedEncodedMessage =
     "66e4672e836ad121ba244bed6576b867d9a447c28a6e66a5b87dee7fbc7e65af5057f86fae8984d9ba7f969ad6fe02a4d75f7445fefdd85b6d"
     "3a477c28d24ba1e3756f792dd1dce8ca94440ecb5279ecd3183a311fc896da1cb39311af37ea4a75e24bdbfd5c1da0de7cecdf1a896f9d8bc8"
     "16d97cd7a2c43bad546fbe8cfebc";
-const PSSParams parameters = {RSA_HASH_FUNCTIONS::SHA1, MGF1, 20, "e3b5d5d002c1bce50c2b65ef88a188d83bce7e61"};
+const PSSParams parameters = {HashAlgorithm::SHA1, MGF1, 20, "e3b5d5d002c1bce50c2b65ef88a188d83bce7e61"};
 
 TEST(RSA_PSS, encode) {
     std::string result = encodePSS_Padding(hexToBytes(inputMsg), parameters, 128);

@@ -37,18 +37,18 @@
  *     is that GMP strips the leading zeros of the encoded message of PKCS#1v1.5.
  */
 
-std::string getAlgorithmIdentifier(const RSA_HASH_FUNCTIONS& hashAlgorithm) {
-    switch (hashAlgorithm) {
-        case RSA_HASH_FUNCTIONS::SHA1:
+std::string getAlgorithmIdentifier(const HashAlgorithm& hashAlg) {
+    switch (hashAlg) {
+        case HashAlgorithm::SHA1:
             return "3021300906052b0e03021a05000414";
             break;
-        case RSA_HASH_FUNCTIONS::SHA256:
+        case HashAlgorithm::SHA256:
             return "3031300d060960864801650304020105000420";
             break;
-        case RSA_HASH_FUNCTIONS::SHA384:
+        case HashAlgorithm::SHA384:
             return "3041300d060960864801650304020205000430";
             break;
-        case RSA_HASH_FUNCTIONS::SHA512:
+        case HashAlgorithm::SHA512:
             return "3051300d060960864801650304020305000440";
         default:
             throw std::invalid_argument("Unsupported hash function");
@@ -65,12 +65,12 @@ std::string decodeForEncryptionPKCS1v15(const std::string& input) {
     return "";
 }
 
-std::string encodeForSigningPKCS1v15(const std::string& input, const RSA_HASH_FUNCTIONS& hashAlgoritm) {
+std::string encodeForSigningPKCS1v15(const std::string& input, const HashAlgorithm& hashAlg) {
     // 1. Hash the input message
-    std::string H = hexToBytes(hash(input, hashAlgoritm));
+    std::string H = hexToBytes(hash(hashAlg)(input));
 
     // 2. Get DER-encoded AlgorithmIdentifier || Hash (H)
-    std::string T = hexToBytes(getAlgorithmIdentifier(hashAlgoritm)) + H;
+    std::string T = hexToBytes(getAlgorithmIdentifier(hashAlg)) + H;
 
     // 3
     size_t tLen = T.length();

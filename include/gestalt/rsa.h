@@ -15,6 +15,7 @@
 #include "rsa/padding_schemes/oaep/oaep.h"
 #include "rsa/padding_schemes/pss/pss.h"
 #include "rsa/padding_schemes/pkcs1v15/pkcs1v15.h"
+#include "hash_utils/hash_utils.h"
 
 class RSA { 
 private:
@@ -40,9 +41,9 @@ public:
     std::string decrypt(const std::string& ciphertext);
     std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
 
-    std::string signMessage(const std::string& message, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
-    std::string signMessage(const std::string& message, const PSSParams& parameters, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
+    std::string signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
+    std::string signMessage(const std::string& message, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
 
-    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
-    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
+    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

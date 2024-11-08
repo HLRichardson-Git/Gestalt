@@ -40,10 +40,10 @@
  *     is that GMP strips the leading zeros of the encoded message of PKCS#1v1.5.
  */
 
-std::string getAlgorithmIdentifier(const RSA_HASH_FUNCTIONS& hashAlgorithm);
+std::string getAlgorithmIdentifier(const HashAlgorithm& hashAlg);
 
 std::string encodeForEncryptionPKCS1v15(const std::string& input);
 std::string decodeForEncryptionPKCS1v15(const std::string& input);
 
-std::string encodeForSigningPKCS1v15(const std::string& input, const RSA_HASH_FUNCTIONS& hashAlgoritm);
+std::string encodeForSigningPKCS1v15(const std::string& input, const HashAlgorithm& hashAlg);
 bool verifyForSigningPKCS1v15(const std::string& input, const std::string& EM);

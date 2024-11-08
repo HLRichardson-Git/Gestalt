@@ -16,37 +16,8 @@
 #include <gestalt/sha1.h>
 #include <gestalt/sha2.h>
 
-std::string hash(const std::string& input, RSA_HASH_FUNCTIONS hashFunc) {
-    switch (hashFunc) {
-        case RSA_HASH_FUNCTIONS::None:
-            return input;
-            break;
-        case RSA_HASH_FUNCTIONS::SHA1:
-            return hashSHA1(input);
-            break;
-        case RSA_HASH_FUNCTIONS::SHA224:
-            return hashSHA224(input);
-            break;
-        case RSA_HASH_FUNCTIONS::SHA256:
-            return hashSHA256(input);
-            break;
-        case RSA_HASH_FUNCTIONS::SHA384:
-            return hashSHA384(input);
-            break;
-        case RSA_HASH_FUNCTIONS::SHA512:
-            return hashSHA512(input);
-        /*case HashFunction::SHAKE128:
-            return shake128(input);
-        case HashFunction::SHAKE256:
-            return shake256(input);*/
-        default:
-            throw std::invalid_argument("Unsupported hash function");
-    }
-}
-
-
-std::string mgf1(const std::string& seed, unsigned int maskLen, RSA_HASH_FUNCTIONS hashFunc) {
-    unsigned int hashLength = static_cast<unsigned int>(hashFunc);
+std::string mgf1(const std::string& seed, unsigned int maskLen, HashAlgorithm hashAlg) {
+    unsigned int hashLength = static_cast<unsigned int>(hashAlg);
     std::string mask = "";
     unsigned char C[4];
     int iterations = (maskLen + hashLength - 1) / hashLength; // This is the same as ceil(maskLen/ SHA256_LENGTH)
@@ -58,7 +29,7 @@ std::string mgf1(const std::string& seed, unsigned int maskLen, RSA_HASH_FUNCTIO
         C[2] = (i >> 8) & 0xFF;
         C[3] = i & 0xFF;
 
-        std::string computedHash = hash(seed + std::string(reinterpret_cast<char*>(C), 4), hashFunc);
+        std::string computedHash = hash(hashAlg)(seed + std::string(reinterpret_cast<char*>(C), 4));
         mask += computedHash;
     }
 

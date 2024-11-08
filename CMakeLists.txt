@@ -38,6 +38,7 @@ set (Sources
     src/rsa/prime_generation/prime_generation.cpp
     src/rsa/rsa_key_generation/rsaKeyGen.cpp
     tools/utils.cpp
+    tools/hash_utils/hash_utils.cpp
 )
 
 add_library (${PROJECT_NAME} STATIC ${Sources})

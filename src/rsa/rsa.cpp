@@ -95,21 +95,24 @@ std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parame
     return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));
 }
 
-std::string RSA::signMessage(const std::string& message, RSA_HASH_FUNCTIONS hashAlgoritm) {
-    std::string messageHash = hash(message, hashAlgoritm);
+std::string RSA::signMessage(const std::string& message, HashAlgorithm hashAlg) {
+    //std::string messageHash = hash(message, hashAlgoritm);
+    std::string messageHash = hash(hashAlg)(message);
     BigInt x = "0x" + messageHash;
     return rawSignatureGen(x).toHexString();
 }
 
-std::string RSA::signMessage(const std::string& message, const PSSParams& parameters, RSA_HASH_FUNCTIONS hashAlgoritm) {
-    std::string messageHash = hash(message, hashAlgoritm);
+std::string RSA::signMessage(const std::string& message, const PSSParams& parameters, HashAlgorithm hashAlg) {
+    //std::string messageHash = hash(message, hashAlgoritm);
+    std::string messageHash = hash(hashAlg)(message);
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
     BigInt x = "0x" + convertToHex(encodePSS_Padding(messageHash, parameters, modulusSizeInBytes));
     return rawSignatureGen(x).toHexString();
 }
 
-bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, RSA_HASH_FUNCTIONS hashAlgoritm) {
-    std::string messageHash = hash(message, hashAlgoritm);
+bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg) {
+    //std::string messageHash = hash(message, hashAlgoritm);
+    std::string messageHash = hash(hashAlg)(message);
     
     BigInt sigInt = BigInt("0x" + signature);
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
@@ -117,8 +120,9 @@ bool RSA::verifySignature(const std::string& message, const std::string& signatu
     return decryptedHash == BigInt("0x" + messageHash);;
 }
 
-bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, RSA_HASH_FUNCTIONS hashAlgoritm) {
-    std::string messageHash = hash(message, hashAlgoritm);
+bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg) {
+    //std::string messageHash = hash(message, hashAlgoritm);
+    std::string messageHash = hash(hashAlg)(message);
 
     BigInt sigInt = BigInt("0x" + signature);
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
