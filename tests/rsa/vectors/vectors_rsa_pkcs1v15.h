@@ -12,7 +12,6 @@
 #pragma once
 
 #include <gestalt/rsa.h>
-#include "rsa/rsaObjects.h"
 
 static BigInt p = "0xe7e8942720a877517273a356053ea2a1bc0c94aa72d55c6e86296b2dfc967948c0a72cbccca7eacb35706e09a1df55a1535bd9b3cc34160b3b6dcd3eda8e6443";
 static BigInt q = "0xb69dca1cf7d4d7ec81e75b90fcca874abcde123fd2700180aa90479b6e48de8d67ed24f9f19d85ba275874f542cd20dc723e6963364a1f9425452b269a6799fd";

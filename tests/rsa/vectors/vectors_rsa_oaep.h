@@ -12,7 +12,6 @@
 #pragma once
 
 #include <gestalt/rsa.h>
-#include "rsa/rsaObjects.h"
 
 /*
  * Test Vector sources:

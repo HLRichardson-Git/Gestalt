@@ -11,8 +11,18 @@
 
 # pragma once
 
-#include "rsa/rsaObjects.h"
+#include <iostream>
+
+#include "bigInt/bigInt.h"
 #include "rsa/prime_generation/prime_generation.h"
+
+enum class RSA_SECURITY_STRENGTH : unsigned int{
+   RSA_1024 = 1024, // 80
+   RSA_2048 = 2048, // 112
+   RSA_3072 = 3072, // 128
+   RSA_7680 = 7680, // 192
+   RSA_15360 = 15360 // 256 
+};
 
 struct RSAKeyGenOptions {
     RSA_SECURITY_STRENGTH securityStrength = RSA_SECURITY_STRENGTH::RSA_2048;

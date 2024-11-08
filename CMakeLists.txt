@@ -31,7 +31,6 @@ set (Sources
     src/ecc/ecdsa/ecdsa.cpp
     src/ecc/ecdh/ecdh.cpp
     src/rsa/rsa.cpp
-    src/rsa/rsaObjects.cpp
     src/rsa/padding_schemes/oaep/oaep.cpp
     src/rsa/padding_schemes/pss/pss.cpp
     src/rsa/padding_schemes/pkcs1v15/pkcs1v15.cpp
