@@ -41,10 +41,9 @@ public:
     std::string decrypt(const std::string& ciphertext);
     std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
 
-    std::string signMessage(const std::string& messageHash);
-    std::string signMessage(const std::string& messageHash, const PSSParams& parameters);
-    std::string signMessage(const std::string& messageHash, const RSA_HASH_FUNCTIONS& hashAlgoritm);
+    std::string signMessage(const std::string& message, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
+    std::string signMessage(const std::string& message, const PSSParams& parameters, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
 
-    bool verifySignature(const std::string& messageHash, const std::string& signature);
-    bool verifySignature(const std::string& messageHash, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters);
+    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
+    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, RSA_HASH_FUNCTIONS hashAlgoritm = RSA_HASH_FUNCTIONS::None);
 };

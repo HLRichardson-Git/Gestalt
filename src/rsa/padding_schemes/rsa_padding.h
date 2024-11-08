@@ -20,11 +20,12 @@ enum RSA_ENCRYPTION_MGF_FUNCTIONS {
 };
 
 enum class RSA_HASH_FUNCTIONS : unsigned int{
-   SHA1 = 20, // 20-Bytes
-   SHA224 = 28, // 28-Bytes
-   SHA256 = 32, // 32-Bytes
-   SHA384 = 48, // 48-Bytes
-   SHA512 = 64 // 64-Bytes
+    None = 0,
+    SHA1 = 20, // 20-Bytes
+    SHA224 = 28, // 28-Bytes
+    SHA256 = 32, // 32-Bytes
+    SHA384 = 48, // 48-Bytes
+    SHA512 = 64 // 64-Bytes
 };
 
 std::string hash(const std::string& input, RSA_HASH_FUNCTIONS hashFunc);

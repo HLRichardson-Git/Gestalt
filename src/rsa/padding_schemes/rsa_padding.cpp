@@ -18,6 +18,9 @@
 
 std::string hash(const std::string& input, RSA_HASH_FUNCTIONS hashFunc) {
     switch (hashFunc) {
+        case RSA_HASH_FUNCTIONS::None:
+            return input;
+            break;
         case RSA_HASH_FUNCTIONS::SHA1:
             return hashSHA1(input);
             break;
