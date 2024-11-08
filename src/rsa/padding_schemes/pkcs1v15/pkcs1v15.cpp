@@ -31,6 +31,30 @@
 #include "pkcs1v15.h"
 #include "utils.h"
 
+/*
+ * NOTICE:
+ *     This is all currently not supported as there is a problem I am not sure how to fix yet which
+ *     is that GMP strips the leading zeros of the encoded message of PKCS#1v1.5.
+ */
+
+std::string getAlgorithmIdentifier(const RSA_HASH_FUNCTIONS& hashAlgorithm) {
+    switch (hashAlgorithm) {
+        case RSA_HASH_FUNCTIONS::SHA1:
+            return "3021300906052b0e03021a05000414";
+            break;
+        case RSA_HASH_FUNCTIONS::SHA256:
+            return "3031300d060960864801650304020105000420";
+            break;
+        case RSA_HASH_FUNCTIONS::SHA384:
+            return "3041300d060960864801650304020205000430";
+            break;
+        case RSA_HASH_FUNCTIONS::SHA512:
+            return "3051300d060960864801650304020305000440";
+        default:
+            throw std::invalid_argument("Unsupported hash function");
+    }
+}
+
 std::string encodeForEncryptionPKCS1v15(const std::string& input) {
     // Generate PS based on input length, return the EM
     return "";
@@ -42,8 +66,24 @@ std::string decodeForEncryptionPKCS1v15(const std::string& input) {
 }
 
 std::string encodeForSigningPKCS1v15(const std::string& input, const RSA_HASH_FUNCTIONS& hashAlgoritm) {
-    // Do encoding as normal
-    return "";
+    // 1. Hash the input message
+    std::string H = hexToBytes(hash(input, hashAlgoritm));
+
+    // 2. Get DER-encoded AlgorithmIdentifier || Hash (H)
+    std::string T = hexToBytes(getAlgorithmIdentifier(hashAlgoritm)) + H;
+
+    // 3
+    size_t tLen = T.length();
+    size_t emLen = tLen + 11;
+    if (emLen < tLen + 11) throw std::invalid_argument("Error PKCS#1v1.5: intended encoded message length to short.");
+
+    // 4. Create padding string (PS) filled with 0xFF bytes
+    std::string PS(emLen - tLen - 3, 0xFF);
+
+    // 5. Construct EM = 0x00 || 0x01 || PS || 0x00 || T
+    std::string EM = std::string(1, 0x00) + std::string(1, 0x01) + PS + std::string(1, 0x00) + T;
+
+    return EM;
 }
 
 bool verifyForSigningPKCS1v15(const std::string& input, const std::string& EM) {

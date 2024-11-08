@@ -101,6 +101,12 @@ std::string RSA::signMessage(const std::string& messageHash, const PSSParams& pa
     return rawSignatureGen(x).toHexString();
 }
 
+std::string RSA::signMessage(const std::string& messageHash, const RSA_HASH_FUNCTIONS& hashAlgoritm) {
+    BigInt x = "0x" + convertToHex(encodeForSigningPKCS1v15(messageHash, hashAlgoritm));
+    std::cout << "x: " << x.toHexString() << std::endl;
+    return rawSignatureGen(x).toHexString();
+}
+
 bool RSA::verifySignature(const std::string& messageHash, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters) {
     BigInt sigInt = BigInt("0x" + signature);
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);

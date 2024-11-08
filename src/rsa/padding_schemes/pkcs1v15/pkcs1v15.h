@@ -28,6 +28,20 @@
  * signing process and ensure compliance with the PKCS#1 v1.5 specifications.
  */
 
+#pragma once
+
+#include <iostream>
+
+#include "../rsa_padding.h"
+
+/*
+ * NOTICE:
+ *     This is all currently not supported as there is a problem I am not sure how to fix yet which
+ *     is that GMP strips the leading zeros of the encoded message of PKCS#1v1.5.
+ */
+
+std::string getAlgorithmIdentifier(const RSA_HASH_FUNCTIONS& hashAlgorithm);
+
 std::string encodeForEncryptionPKCS1v15(const std::string& input);
 std::string decodeForEncryptionPKCS1v15(const std::string& input);
 

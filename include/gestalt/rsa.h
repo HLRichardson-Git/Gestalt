@@ -15,6 +15,7 @@
 #include "rsa/rsaObjects.h"
 #include "rsa/padding_schemes/oaep/oaep.h"
 #include "rsa/padding_schemes/pss/pss.h"
+#include "rsa/padding_schemes/pkcs1v15/pkcs1v15.h"
 
 class RSA { 
 private:
@@ -42,6 +43,7 @@ public:
 
     std::string signMessage(const std::string& messageHash);
     std::string signMessage(const std::string& messageHash, const PSSParams& parameters);
+    std::string signMessage(const std::string& messageHash, const RSA_HASH_FUNCTIONS& hashAlgoritm);
 
     bool verifySignature(const std::string& messageHash, const std::string& signature);
     bool verifySignature(const std::string& messageHash, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters);

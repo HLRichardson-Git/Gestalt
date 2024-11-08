@@ -16,8 +16,7 @@
 
 inline void stringToGMP(const std::string& str, mpz_t& result) {
     if (str.substr(0, 2) == "0x") {
-        std::string truncatedStr = str.substr(2, str.length());
-        mpz_set_str(result, truncatedStr.c_str(), 16);
+        mpz_set_str(result, str.c_str() + 2, 16);
     } else {
         mpz_set_str(result, str.c_str(), 10);
     }
