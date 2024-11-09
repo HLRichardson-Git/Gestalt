@@ -46,9 +46,12 @@ bool RSAKeyPair::validatePrivateKey(RSAPrivateKey privateKeyCandidate) {
         }
     }
 
+    unsigned int specifiedStrengthValue = static_cast<unsigned int>(specifiedStrength);
     unsigned int dBitLength = mpz_sizeinbase(privateKeyCandidate.d.n, 2);
-    if (abs(int (dBitLength - static_cast<int>(specifiedStrength))) > 10) { // within specified size +-10
-        throw std::invalid_argument("Private key 'd' bit length is too far from the specified strength.");
+    if (abs(int (dBitLength - specifiedStrengthValue)) > 10) { // within specified size +-10
+        throw std::invalid_argument("Private key 'd' bit length (" + std::to_string(dBitLength) + 
+                                " bits) is too far from the specified strength (" + 
+                                std::to_string(specifiedStrengthValue) + " bits).");
     }
 
     return true;

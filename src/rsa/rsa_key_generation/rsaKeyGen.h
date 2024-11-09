@@ -95,10 +95,12 @@ private:
     friend class RSA_KeyPair_Test;
 public:
 
-    RSAKeyPair() { 
+    RSAKeyPair() {
+        specifiedStrength = RSA_SECURITY_STRENGTH::RSA_2048;
         generateKeyPair({RSA_SECURITY_STRENGTH::RSA_2048, RANDOM_PRIME_METHOD::probable}); 
     };
     RSAKeyPair(RSAKeyGenOptions options) { 
+        specifiedStrength = options.securityStrength;
         generateKeyPair(options);
     };
     
@@ -117,12 +119,14 @@ public:
         }
     };
 
-    void setPrivateKey(RSAPrivateKey privateKeyCandidate) { 
+    void setPrivateKey(RSAPrivateKey privateKeyCandidate, RSA_SECURITY_STRENGTH specifiedPrivateStrength) {
+        specifiedStrength = specifiedPrivateStrength; 
         if (validatePrivateKey(privateKeyCandidate)) {
             privateKey.d = privateKeyCandidate.d;
         }
     };
-    void setPublicKey(RSAPublicKey publicKeyCandidate) { 
+    void setPublicKey(RSAPublicKey publicKeyCandidate, RSA_SECURITY_STRENGTH specifiedPublicStrength) {
+        specifiedStrength = specifiedPublicStrength; 
         if (validatePublicKey(publicKeyCandidate)) {
             publicKey.n = publicKeyCandidate.n;
             publicKey.e = publicKeyCandidate.e;
