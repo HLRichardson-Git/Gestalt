@@ -33,7 +33,7 @@ TEST(RSA_KeyPair_Test, testKeyReGen) {
     RSAPrivateKey privateKey1 = rsa.getPrivateKey();
     RSAPublicKey publicKey1 = rsa.getPublicKey();
 
-    rsa.regenerateKeyPair({RSA_SECURITY_STRENGTH::RSA_2048, RANDOM_PRIME_METHOD::probable});
+    rsa.regenerateKeyPair({RSASecurityStrength::RSA_2048, RandomPrimeMethod::probable});
 
     RSAPrivateKey privateKey2 = rsa.getPrivateKey();
     RSAPublicKey publicKey2 = rsa.getPublicKey();
@@ -46,7 +46,7 @@ TEST(RSA_KeyPair_Test, customKeyPairInitialization) {
     RSAPrivateKey privateKey(d, p, q);
     RSAPublicKey publicKey(n, e);
 
-    RSAKeyPair rsa(RSA_SECURITY_STRENGTH::RSA_2048, privateKey, publicKey);
+    RSAKeyPair rsa(RSASecurityStrength::RSA_2048, privateKey, publicKey);
 
     EXPECT_TRUE(rsa.getPrivateKey().d == privateKey.d) << "Custom private exponent intialization failed";
     EXPECT_TRUE(rsa.getPublicKey().n == publicKey.n) << "Custom public modulus intialization failed";
@@ -59,7 +59,7 @@ TEST(RSA_KeyPair_Test, invalidKeyPairInitialization) {
 
     EXPECT_THROW({
         RSAPrivateKey invalidPrivateKey(BigInt("123"), invalidP, invalidQ);
-        RSAKeyPair invalidKeyPair(RSA_SECURITY_STRENGTH::RSA_2048, invalidPrivateKey, RSAPublicKey());
+        RSAKeyPair invalidKeyPair(RSASecurityStrength::RSA_2048, invalidPrivateKey, RSAPublicKey());
     }, std::runtime_error);
 }
 
@@ -69,7 +69,7 @@ TEST(RSA_KeyPair_Test, specifiedWrongSecurityStrength) {
 
     EXPECT_THROW({
         // The keys are intialized with components that are 2048-bits
-        RSAKeyPair invalidKeyPair(RSA_SECURITY_STRENGTH::RSA_3072, privateKey, publicKey);
+        RSAKeyPair invalidKeyPair(RSASecurityStrength::RSA_3072, privateKey, publicKey);
     }, std::invalid_argument) << "Private key bit length validation failed";
 }
 
@@ -78,7 +78,7 @@ TEST(RSA_KeyPair_Test, smallPublicExponent) {
     RSAPublicKey publicKey(n, "3");
 
     EXPECT_THROW({
-        RSAKeyPair rsa(RSA_SECURITY_STRENGTH::RSA_2048, privateKey, publicKey);
+        RSAKeyPair rsa(RSASecurityStrength::RSA_2048, privateKey, publicKey);
     }, std::invalid_argument) << "Failed to set a small public exponent";
 }
 

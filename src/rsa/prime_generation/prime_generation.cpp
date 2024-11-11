@@ -9,11 +9,9 @@
  *
  */
 
-#include<iostream> // for debugging
-
 #include "prime_generation.h"
 
-void generateLargePrime(mpz_t prime, unsigned int bits, RANDOM_PRIME_METHOD method, gmp_randstate_t& state) {
+void generateLargePrime(mpz_t prime, unsigned int bits, RandomPrimeMethod method, gmp_randstate_t& state) {
     mpz_t lower_bound, upper_bound;
     mpz_inits(lower_bound, upper_bound, NULL);
 
@@ -32,8 +30,8 @@ void generateLargePrime(mpz_t prime, unsigned int bits, RANDOM_PRIME_METHOD meth
              */
             unsigned int is_prime = mpz_probab_prime_p(prime, 25); 
 
-            if ((method == RANDOM_PRIME_METHOD::provable && is_prime == 2) ||
-                (method == RANDOM_PRIME_METHOD::probable && (is_prime == 1 || is_prime == 2))) {
+            if ((method == RandomPrimeMethod::provable && is_prime == 2) ||
+                (method == RandomPrimeMethod::probable && (is_prime == 1 || is_prime == 2))) {
             //if (is_prime > 0) {
                 break; // Prime number found
             }

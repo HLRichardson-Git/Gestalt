@@ -42,7 +42,7 @@ static RSAPublicKey publicKeyVector2 = { "0xa7a1882a7fb896786034d07fb1b9f6327c27
 
 static const struct RSA_PSS_TestVectors {
   std::string name;
-  RSA_SECURITY_STRENGTH keySecurityStrength;
+  RSASecurityStrength keySecurityStrength;
   RSAPrivateKey privateKey;
   RSAPublicKey publicKey;
   PSSParams parameters;
@@ -51,7 +51,7 @@ static const struct RSA_PSS_TestVectors {
 } kRSA_PSS_TestVectors[] = {
     {   // Source [1]
         "PSS_1024_SHA1",
-        RSA_SECURITY_STRENGTH::RSA_1024,
+        RSASecurityStrength::RSA_1024,
         privateKeyVector,
         publicKeyVector,
         PSSParams(HashAlgorithm::SHA1, RSA_MGF_FUNCTIONS::MGF1, 20, "e3b5d5d002c1bce50c2b65ef88a188d83bce7e61"),
@@ -60,7 +60,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_2048_SHA224",
-        RSA_SECURITY_STRENGTH::RSA_2048,
+        RSASecurityStrength::RSA_2048,
         privateKeyVector1,
         publicKeyVector1,
         PSSParams(HashAlgorithm::SHA224, RSA_MGF_FUNCTIONS::MGF1, 15, "463729b3eaf43502d9cff129925681"),
@@ -69,7 +69,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_2048_SHA256",
-        RSA_SECURITY_STRENGTH::RSA_2048,
+        RSASecurityStrength::RSA_2048,
         privateKeyVector1,
         publicKeyVector1,
         PSSParams(HashAlgorithm::SHA256, RSA_MGF_FUNCTIONS::MGF1, 20, "e1256fc1eeef81773fdd54657e4007fde6bcb9b1"),
@@ -78,7 +78,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_2048_SHA384",
-        RSA_SECURITY_STRENGTH::RSA_2048,
+        RSASecurityStrength::RSA_2048,
         privateKeyVector1,
         publicKeyVector1,
         PSSParams(HashAlgorithm::SHA384, RSA_MGF_FUNCTIONS::MGF1, 25, "b750587671afd76886e8ffb7865e78f706641b2e4251b48706"),
@@ -87,7 +87,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_2048_SHA512",
-        RSA_SECURITY_STRENGTH::RSA_2048,
+        RSASecurityStrength::RSA_2048,
         privateKeyVector1,
         publicKeyVector1,
         PSSParams(HashAlgorithm::SHA512, RSA_MGF_FUNCTIONS::MGF1, 30, "aa10fec3f83b7a97e092877a5bf9081283f502a0a46b50e395ab983a49ac"),
@@ -96,7 +96,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_3072_SHA224",
-        RSA_SECURITY_STRENGTH::RSA_3072,
+        RSASecurityStrength::RSA_3072,
         privateKeyVector2,
         publicKeyVector2,
         PSSParams(HashAlgorithm::SHA224, RSA_MGF_FUNCTIONS::MGF1, 28, "3f805057471aab0a28cfc8430dabcf990612e8a908b158ae36b4ed53"),
@@ -105,7 +105,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_3072_SHA256",
-        RSA_SECURITY_STRENGTH::RSA_3072,
+        RSASecurityStrength::RSA_3072,
         privateKeyVector2,
         publicKeyVector2,
         PSSParams(HashAlgorithm::SHA256, RSA_MGF_FUNCTIONS::MGF1, 32, "3e07ade72a3f52530f53135a5d7d93217435ba001ea55a8f5d5d1304684874bc"),
@@ -114,7 +114,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_3072_SHA384",
-        RSA_SECURITY_STRENGTH::RSA_3072,
+        RSASecurityStrength::RSA_3072,
         privateKeyVector2,
         publicKeyVector2,
         PSSParams(HashAlgorithm::SHA384, RSA_MGF_FUNCTIONS::MGF1, 48, "61a762f8968d5f367e2dbcacb4021653dc75437d9000e3169d943729703837a5cbf4de62bdedc95fd0d1004e84751452"),
@@ -123,7 +123,7 @@ static const struct RSA_PSS_TestVectors {
     },
     {   // Source [2]
         "PSS_3072_SHA512",
-        RSA_SECURITY_STRENGTH::RSA_3072,
+        RSASecurityStrength::RSA_3072,
         privateKeyVector2,
         publicKeyVector2,
         PSSParams(HashAlgorithm::SHA512, RSA_MGF_FUNCTIONS::MGF1, 62, "2d0c49b20789f39502eefd092a2b6a9b2757c1456147569a685fca4492a8d5b0e6234308385d3d629644ca37e3399616c266f199b6521a9987b2be9ee783"),

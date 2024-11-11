@@ -59,7 +59,7 @@ BigInt RSA::rawSignatureVer(const BigInt& signature, const RSAPublicKey& recipie
 }
 
 std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
-    BigInt x = plaintext;
+    BigInt x = "0x" + plaintext;
     return rawEncrypt(x, recipientPublicKey).toHexString();
 }
 
@@ -70,12 +70,12 @@ std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recip
 }
 
 std::string RSA::decrypt(const std::string& ciphertext) {
-    BigInt y = ciphertext;
+    BigInt y = "0x" + ciphertext;
     return rawDecrypt(y).toHexString();
 }
 
 std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters) {
-    BigInt y = ciphertext;
+    BigInt y = "0x" + ciphertext;
     BigInt result = rawDecrypt(y);
 
     /* 

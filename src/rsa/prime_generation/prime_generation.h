@@ -15,7 +15,7 @@
 
 #include "bigInt/bigInt.h"
 
-enum class RANDOM_PRIME_METHOD {
+enum class RandomPrimeMethod {
     provable,
     probable
     //provableWithProvableAux,
@@ -23,4 +23,4 @@ enum class RANDOM_PRIME_METHOD {
     //probableWithProbableAux
 };
 
-void generateLargePrime(mpz_t prime, unsigned int bits, RANDOM_PRIME_METHOD method, gmp_randstate_t& state);
+void generateLargePrime(mpz_t prime, unsigned int bits, RandomPrimeMethod method, gmp_randstate_t& state);

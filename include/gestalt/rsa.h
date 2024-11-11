@@ -29,7 +29,7 @@ private:
 
 public:
     RSA() {};
-    RSA(RSA_SECURITY_STRENGTH specifiedStength, const RSAPrivateKey& privateKey, const RSAPublicKey& publicKey) 
+    RSA(RSASecurityStrength specifiedStength, const RSAPrivateKey& privateKey, const RSAPublicKey& publicKey) 
         : keyPair(specifiedStength, privateKey, publicKey) {}
 
     RSAPrivateKey getPrivateKey() const { return keyPair.getPrivateKey(); };

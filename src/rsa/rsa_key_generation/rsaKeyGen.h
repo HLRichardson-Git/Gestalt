@@ -16,7 +16,7 @@
 #include "bigInt/bigInt.h"
 #include "rsa/prime_generation/prime_generation.h"
 
-enum class RSA_SECURITY_STRENGTH : unsigned int{
+enum class RSASecurityStrength : unsigned int{
    RSA_1024 = 1024, // 80
    RSA_2048 = 2048, // 112
    RSA_3072 = 3072, // 128
@@ -25,8 +25,8 @@ enum class RSA_SECURITY_STRENGTH : unsigned int{
 };
 
 struct RSAKeyGenOptions {
-    RSA_SECURITY_STRENGTH securityStrength = RSA_SECURITY_STRENGTH::RSA_2048;
-    RANDOM_PRIME_METHOD primeMethod = RANDOM_PRIME_METHOD::probable;
+    RSASecurityStrength securityStrength = RSASecurityStrength::RSA_2048;
+    RandomPrimeMethod primeMethod = RandomPrimeMethod::probable;
 };
 
 struct RSAPrivateKey {
@@ -83,7 +83,7 @@ class RSAKeyPair {
 private:
     RSAPrivateKey privateKey;
     RSAPublicKey publicKey;
-    RSA_SECURITY_STRENGTH specifiedStrength;
+    RSASecurityStrength specifiedStrength;
 
     bool isPrime(const BigInt& number);
     bool validatePrivateKey(RSAPrivateKey privateKeyCandidate);
@@ -96,15 +96,15 @@ private:
 public:
 
     RSAKeyPair() {
-        specifiedStrength = RSA_SECURITY_STRENGTH::RSA_2048;
-        generateKeyPair({RSA_SECURITY_STRENGTH::RSA_2048, RANDOM_PRIME_METHOD::probable}); 
+        specifiedStrength = RSASecurityStrength::RSA_2048;
+        generateKeyPair({RSASecurityStrength::RSA_2048, RandomPrimeMethod::probable}); 
     };
     RSAKeyPair(RSAKeyGenOptions options) { 
         specifiedStrength = options.securityStrength;
         generateKeyPair(options);
     };
     
-    RSAKeyPair(RSA_SECURITY_STRENGTH specifiedStrength, 
+    RSAKeyPair(RSASecurityStrength specifiedStrength, 
                const RSAPrivateKey& privateKeyCandidate, 
                const RSAPublicKey& publicKeyCandidate)   
         : specifiedStrength(specifiedStrength) {
@@ -119,13 +119,13 @@ public:
         }
     };
 
-    void setPrivateKey(RSAPrivateKey privateKeyCandidate, RSA_SECURITY_STRENGTH specifiedPrivateStrength) {
+    void setPrivateKey(RSAPrivateKey privateKeyCandidate, RSASecurityStrength specifiedPrivateStrength) {
         specifiedStrength = specifiedPrivateStrength; 
         if (validatePrivateKey(privateKeyCandidate)) {
             privateKey.d = privateKeyCandidate.d;
         }
     };
-    void setPublicKey(RSAPublicKey publicKeyCandidate, RSA_SECURITY_STRENGTH specifiedPublicStrength) {
+    void setPublicKey(RSAPublicKey publicKeyCandidate, RSASecurityStrength specifiedPublicStrength) {
         specifiedStrength = specifiedPublicStrength; 
         if (validatePublicKey(publicKeyCandidate)) {
             publicKey.n = publicKeyCandidate.n;
