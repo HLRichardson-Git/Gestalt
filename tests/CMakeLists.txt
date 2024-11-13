@@ -18,6 +18,12 @@ set (Sources
     ecc/test_ecdsa_functions.cpp
     ecc/test_ecdh.cpp
     ecc/test_ecdh_functions.cpp
+    rsa/test_rsa_raw.cpp
+    rsa/test_rsa_padding.cpp
+    rsa/test_rsa_oaep.cpp
+    rsa/test_rsa_pss.cpp
+    rsa/test_rsa_pkcs1v15.cpp
+    rsa/test_rsa_key_generation.cpp
     hmac/test_hmac.cpp
     sha1/test_sha1.cpp
     sha1/test_sha1_functions.cpp

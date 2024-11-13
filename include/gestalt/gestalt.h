@@ -17,4 +17,5 @@
 #include "hmac_sha1.h"
 #include "hmac_sha2.h"
 #include "ecdsa.h"
+#include "rsa.h"
 #include "ecdh.h"
