@@ -22,6 +22,7 @@
 # pragma once
 
 #include <string>
+#include <cstring>
 #include <gmp.h>
 
 inline void stringToGMP(const std::string& str, mpz_t& result) {
