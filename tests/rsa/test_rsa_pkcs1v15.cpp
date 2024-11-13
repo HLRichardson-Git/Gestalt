@@ -7,6 +7,10 @@
 /*
  * test_rsa_pkcs1v15.cpp
  *
+ * This file contains unit tests for the PKCS#1 v1.5 padding scheme used in RSA encryption and signature operations. 
+ * The tests cover both encoding and decoding of padded messages for encryption and verification of signature integrity,
+ * ensuring correct padding behavior and error handling.
+ * 
  */
 
 #include "gtest/gtest.h"

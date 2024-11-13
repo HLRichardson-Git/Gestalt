@@ -7,6 +7,13 @@
 /*
  * hash_utils.h
  *
+ * This file provides utility functions to easily select and apply various cryptographic
+ * hash algorithms (SHA1, SHA224, SHA256, SHA384, SHA512) based on user input.
+ * 
+ * The `hash` function returns a callable function object that can be used to hash 
+ * strings with the selected hash algorithm. It supports multiple hash algorithms 
+ * through the `HashAlgorithm` enum and internally uses pre-defined hash functions.
+ * 
  */
 
 # pragma once

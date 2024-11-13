@@ -7,6 +7,10 @@
 /*
  * prime_generation.cpp
  *
+ * This file provides functionality to generate large prime numbers for RSA key generation. It supports both provable 
+ * and probable primality tests, allowing for trade-offs between performance and certainty.The `generateLargePrime` 
+ * function generates a prime number of specified bit length using the chosen primality test method.
+ * 
  */
 
 #include "prime_generation.h"

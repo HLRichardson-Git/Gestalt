@@ -23,6 +23,8 @@ static BigInt e = 65537;
 static RSAPrivateKey privateKeyVector = { d, p, q };
 static RSAPublicKey publicKeyVector = { n, e };
 
+static RSA rsa(RSASecurityStrength::RSA_2048, privateKeyVector, publicKeyVector);
+
 static std::string pt = "102030405060708090a0b0c0d0e0f";
 static std::string ct = "2eab1c8d5315c5094fcc5ed524c312f5bb30bc8516f080f3f10a8d5bb4031e316087d5a0357cd13a0064a5b53df9d9cb39b2ae0835b7c1dac78c06302fdd2a85fa488534ddde50afff6563d9803dacac3716f9005151869717f2aa7da76b5b33acf6185aebe7e2c97cc408cb9a8a7e6293445ed18af827c40fc983397f4564e03d59f0d1e1032d911e551e3bad62b01afa27dd62375d4e8faeea83ebf4a7ac5908c7bc0b95b707753f69de0720d2009c905719035138af5ad14a999226505132e1b6187e5183e01393b3bc14506c6bdcb3475f3e5fe0a250c3979196767ea32bc049e72bb536cf69df9516e412d363ac7c8a4f086d382e96ef7f95a735f2cdfd";
 

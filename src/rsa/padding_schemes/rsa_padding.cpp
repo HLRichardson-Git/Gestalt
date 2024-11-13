@@ -7,14 +7,15 @@
 /*
  * rsa_padding.cpp
  *
+ * This file implements the Mask Generation Function (MGF1), which generates a mask of a specified length based on a 
+ * given seed and hash algorithm (such as SHA1, SHA256, etc.). The MGF1 function is commonly used in cryptographic 
+ * protocols like RSA-PSS and OAEP.
+ * 
  */
 
-#include <iostream> // for debugging
 #include <string>
 
 #include "rsa_padding.h"
-#include <gestalt/sha1.h>
-#include <gestalt/sha2.h>
 
 std::string mgf1(const std::string& seed, unsigned int maskLen, HashAlgorithm hashAlg) {
     unsigned int hashLength = static_cast<unsigned int>(hashAlg);

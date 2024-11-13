@@ -7,6 +7,16 @@
 /*
  * bigInt.h
  *
+ * This file defines a wrapper class `BigInt` for GMP (GNU Multi-Precision) integers. The `BigInt` class provides 
+ * convenient constructors, operators, and utility functions for working with large integers, including conversions 
+ * from string representations (hexadecimal and decimal), arithmetic operations, and memory management.
+ *
+ * Key features:
+ * - Supports both hexadecimal and decimal string-to-GMP conversions.
+ * - Implements common arithmetic operators: +, -, *, and %.
+ * - Memory management functions for GMP integers.
+ * - Methods for converting GMP values to hexadecimal and decimal strings.
+ * 
  */
 
 # pragma once

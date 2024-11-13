@@ -7,15 +7,20 @@
 /*
  * rsa.h
  *
+ * RSA is a widely used asymmetric encryption algorithm that relies on the difficulty of factoring 
+ * large numbers. The class provides both basic RSA operations (without padding) and secure 
+ * operations with padding schemes for enhanced security.
+ * 
+ * This file defines the RSA class, which provides functionality for RSA encryption, 
+ * decryption, digital signatures, and signature verification. The RSA class supports 
+ * both raw RSA operations and padded encryption/signature schemes (e.g., OAEP and PSS).
+ * 
  */
 
 # pragma once
 
 #include "rsa/rsa_key_generation/rsaKeyGen.h"
-#include "rsa/padding_schemes/oaep/oaep.h"
-#include "rsa/padding_schemes/pss/pss.h"
-#include "rsa/padding_schemes/pkcs1v15/pkcs1v15.h"
-#include "hash_utils/hash_utils.h"
+#include "rsa/padding_schemes/rsa_padding.h"
 
 class RSA { 
 private:

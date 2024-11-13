@@ -7,6 +7,11 @@
 /*
  * rsaKeyGen.cpp
  *
+ * This file provides functionality for generating RSA key pairs of various strengths (1024, 2048, 3072, 7680, 
+ * 15360 bits). It includes structures for RSA public and private keys, as well as methods for validating and managing 
+ * RSA keys. The key generation process uses prime number generation and modular arithmetic to compute the necessary 
+ * key components.
+ * 
  */
 
 #include "rsaKeyGen.h"

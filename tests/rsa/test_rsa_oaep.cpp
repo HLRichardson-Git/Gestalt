@@ -7,14 +7,19 @@
 /*
  * test_rsa_oaep.cpp
  *
+ * This file contains unit tests for the RSA Optimal Asymmetric Encryption Padding (OAEP) scheme, including both the 
+ * application and removal of OAEP padding. Tests ensure correct handling of padding, error conditions, and OAEP 
+ * encryption/decryption functionality.
+ *
  */
 
 #include "gtest/gtest.h"
 #include <iostream>
 
-#include "utils.h"
 #include <gestalt/rsa.h>
+#include "rsa/padding_schemes/oaep/oaep.h"
 #include "vectors/vectors_rsa_oaep.h"
+#include "utils.h"
 
 TEST(RSA_OAEP, applyOAEP) {
     std::string input = "Hello, Gestalt!";

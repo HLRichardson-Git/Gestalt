@@ -22,17 +22,15 @@
 
 #include "../rsa_padding.h"
 
-const size_t PADDING1_SIZE = 8;
-
 class PSSParams {
 public:
     HashAlgorithm hashFunc;  // Enum for available hash functions
-    RSA_MGF_FUNCTIONS mgfFunc;  // Enum for MGF1 with specific hash functions
+    RSA_MGFFunctions mgfFunc;  // Enum for MGF1 with specific hash functions
     size_t sLen;
     std::string salt; // Should only be set for testing purposes
 
     PSSParams(HashAlgorithm hash = HashAlgorithm::SHA256, 
-              RSA_MGF_FUNCTIONS mgf = RSA_MGF_FUNCTIONS::MGF1, 
+              RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1, 
               size_t sLen = 0,
               const std::string& salt = "")
         : hashFunc(hash), mgfFunc(mgf), sLen(sLen), salt(salt) {}

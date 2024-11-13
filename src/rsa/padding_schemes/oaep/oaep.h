@@ -7,6 +7,14 @@
 /*
  * oaep.h
  *
+ * This file provides the implementation for the Optimal Asymmetric Encryption Padding (OAEP) scheme used in RSA 
+ * encryption. It includes functions for applying and removing OAEP padding with configurable hash functions and mask 
+ * generation functions (MGF1).
+ * 
+ * This file provides functions for applying and removing OAEP padding, based on PKCS #1 v2.2 
+ * (see https://tools.ietf.org/html/rfc8017). The implementation includes hash-based mask generation using MGF1, 
+ * supporting configurable hash functions and label handling.
+ * 
  */
 
 # pragma once
@@ -19,11 +27,11 @@ class OAEPParams {
 public:
     std::string label;
     HashAlgorithm hashFunc;  // Enum for available hash functions
-    RSA_MGF_FUNCTIONS mgfFunc;  // Enum for MGF1 with specific hash functions
+    RSA_MGFFunctions mgfFunc;  // Enum for MGF1 with specific hash functions
     std::string seed; // Should only be set for testing purposes
 
     OAEPParams(HashAlgorithm hash = HashAlgorithm::SHA256, 
-               RSA_MGF_FUNCTIONS mgf = RSA_MGF_FUNCTIONS::MGF1, 
+               RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1, 
                const std::string& label = "",
                const std::string& seed = "")
         : label(label), hashFunc(hash), mgfFunc(mgf), seed(seed) {}

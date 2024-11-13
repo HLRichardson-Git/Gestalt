@@ -7,13 +7,16 @@
 /*
  * test_rsa_functions.cpp
  *
+ * This file contains unit tests for RSA key pair generation, validation, and edge cases. 
+ * The tests cover key pair generation, custom initialization, invalid key handling, and ensuring key components like 
+ * modulus and exponents meet the required cryptographic standards.
+ * 
  */
 
 #include "gtest/gtest.h"
 
 #include "rsa/rsa_key_generation/rsaKeyGen.h"
 #include "vectors/vectors_rsa_key_gen.h"
-//#include "vectors/vectors_rsa.h"
 
 const bool skipRSAKeyGen = true; // RSA key gen can take awhile, so set to false if you'd like to test RSA keyGen
 

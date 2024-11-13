@@ -7,16 +7,22 @@
 /*
  * rsa_padding.h
  *
+ * This file implements the Mask Generation Function (MGF1), which generates a mask of a specified length based on a 
+ * given seed and hash algorithm (such as SHA1, SHA256, etc.). The MGF1 function is commonly used in cryptographic 
+ * protocols like RSA-PSS and OAEP.
+ * 
  */
 
 # pragma once
 
 #include "hash_utils/hash_utils.h"
 
-const unsigned int SHA256_LENGTH = 32; // Hard coded hash len for sha2-256 for now
+class OAEPParams;
+class PSSParams;
 
-enum RSA_MGF_FUNCTIONS {
+enum RSA_MGFFunctions {
     MGF1
+    // TODO: Allow these when these are implemented.
     //SHAKE128,
     //SHAKE256
 };

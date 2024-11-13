@@ -16,16 +16,6 @@
  * signatures using the PKCS #1 v1.5 padding scheme, as specified in RFC 3447 
  * (https://tools.ietf.org/html/rfc3447). The implementation handles:
  * 
- * - Signing: The input message is hashed, and the resulting hash is 
- *   formatted with a specific DER-encoded structure for signing.
- * - Verification: The signature is decrypted to retrieve the encoded message 
- *   and compared against a newly computed encoded message from the original 
- *   input using the extracted hash algorithm.
- * - Encryption: The plaintext message is padded with a fixed structure, 
- *   ensuring it fits within the RSA modulus.
- * 
- * The functions provided allow for configurable hash algorithms during the 
- * signing process and ensure compliance with the PKCS#1 v1.5 specifications.
  */
 
 #include "pkcs1v15.h"

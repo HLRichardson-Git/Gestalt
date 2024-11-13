@@ -11,12 +11,24 @@ appropriate release branch.
 Gestalt Releases
 ----------------
 
+ - [Gestalt 0.7](#gestalt-07)
  - [Gestalt 0.6](#gestalt-06)
  - [Gestalt 0.5](#gestalt-05)
  - [Gestalt 0.4](#gestalt-04)
  - [Gestalt 0.3](#gestalt-03)
  - [Gestalt 0.2](#gestalt-02)
  - [Gestalt 0.1](#gestalt-01)
+
+ Gestalt 0.7
+-----------
+
+### Changes between 0.6.2 and 0.7 [12 Nov 2024]
+
+ * Adds RSA Key Generation with provable or probable primes with key sizes of 1024 to 15360.
+ * Adds RSA key encryption with Raw or OAEP padding schemes.
+ * Adds RSA message Signing Scheme with Raw or PSS padding schemes.
+ * Refactors the `BigInt` class outside of ECC to its own file in `tools/bigint/bigint.h` to be used anywhere.
+ * Refactors the hash utilities in ECC to its own file in `tools/hash_utils/hash_utils.h` to be used anywhere.
 
  Gestalt 0.6
 -----------

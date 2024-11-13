@@ -7,6 +7,10 @@
 /*
  * test_rsa_padding.cpp
  *
+ * This file contains unit tests for RSA padding functions, including the MGF1 (Mask Generation Function) used in RSA 
+ * schemes like OAEP. The tests ensure proper output generation for various input values and padding configurations 
+ * using different hash algorithms.
+ *
  */
 
 #include "gtest/gtest.h"

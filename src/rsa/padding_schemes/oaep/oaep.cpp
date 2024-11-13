@@ -7,6 +7,14 @@
 /*
  * oaep.cpp
  *
+ * This file provides the implementation for the Optimal Asymmetric Encryption Padding (OAEP) scheme used in RSA 
+ * encryption. It includes functions for applying and removing OAEP padding with configurable hash functions and mask 
+ * generation functions (MGF1).
+ * 
+ * This file provides functions for applying and removing OAEP padding, based on PKCS #1 v2.2 
+ * (see https://tools.ietf.org/html/rfc8017). The implementation includes hash-based mask generation using MGF1, 
+ * supporting configurable hash functions and label handling.
+ * 
  */
 
 #include <iostream>

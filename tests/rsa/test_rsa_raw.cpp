@@ -7,6 +7,10 @@
 /*
  * test_rsa_raw.cpp
  *
+ * This file contains unit tests for raw RSA encryption, decryption, and signature operations. The tests verify the 
+ * correct functioning of RSA encryption and decryption without padding, as well as signature generation and 
+ * verification, including failure scenarios for tampered signatures.
+ * 
  */
 
 #include "gtest/gtest.h"
@@ -14,8 +18,6 @@
 
 #include <gestalt/rsa.h>
 #include "vectors/vectors_rsa.h"
-
-RSA rsa(RSASecurityStrength::RSA_2048, privateKeyVector, publicKeyVector);
 
 TEST(RSA_Raw, encrypt) {
     std::string computedCiphertext = rsa.encrypt(pt, publicKeyVector);
