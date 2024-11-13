@@ -19,6 +19,8 @@
 #include "pss.h"
 #include "utils.h"
 
+const size_t PADDING1_SIZE = 8;
+
 // Source: https://datatracker.ietf.org/doc/html/rfc3447#section-9.1.1
 std::string encodePSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes) {
     unsigned int emLen = ((4 * modulusSizeBytes) + 3) / 4; // Simplified equation to calcualte intended EM Length

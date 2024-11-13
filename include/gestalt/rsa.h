@@ -34,6 +34,8 @@ private:
 
 public:
     RSA() {};
+    RSA(RSAKeyGenOptions keyGenerationOptions) // TODO: Make a unit test for this constructor
+        : keyPair(keyGenerationOptions) {}
     RSA(RSASecurityStrength specifiedStength, const RSAPrivateKey& privateKey, const RSAPublicKey& publicKey) 
         : keyPair(specifiedStength, privateKey, publicKey) {}
 
