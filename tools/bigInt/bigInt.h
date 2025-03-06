@@ -23,6 +23,7 @@
 
 #include <string>
 #include <cstring>
+#include <vector>
 #include <gmp.h>
 
 inline void stringToGMP(const std::string& str, mpz_t& result) {
@@ -60,6 +61,11 @@ public:
 
     BigInt(const mpz_t& mpzN) {
         mpz_init_set(n, mpzN);
+    }
+
+    BigInt(const std::vector<uint8_t>& bytes) {
+        mpz_init(n);
+        mpz_import(n, bytes.size(), 1, sizeof(uint8_t), 1, 0, bytes.data());
     }
 
     BigInt& operator=(const BigInt& other) {
