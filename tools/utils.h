@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
 /*
  * TODO: these following 9 functions was my first attempt to streamline parsing user inputs.

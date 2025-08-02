@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "ecc/ecc.h"
+#include "utils.h"
 
 class ECC_Test : public ::testing::Test {
 private:
@@ -185,6 +186,27 @@ TEST_F(ECC_Test, setKeyPair) {
     EXPECT_THROW(eccObject.setKeyPair(mismatchKeyPair), std::invalid_argument);
 
     EXPECT_TRUE(true);
+}
+
+TEST_F(ECC_Test, ExportImportCompressedPublicKey) {
+    // Known valid public key
+    std::string uncompressedX = "0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE";
+    std::string uncompressedY = "0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD";
+
+    ECDSAPublicKey originalKey(uncompressedX, uncompressedY);
+
+    // Export to compressed format
+    std::string compressed = originalKey.exportCompressed();
+
+    // Import the compressed key into a new object
+    ECDSAPublicKey importedKey(compressed, StandardCurve::secp256k1);
+
+    // Compare x and y of the original and imported key
+    Point orig = originalKey.getPublicKey();
+    Point imp = importedKey.getPublicKey();
+
+    EXPECT_EQ(mpz_cmp(orig.x, imp.x), 0);
+    EXPECT_EQ(mpz_cmp(orig.y, imp.y), 0);
 }
 
 TEST(ECC_Objects, BigIntInitialization) {
