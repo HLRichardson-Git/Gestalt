@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 typedef std::string (*hash_f)(const std::string& in);
 
