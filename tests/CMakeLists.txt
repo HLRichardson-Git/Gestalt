@@ -29,6 +29,7 @@ set (Sources
     sha1/test_sha1_functions.cpp
     sha2/test_sha2.cpp
     asn1/der/test_der_decoder.cpp
+    asn1/der/test_der_encoder.cpp
 )
 
 add_executable (${This} ${Sources})

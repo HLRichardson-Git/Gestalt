@@ -55,3 +55,37 @@ public:
     KeyFormat detectPublicKeyFormat();
 };
 
+class DEREncoder {
+private:
+    std::vector<uint8_t> buffer;
+    
+    // Core DER writing methods
+    void writeTag(uint8_t tag);
+    void writeLength(size_t length);
+    void writeInteger(const BigInt& value);
+    void writeSequence(const std::vector<uint8_t>& content);
+    void writeObjectIdentifier(const std::string& oidHex);
+    void writeNull();
+    void writeBitString(const std::vector<uint8_t>& data);
+    
+    // Helper methods
+    std::vector<uint8_t> encodeLength(size_t length);
+    std::vector<uint8_t> encodeInteger(const BigInt& value);
+    std::vector<uint8_t> encodeBigIntToBytes(const BigInt& value);
+    std::vector<uint8_t> wrapInSequence(const std::vector<uint8_t>& content);
+    const std::vector<uint8_t>& getBuffer() const { return buffer; }
+    void clear() { buffer.clear(); }
+    
+    // Validation
+    void validateRSAPublicKey(const RSAPublicKey& key);
+    
+public:
+    DEREncoder() = default;
+    
+    // Key encoding methods - explicit format
+    std::vector<uint8_t> encodeRSAPublicKeyToPKCS1(const RSAPublicKey& key);
+    std::vector<uint8_t> encodeRSAPublicKeyToPKCS8(const RSAPublicKey& key);
+
+    // Generic function that by defauly encodes in PKCS8 format
+    std::vector<uint8_t> encodeRSAPublicKeyToDER(const RSAPublicKey& key, KeyFormat format = KeyFormat::PKCS8);
+};
