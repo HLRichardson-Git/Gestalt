@@ -15,9 +15,61 @@
  */
 
 #include "rsaKeyGen.h"
+#include "asn1/der/der.h"
 
 unsigned int RSAPublicKey::getPublicModulusBitLength() const {
     return mpz_sizeinbase(n.n, 2);
+}
+
+std::vector<uint8_t> RSAPublicKey::toDER(KeyFormat format) const {
+    DEREncoder encoder;
+    switch (format) {
+        case KeyFormat::PKCS1: return encoder.encodeRSAPublicKeyToPKCS1(*this);
+        case KeyFormat::PKCS8: 
+        default: return encoder.encodeRSAPublicKeyToPKCS8(*this);
+    }
+}
+
+void RSAPublicKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
+    DERDecoder decoder(der);
+    switch (format) {
+        case KeyFormat::PKCS1: {
+            RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS1();
+            n = decoded.n;
+            e = decoded.e;
+            break;
+        }
+        case KeyFormat::PKCS8:
+        default: {
+            RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS8();
+            n = decoded.n;
+            e = decoded.e;
+            break;
+        }
+    }
+}
+
+std::vector<uint8_t> RSAPrivateKey::toDER(KeyFormat format, const RSAPublicKey* pubKey) const {
+    if (!pubKey) {
+        throw std::runtime_error("RSAPrivateKey::toDER requires a public key for encoding");
+    }
+    DEREncoder encoder;
+    switch (format) {
+        case KeyFormat::PKCS1: return encoder.encodeRSAPrivateKeyToPKCS1({*this, *pubKey});
+        case KeyFormat::PKCS8: 
+        default: return encoder.encodeRSAPrivateKeyToPKCS8({*this, *pubKey});
+    }
+}
+
+void RSAPrivateKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
+    DERDecoder decoder(der);
+    RSAKeyPair decoded;
+    switch (format) {
+        case KeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(); break;
+        case KeyFormat::PKCS8: 
+        default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(); break;
+    }
+    *this = decoded.getPrivateKey();
 }
 
 bool RSAKeyPair::isPrime(const BigInt& number) {
@@ -132,4 +184,36 @@ unsigned int RSAKeyPair::getModulusBitLength() const {
 
 unsigned int RSAKeyPair::getPrivateExponentBitLength() const {
     return mpz_sizeinbase(privateKey.d.n, 2);
+}
+
+std::vector<uint8_t> RSAKeyPair::toDER(KeyFormat format) {
+    DEREncoder encoder;
+    // Encode private key, include the public key in the DER
+    return encoder.encodeRSAPrivateKeyToDER(*this, format);
+}
+
+void RSAKeyPair::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
+    DERDecoder decoder(der);
+    RSAKeyPair decoded;
+
+    switch (format) {
+        case KeyFormat::PKCS1:
+            decoded = decoder.decodeRSAPrivateKeyFromPKCS1();
+            break;
+        case KeyFormat::PKCS8:
+        default:
+            decoded = decoder.decodeRSAPrivateKeyFromPKCS8();
+            break;
+    }
+
+    privateKey = decoded.getPrivateKey();
+    publicKey = decoded.getPublicKey();
+
+    // Update the security strength from the decoded modulus
+    unsigned int nBits = publicKey.n.bitLength() + 1;
+    if      (nBits >= 15360) specifiedStrength = RSASecurityStrength::RSA_15360;
+    else if (nBits >=  7680) specifiedStrength = RSASecurityStrength::RSA_7680;
+    else if (nBits >=  3072) specifiedStrength = RSASecurityStrength::RSA_3072;
+    else if (nBits >=  2048) specifiedStrength = RSASecurityStrength::RSA_2048;
+    else                     specifiedStrength = RSASecurityStrength::RSA_1024;
 }

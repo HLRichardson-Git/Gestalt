@@ -20,6 +20,10 @@
 
 #include "bigInt/bigInt.h"
 #include "rsa/prime_generation/prime_generation.h"
+#include "asn1/object_identifiers.h"
+
+class DEREncoder;
+class DERDecoder;
 
 enum class RSASecurityStrength : unsigned int{
    RSA_1024 = 1024, // 80
@@ -32,6 +36,21 @@ enum class RSASecurityStrength : unsigned int{
 struct RSAKeyGenOptions {
     RSASecurityStrength securityStrength = RSASecurityStrength::RSA_2048;
     RandomPrimeMethod primeMethod = RandomPrimeMethod::probable;
+};
+
+struct RSAPublicKey {
+    BigInt n;
+    BigInt e = 65537;
+
+    RSAPublicKey() = default;
+    RSAPublicKey(const BigInt& n, const BigInt& e)
+    : n(n), e(e) {}
+
+    unsigned int getPublicModulusBitLength() const;
+
+    // Encode this key to DER (PKCS1 or PKCS8)
+    std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
 };
 
 struct RSAPrivateKey {
@@ -71,17 +90,9 @@ struct RSAPrivateKey {
         std::cout << "dQ: " << dQ.toHexString() << std::endl;
         std::cout << "qInv: " << qInv.toHexString() << std::endl;
     }
-};
 
-struct RSAPublicKey {
-    BigInt n;
-    BigInt e = 65537;
-
-    RSAPublicKey() = default;
-    RSAPublicKey(const BigInt& n, const BigInt& e)
-    : n(n), e(e) {}
-
-    unsigned int getPublicModulusBitLength() const;
+    std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8, const RSAPublicKey* pubKey = nullptr) const;
+    void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
 };
 
 class RSAKeyPair {
@@ -160,4 +171,7 @@ public:
     void regenerateKeyPair(const RSAKeyGenOptions& options);
     unsigned int getModulusBitLength() const;
     unsigned int getPrivateExponentBitLength() const;
+
+    std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8);
+    void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
 };
