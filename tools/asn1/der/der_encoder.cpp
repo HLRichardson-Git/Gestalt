@@ -40,30 +40,29 @@ std::vector<uint8_t> DEREncoder::encodeBigIntToBytes(const BigInt& value) {
 }
 
 std::vector<uint8_t> DEREncoder::encodeInteger(const BigInt& value) {
-    std::vector<uint8_t> result;
-    
-    // Get bytes of the integer
     std::vector<uint8_t> valueBytes = encodeBigIntToBytes(value);
-    
-    // DER requires adding a leading 0x00 if the high bit is set (to indicate positive)
-    bool needsPadding = !valueBytes.empty() && (valueBytes[0] & 0x80);
-    
-    // INTEGER tag
-    result.push_back(0x02);
-    
-    // Calculate content length (with optional padding)
+
+    // BigInt/ GMP strips leading zeros, so when we pass a zero this is stripped. So, when the value is empty
+    // this means we passed a zero and it was stripped. Thus, we manually add the zero byte.
+    if (valueBytes.empty()) {
+        valueBytes.push_back(0x00);
+    }
+
+    bool needsPadding = valueBytes[0] & 0x80;
+
+    std::vector<uint8_t> result;
+    result.push_back(0x02);  // INTEGER tag
+
     size_t contentLength = valueBytes.size() + (needsPadding ? 1 : 0);
     std::vector<uint8_t> lengthBytes = encodeLength(contentLength);
     result.insert(result.end(), lengthBytes.begin(), lengthBytes.end());
-    
-    // Add padding if needed
+
     if (needsPadding) {
         result.push_back(0x00);
     }
-    
-    // Add the integer bytes
+
     result.insert(result.end(), valueBytes.begin(), valueBytes.end());
-    
+
     return result;
 }
 
@@ -277,5 +276,96 @@ std::vector<uint8_t> DEREncoder::encodeRSAPublicKeyToDER(const RSAPublicKey& key
         return encodeRSAPublicKeyToPKCS1(key);
     } else {
         return encodeRSAPublicKeyToPKCS8(key);
+    }
+}
+
+// Encode RSA private key (PKCS#1) from an RSAKeyPair
+std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToPKCS1(const RSAKeyPair& keyPair) {
+    clear();
+
+    const RSAPublicKey& pub = keyPair.getPublicKey();
+    const RSAPrivateKey& priv = keyPair.getPrivateKey();
+
+    std::vector<uint8_t> content;
+
+    // version = 0
+    std::vector<uint8_t> versionEncoded = encodeInteger(BigInt(0));
+    content.insert(content.end(), versionEncoded.begin(), versionEncoded.end());
+
+    // n, e, d, p, q, dP, dQ, qInv
+    std::vector<uint8_t> modulusEncoded = encodeInteger(pub.n);
+    content.insert(content.end(), modulusEncoded.begin(), modulusEncoded.end());
+
+    std::vector<uint8_t> exponentEncoded = encodeInteger(pub.e);
+    content.insert(content.end(), exponentEncoded.begin(), exponentEncoded.end());
+
+    std::vector<uint8_t> dEncoded = encodeInteger(priv.d);
+    content.insert(content.end(), dEncoded.begin(), dEncoded.end());
+
+    std::vector<uint8_t> pEncoded = encodeInteger(priv.p);
+    content.insert(content.end(), pEncoded.begin(), pEncoded.end());
+
+    std::vector<uint8_t> qEncoded = encodeInteger(priv.q);
+    content.insert(content.end(), qEncoded.begin(), qEncoded.end());
+
+    std::vector<uint8_t> dPEncoded = encodeInteger(priv.dP);
+    content.insert(content.end(), dPEncoded.begin(), dPEncoded.end());
+
+    std::vector<uint8_t> dQEncoded = encodeInteger(priv.dQ);
+    content.insert(content.end(), dQEncoded.begin(), dQEncoded.end());
+
+    std::vector<uint8_t> qInvEncoded = encodeInteger(priv.qInv);
+    content.insert(content.end(), qInvEncoded.begin(), qInvEncoded.end());
+
+    // Wrap in SEQUENCE
+    buffer = wrapInSequence(content);
+    return buffer;
+}
+
+// Encode RSA private key (PKCS#8) from an RSAKeyPair
+std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToPKCS8(const RSAKeyPair& keyPair) {
+    clear();
+
+    // 1. Encode PKCS#1 DER
+    std::vector<uint8_t> pkcs1Der = encodeRSAPrivateKeyToPKCS1(keyPair);
+
+    // 2. AlgorithmIdentifier SEQUENCE
+    std::vector<uint8_t> algIdContent;
+    {
+        DEREncoder tmp;
+        tmp.writeObjectIdentifier(OID_RSA);
+        tmp.writeNull();
+        algIdContent = tmp.getBuffer(); // raw content
+    }
+    std::vector<uint8_t> algId = wrapInSequence(algIdContent);
+
+    // 3. PrivateKey OCTET STRING
+    std::vector<uint8_t> privKeyOctet;
+    privKeyOctet.push_back(0x04); // OCTET STRING tag
+    std::vector<uint8_t> lenEnc = encodeLength(pkcs1Der.size());
+    privKeyOctet.insert(privKeyOctet.end(), lenEnc.begin(), lenEnc.end());
+    privKeyOctet.insert(privKeyOctet.end(), pkcs1Der.begin(), pkcs1Der.end());
+
+    // 4. Version INTEGER
+    std::vector<uint8_t> versionBytes = encodeInteger(BigInt(0));
+
+    // 5. Combine all for outer SEQUENCE
+    std::vector<uint8_t> outerContent;
+    outerContent.insert(outerContent.end(), versionBytes.begin(), versionBytes.end());
+    outerContent.insert(outerContent.end(), algId.begin(), algId.end());
+    outerContent.insert(outerContent.end(), privKeyOctet.begin(), privKeyOctet.end());
+
+    // 6. Wrap in outer SEQUENCE
+    buffer = wrapInSequence(outerContent);
+
+    return buffer;
+}
+
+// Convenience wrapper to choose format
+std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, KeyFormat format) {
+    if (format == KeyFormat::PKCS1) {
+        return encodeRSAPrivateKeyToPKCS1(keyPair);
+    } else {
+        return encodeRSAPrivateKeyToPKCS8(keyPair);
     }
 }

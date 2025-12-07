@@ -18,7 +18,7 @@
 
 class DERDecoder {
 private:
-    const std::vector<uint8_t>& data;
+    const std::vector<uint8_t> data;
     size_t pos;
     
     // Core DER reading methods
@@ -40,8 +40,8 @@ private:
     void validateRSAPrivateKey(const RSAPrivateKey& key);
     
 public:
-    DERDecoder(const std::vector<uint8_t>& data) 
-        : data(data), pos(0) {}
+    explicit DERDecoder(std::vector<uint8_t> input) 
+        : data(std::move(input)), pos(0) {}
     
     void printDerAtPosition(); // For debugging
     
@@ -83,10 +83,16 @@ private:
 public:
     DEREncoder() = default;
     
-    // Key encoding methods - explicit format
+    // Public key encoding methods
     std::vector<uint8_t> encodeRSAPublicKeyToPKCS1(const RSAPublicKey& key);
     std::vector<uint8_t> encodeRSAPublicKeyToPKCS8(const RSAPublicKey& key);
-
-    // Generic function that by defauly encodes in PKCS8 format
+    // Generic function that by default encodes in PKCS8 format
     std::vector<uint8_t> encodeRSAPublicKeyToDER(const RSAPublicKey& key, KeyFormat format = KeyFormat::PKCS8);
+
+    // Private key encoding methods
+    std::vector<uint8_t> encodeRSAPrivateKeyToPKCS1(const RSAKeyPair& keyPair);
+    std::vector<uint8_t> encodeRSAPrivateKeyToPKCS8(const RSAKeyPair& keyPair);
+    // Generic function that by default encodes in PKCS8 format
+    std::vector<uint8_t> encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, KeyFormat format = KeyFormat::PKCS8);
+
 };
