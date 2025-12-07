@@ -124,6 +124,22 @@ public:
         }
     };
 
+    RSAKeyPair(const RSAPrivateKey& priv, const RSAPublicKey& pub)
+        : privateKey(priv), publicKey(pub)
+    {
+        // Infer security strength from modulus size
+        unsigned int nBits = pub.n.bitLength() + 1;
+
+        if      (nBits >= 15360) specifiedStrength = RSASecurityStrength::RSA_15360;
+        else if (nBits >=  7680) specifiedStrength = RSASecurityStrength::RSA_7680;
+        else if (nBits >=  3072) specifiedStrength = RSASecurityStrength::RSA_3072;
+        else if (nBits >=  2048) specifiedStrength = RSASecurityStrength::RSA_2048;
+        else                     specifiedStrength = RSASecurityStrength::RSA_1024;
+
+        validatePrivateKey(privateKey);
+        validatePublicKey(publicKey);
+    }
+
     void setPrivateKey(RSAPrivateKey privateKeyCandidate, RSASecurityStrength specifiedPrivateStrength) {
         specifiedStrength = specifiedPrivateStrength; 
         if (validatePrivateKey(privateKeyCandidate)) {

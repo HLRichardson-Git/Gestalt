@@ -377,35 +377,108 @@ RSAPublicKey DERDecoder::decodeRSAPublicKeyFromDER() {
     }
 }
 
-KeyFormat DERDecoder::detectPublicKeyFormat() {
+RSAKeyPair DERDecoder::decodeRSAPrivateKeyFromPKCS1() {
+    size_t sequenceEnd = readSequence();
+
+    BigInt version = readIntegerAsBigInt();
+    if (version != 0) {
+        std::cerr << "Warning: RSA private key version " 
+                  << version.toDecimalString() << " (expected 0)" << std::endl;
+    }
+
+    BigInt n = readIntegerAsBigInt();
+    BigInt e = readIntegerAsBigInt();
+    BigInt d = readIntegerAsBigInt();
+
+    // Build public key
+    RSAPublicKey publicKey{n, e};
+
+    // Full CRT-form private key
+    BigInt p    = readIntegerAsBigInt();
+    BigInt q    = readIntegerAsBigInt();
+    BigInt dP   = readIntegerAsBigInt();
+    BigInt dQ   = readIntegerAsBigInt();
+    BigInt qInv = readIntegerAsBigInt();
+
+    RSAPrivateKey privateKey(d, p, q, dP, dQ, qInv);
+
+    if (pos != sequenceEnd) {
+        std::cerr << "Warning: extra data at end of PKCS#1 private key" << std::endl;
+    }
+
+    return RSAKeyPair(privateKey, publicKey);
+}
+
+RSAKeyPair DERDecoder::decodeRSAPrivateKeyFromPKCS8() {
+    size_t outerEnd = readSequence();  // Outer PrivateKeyInfo sequence
+    
+    // Read version (should be 0)
+    BigInt version = readIntegerAsBigInt();
+    if (version != 0) {
+        std::cerr << "Warning: PKCS#8 version is " 
+                  << version.toDecimalString() << " (expected 0)" << std::endl;
+    }
+    
+    // Read AlgorithmIdentifier
+    size_t algIdEnd = readSequence();
+    expectRSAObjectIdentifier();
+    readNullIfPresent();  // Parameters are optional
+    
+    // Validate we're at the end of AlgorithmIdentifier
+    if (pos > algIdEnd) {
+        throw std::runtime_error("Read past end of AlgorithmIdentifier");
+    }
+    
+    // Read the OCTET STRING containing the PKCS#1 private key
+    uint8_t tag = readTag();
+    if (tag != 0x04) {
+        std::stringstream ss;
+        ss << "Expected OCTET STRING tag (0x04), got: 0x" << std::hex << (int)tag;
+        throw std::runtime_error(ss.str());
+    }
+    
+    size_t octetStringLength = readLength();
+    size_t octetStringEnd = pos + octetStringLength;
+    
+    // Validate length
+    if (octetStringEnd > data.size()) {
+        throw std::runtime_error("OCTET STRING length exceeds available data");
+    }
+    
+    // The OCTET STRING contains a PKCS#1 RSAPrivateKey
+    // We parse it in place since pos is already pointing to the start
+    RSAKeyPair key = decodeRSAPrivateKeyFromPKCS1();
+    
+    // Validate we're at the end of the OCTET STRING
+    if (pos != octetStringEnd) {
+        std::cerr << "Warning: Extra data in PKCS#8 OCTET STRING" << std::endl;
+    }
+    
+    // Validate we're at or near the end of the outer sequence
+    if (pos > outerEnd) {
+        throw std::runtime_error("Read past end of PKCS#8 PrivateKeyInfo");
+    }
+    
+    return key;
+}
+
+RSAKeyPair DERDecoder::decodeRSAPrivateKeyFromDER() {
     size_t savedPos = pos;
     
     try {
-        readSequence(); // First sequence
-        
-        // Peek at the next tag
-        if (pos >= data.size()) {
-            throw std::runtime_error("Unexpected end of data after initial SEQUENCE");
-        }
-        
-        uint8_t nextTag = data[pos];
-        
-        // Restore position
+        // Try PKCS#8 first (more common)
+        return decodeRSAPrivateKeyFromPKCS8();
+    } catch (const std::runtime_error& e) {
+        // Reset position and try PKCS#1
         pos = savedPos;
-        
-        if (nextTag == 0x30) {
-            // Next element is a SEQUENCE, likely PKCS#8 (AlgorithmIdentifier)
-            return KeyFormat::PKCS8;
-        } else if (nextTag == 0x02) {
-            // Next element is an INTEGER, likely PKCS#1
-            return KeyFormat::PKCS1;
-        } else {
-            std::stringstream ss;
-            ss << "Unknown key format: unexpected tag 0x" << std::hex << (int)nextTag;
-            throw std::runtime_error(ss.str());
+        try {
+            return decodeRSAPrivateKeyFromPKCS1();
+        } catch (const std::runtime_error& e2) {
+            throw std::runtime_error(
+                "Failed to parse RSA private key. Not valid PKCS#8 or PKCS#1 format.\n"
+                "PKCS#8 error: " + std::string(e.what()) + "\n" +
+                "PKCS#1 error: " + std::string(e2.what())
+            );
         }
-    } catch (...) {
-        pos = savedPos;
-        throw;
     }
 }

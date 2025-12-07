@@ -37,6 +37,7 @@ private:
     
     // Validation
     void validateRSAPublicKey(const BigInt& modulus, const BigInt& exponent);
+    void validateRSAPrivateKey(const RSAPrivateKey& key);
     
 public:
     DERDecoder(const std::vector<uint8_t>& data) 
@@ -44,15 +45,15 @@ public:
     
     void printDerAtPosition(); // For debugging
     
-    // Key decoding methods - explicit format
+    // Public key decoding methods
     RSAPublicKey decodeRSAPublicKeyFromPKCS8();
     RSAPublicKey decodeRSAPublicKeyFromPKCS1();
+    RSAPublicKey decodeRSAPublicKeyFromDER();  // Auto-detect
     
-    // Auto-detect format
-    RSAPublicKey decodeRSAPublicKeyFromDER();
-    
-    // Utility methods
-    KeyFormat detectPublicKeyFormat();
+    // Private key decoding methods
+    RSAKeyPair decodeRSAPrivateKeyFromPKCS1();
+    RSAKeyPair decodeRSAPrivateKeyFromPKCS8();
+    RSAKeyPair decodeRSAPrivateKeyFromDER();  // Auto-detect
 };
 
 class DEREncoder {
