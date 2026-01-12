@@ -30,6 +30,8 @@ set (Sources
     sha2/test_sha2.cpp
     asn1/der/test_der_decoder.cpp
     asn1/der/test_der_encoder.cpp
+    asn1/pem/test_pem_decoder.cpp
+    asn1/pem/test_pem_encoder.cpp
 )
 
 add_executable (${This} ${Sources})

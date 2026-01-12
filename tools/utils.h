@@ -17,6 +17,10 @@
 #include <vector>
 #include <string>
 
+// Used for DER <-> PEM conversions
+std::string base64Encode(const std::vector<uint8_t>& hexVector);
+std::vector<uint8_t> base64Decode(const std::string& baseSixtyFourString);
+
 /*
  * TODO: these following 9 functions was my first attempt to streamline parsing user inputs.
  *       I still want to explore better ideas as this one tried to use the input to determine the format
