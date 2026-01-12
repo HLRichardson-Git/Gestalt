@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -51,6 +51,10 @@ struct RSAPublicKey {
     // Encode this key to DER (PKCS1 or PKCS8)
     std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8) const;
     void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
+
+    // Encode this key to PEM (PKCS1 or PKCS8)
+    std::string toPEM(KeyFormat format = KeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, KeyFormat format = KeyFormat::PKCS8);
 };
 
 struct RSAPrivateKey {
@@ -93,6 +97,9 @@ struct RSAPrivateKey {
 
     std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8, const RSAPublicKey* pubKey = nullptr) const;
     void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
+
+    std::string toPEM(KeyFormat format, const RSAPublicKey* pubKey) const;
+    void fromPEM(const std::string& pem, KeyFormat format);
 };
 
 class RSAKeyPair {
@@ -151,6 +158,14 @@ public:
         validatePublicKey(publicKey);
     }
 
+    RSAKeyPair(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8) {
+        fromDER(der, format);
+    }
+
+    RSAKeyPair(const std::string& pem, KeyFormat format = KeyFormat::PKCS8) {
+        fromPEM(pem, format);
+    }
+
     void setPrivateKey(RSAPrivateKey privateKeyCandidate, RSASecurityStrength specifiedPrivateStrength) {
         specifiedStrength = specifiedPrivateStrength; 
         if (validatePrivateKey(privateKeyCandidate)) {
@@ -174,4 +189,7 @@ public:
 
     std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8);
     void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
+
+    std::string toPEM(KeyFormat format = KeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, KeyFormat format = KeyFormat::PKCS8);
 };

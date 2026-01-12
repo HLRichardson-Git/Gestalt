@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -14,8 +14,12 @@
  * 
  */
 
+#include <sstream>
+
 #include "rsaKeyGen.h"
 #include "asn1/der/der.h"
+#include "asn1/pem/pem.h"
+#include "utils.h"
 
 unsigned int RSAPublicKey::getPublicModulusBitLength() const {
     return mpz_sizeinbase(n.n, 2);
@@ -49,6 +53,35 @@ void RSAPublicKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
     }
 }
 
+std::string RSAPublicKey::toPEM(KeyFormat format) const {
+    PEMEncoder encoder;
+    switch (format) {
+        case KeyFormat::PKCS1: return encoder.encodeRSAPublicKeyToPKCS1(*this);
+        case KeyFormat::PKCS8: 
+        default: return encoder.encodeRSAPublicKeyToPKCS8(*this);
+    }
+}
+
+void RSAPublicKey::fromPEM(const std::string& pem, KeyFormat format) {
+    PEMDecoder decoder;
+    
+    switch (format) {
+        case KeyFormat::PKCS1: {
+            RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS1(pem);
+            n = decoded.n;
+            e = decoded.e;
+            break;
+        }
+        case KeyFormat::PKCS8:
+        default: {
+            RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS8(pem);
+            n = decoded.n;
+            e = decoded.e;
+            break;
+        }
+    }
+}
+
 std::vector<uint8_t> RSAPrivateKey::toDER(KeyFormat format, const RSAPublicKey* pubKey) const {
     if (!pubKey) {
         throw std::runtime_error("RSAPrivateKey::toDER requires a public key for encoding");
@@ -68,6 +101,29 @@ void RSAPrivateKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
         case KeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(); break;
         case KeyFormat::PKCS8: 
         default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(); break;
+    }
+    *this = decoded.getPrivateKey();
+}
+
+std::string RSAPrivateKey::toPEM(KeyFormat format, const RSAPublicKey* pubKey) const {
+    if (!pubKey) {
+        throw std::runtime_error("RSAPrivateKey::toPem requires a public key for encoding");
+    }
+    PEMEncoder encoder;
+    switch (format) {
+        case KeyFormat::PKCS1: return encoder.encodeRSAPrivateKeyToPKCS1({*this, *pubKey});
+        case KeyFormat::PKCS8: 
+        default: return encoder.encodeRSAPrivateKeyToPKCS8({*this, *pubKey});
+    }
+}
+
+void RSAPrivateKey::fromPEM(const std::string& pem, KeyFormat format) {
+    PEMDecoder decoder;
+    RSAKeyPair decoded;
+    switch (format) {
+        case KeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(pem); break;
+        case KeyFormat::PKCS8: 
+        default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(pem); break;
     }
     *this = decoded.getPrivateKey();
 }
@@ -216,4 +272,63 @@ void RSAKeyPair::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
     else if (nBits >=  3072) specifiedStrength = RSASecurityStrength::RSA_3072;
     else if (nBits >=  2048) specifiedStrength = RSASecurityStrength::RSA_2048;
     else                     specifiedStrength = RSASecurityStrength::RSA_1024;
+}
+
+std::string RSAKeyPair::toPEM(KeyFormat format) const {
+    DEREncoder encoder;
+    std::vector<uint8_t> der = encoder.encodeRSAPrivateKeyToDER(*this, format); // encode to DER first
+
+    // Base64 encode DER
+    std::string base64 = base64Encode(der);
+
+    // Break Base64 into 64-character lines
+    std::ostringstream oss;
+    const std::string header = (format == KeyFormat::PKCS1) ? 
+        "-----BEGIN RSA PRIVATE KEY-----" : 
+        "-----BEGIN PRIVATE KEY-----";
+    const std::string footer = (format == KeyFormat::PKCS1) ? 
+        "-----END RSA PRIVATE KEY-----" : 
+        "-----END PRIVATE KEY-----";
+
+    oss << header << "\n";
+
+    for (size_t i = 0; i < base64.size(); i += 64) {
+        oss << base64.substr(i, 64) << "\n";
+    }
+
+    oss << footer << "\n";
+
+    return oss.str();
+}
+
+void RSAKeyPair::fromPEM(const std::string& pem, KeyFormat format) {
+    // Find header and footer
+    std::string header, footer;
+    if (format == KeyFormat::PKCS1) {
+        header = "-----BEGIN RSA PRIVATE KEY-----";
+        footer = "-----END RSA PRIVATE KEY-----";
+    } else {
+        header = "-----BEGIN PRIVATE KEY-----";
+        footer = "-----END PRIVATE KEY-----";
+    }
+
+    auto start = pem.find(header);
+    auto end = pem.find(footer);
+
+    if (start == std::string::npos || end == std::string::npos || start >= end) {
+        throw std::invalid_argument("Invalid PEM format: missing header or footer");
+    }
+
+    // Extract Base64 block
+    start += header.size();
+    std::string base64 = pem.substr(start, end - start);
+
+    // Remove newlines and whitespace
+    base64.erase(std::remove_if(base64.begin(), base64.end(), ::isspace), base64.end());
+
+    // Decode Base64 to DER
+    std::vector<uint8_t> der = base64Decode(base64);
+
+    // Delegate to DER decoder
+    fromDER(der, format);
 }

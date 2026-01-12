@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -204,6 +204,107 @@ TEST(RSA_DER_Test, roundTrip_PKCS1) {
     rsa2.fromDER(der, KeyFormat::PKCS1);
 
     // Check that all components match
+    EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
+    EXPECT_EQ(rsa.getPublicKey().e,  rsa2.getPublicKey().e);
+    EXPECT_EQ(rsa.getPrivateKey().d,  rsa2.getPrivateKey().d);
+    EXPECT_EQ(rsa.getPrivateKey().p,  rsa2.getPrivateKey().p);
+    EXPECT_EQ(rsa.getPrivateKey().q,  rsa2.getPrivateKey().q);
+    EXPECT_EQ(rsa.getPrivateKey().dP, rsa2.getPrivateKey().dP);
+    EXPECT_EQ(rsa.getPrivateKey().dQ, rsa2.getPrivateKey().dQ);
+    EXPECT_EQ(rsa.getPrivateKey().qInv, rsa2.getPrivateKey().qInv);
+}
+
+TEST(RSA_PEM_Test, publicKey_PKCS8_roundtrip) {
+    RSAPublicKey pubKey(n, e);
+
+    // Encode to PEM
+    std::string pem = pubKey.toPEM(KeyFormat::PKCS8);
+
+    // Decode back
+    RSAPublicKey decoded;
+    decoded.fromPEM(pem, KeyFormat::PKCS8);
+
+    EXPECT_EQ(pubKey.n, decoded.n);
+    EXPECT_EQ(pubKey.e, decoded.e);
+}
+
+TEST(RSA_PEM_Test, publicKey_PKCS1_roundtrip) {
+    RSAPublicKey pubKey(n, e);
+
+    std::string pem = pubKey.toPEM(KeyFormat::PKCS1);
+    RSAPublicKey decoded;
+    decoded.fromPEM(pem, KeyFormat::PKCS1);
+
+    EXPECT_EQ(pubKey.n, decoded.n);
+    EXPECT_EQ(pubKey.e, decoded.e);
+}
+
+TEST(RSA_PEM_Test, privateKey_PKCS8_roundtrip) {
+    RSAPrivateKey privKey(d, p, q);
+    RSAPublicKey pubKey(n, e);
+
+    std::string pem = privKey.toPEM(KeyFormat::PKCS8, &pubKey);
+    RSAPrivateKey decoded;
+    decoded.fromPEM(pem, KeyFormat::PKCS8);
+
+    EXPECT_EQ(privKey.d, decoded.d);
+    EXPECT_EQ(privKey.p, decoded.p);
+    EXPECT_EQ(privKey.q, decoded.q);
+    EXPECT_EQ(privKey.dP, decoded.dP);
+    EXPECT_EQ(privKey.dQ, decoded.dQ);
+    EXPECT_EQ(privKey.qInv, decoded.qInv);
+}
+
+TEST(RSA_PEM_Test, privateKey_PKCS1_roundtrip) {
+    RSAPrivateKey privKey(d, p, q);
+    RSAPublicKey pubKey(n, e);
+
+    std::string pem = privKey.toPEM(KeyFormat::PKCS1, &pubKey);
+    RSAPrivateKey decoded;
+    decoded.fromPEM(pem, KeyFormat::PKCS1);
+
+    EXPECT_EQ(privKey.d, decoded.d);
+    EXPECT_EQ(privKey.p, decoded.p);
+    EXPECT_EQ(privKey.q, decoded.q);
+    EXPECT_EQ(privKey.dP, decoded.dP);
+    EXPECT_EQ(privKey.dQ, decoded.dQ);
+    EXPECT_EQ(privKey.qInv, decoded.qInv);
+}
+
+TEST(RSA_PEM_Test, roundTrip_PKCS8) {
+    RSAPrivateKey priv(d, p, q, dP, dQ, qInv);
+    RSAPublicKey pub(n, e);
+    RSAKeyPair rsa(priv, pub);
+
+    // Encode to PEM
+    std::string pem = rsa.toPEM(KeyFormat::PKCS8);
+    ASSERT_FALSE(pem.empty());
+
+    // Decode from PEM
+    RSAKeyPair rsa2(priv, pub);
+    rsa2.fromPEM(pem, KeyFormat::PKCS8);
+
+    EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
+    EXPECT_EQ(rsa.getPublicKey().e,  rsa2.getPublicKey().e);
+    EXPECT_EQ(rsa.getPrivateKey().d,  rsa2.getPrivateKey().d);
+    EXPECT_EQ(rsa.getPrivateKey().p,  rsa2.getPrivateKey().p);
+    EXPECT_EQ(rsa.getPrivateKey().q,  rsa2.getPrivateKey().q);
+    EXPECT_EQ(rsa.getPrivateKey().dP, rsa2.getPrivateKey().dP);
+    EXPECT_EQ(rsa.getPrivateKey().dQ, rsa2.getPrivateKey().dQ);
+    EXPECT_EQ(rsa.getPrivateKey().qInv, rsa2.getPrivateKey().qInv);
+}
+
+TEST(RSA_PEM_Test, roundTrip_PKCS1) {
+    RSAPrivateKey priv(d, p, q, dP, dQ, qInv);
+    RSAPublicKey pub(n, e);
+    RSAKeyPair rsa(priv, pub);
+
+    std::string pem = rsa.toPEM(KeyFormat::PKCS1);
+    ASSERT_FALSE(pem.empty());
+
+    RSAKeyPair rsa2(priv, pub);
+    rsa2.fromPEM(pem, KeyFormat::PKCS1);
+
     EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
     EXPECT_EQ(rsa.getPublicKey().e,  rsa2.getPublicKey().e);
     EXPECT_EQ(rsa.getPrivateKey().d,  rsa2.getPrivateKey().d);
