@@ -28,12 +28,12 @@ set (Sources
     sha1/test_sha1.cpp
     sha1/test_sha1_functions.cpp
     sha2/test_sha2.cpp
-    asn1/der/test_der_decoder.cpp
-    asn1/der/test_der_encoder.cpp
+    asn1/der/test_rsa_der_decoder.cpp
+    asn1/der/test_rsa_der_encoder.cpp
     asn1/der/test_ecc_der_decoder.cpp
     asn1/der/test_ecc_der_encoder.cpp
-    asn1/pem/test_pem_decoder.cpp
-    asn1/pem/test_pem_encoder.cpp
+    asn1/pem/test_rsa_pem_decoder.cpp
+    asn1/pem/test_rsa_pem_encoder.cpp
     asn1/pem/test_ecc_pem_decoder.cpp
     asn1/pem/test_ecc_pem_encoder.cpp
 )

@@ -96,12 +96,9 @@ std::vector<uint8_t> RSAPrivateKey::toDER(RsaKeyFormat format, const RSAPublicKe
 
 void RSAPrivateKey::fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format) {
     DERDecoder decoder(der);
-    RSAKeyPair decoded;
-    switch (format) {
-        case RsaKeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(); break;
-        case RsaKeyFormat::PKCS8: 
-        default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(); break;
-    }
+    RSAKeyPair decoded = (format == RsaKeyFormat::PKCS1)
+        ? decoder.decodeRSAPrivateKeyFromPKCS1()
+        : decoder.decodeRSAPrivateKeyFromPKCS8();
     *this = decoded.getPrivateKey();
 }
 
@@ -119,12 +116,9 @@ std::string RSAPrivateKey::toPEM(RsaKeyFormat format, const RSAPublicKey* pubKey
 
 void RSAPrivateKey::fromPEM(const std::string& pem, RsaKeyFormat format) {
     PEMDecoder decoder;
-    RSAKeyPair decoded;
-    switch (format) {
-        case RsaKeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(pem); break;
-        case RsaKeyFormat::PKCS8: 
-        default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(pem); break;
-    }
+    RSAKeyPair decoded = (format == RsaKeyFormat::PKCS1)
+        ? decoder.decodeRSAPrivateKeyFromPKCS1(pem)
+        : decoder.decodeRSAPrivateKeyFromPKCS8(pem);
     *this = decoded.getPrivateKey();
 }
 
@@ -250,17 +244,9 @@ std::vector<uint8_t> RSAKeyPair::toDER(RsaKeyFormat format) {
 
 void RSAKeyPair::fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format) {
     DERDecoder decoder(der);
-    RSAKeyPair decoded;
-
-    switch (format) {
-        case RsaKeyFormat::PKCS1:
-            decoded = decoder.decodeRSAPrivateKeyFromPKCS1();
-            break;
-        case RsaKeyFormat::PKCS8:
-        default:
-            decoded = decoder.decodeRSAPrivateKeyFromPKCS8();
-            break;
-    }
+    RSAKeyPair decoded = (format == RsaKeyFormat::PKCS1)
+        ? decoder.decodeRSAPrivateKeyFromPKCS1()
+        : decoder.decodeRSAPrivateKeyFromPKCS8();
 
     privateKey = decoded.getPrivateKey();
     publicKey = decoded.getPublicKey();

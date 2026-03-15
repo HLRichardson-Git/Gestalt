@@ -5,7 +5,7 @@
  */
 
 /*
- * test_der_decoder.cpp
+ * test_rsa_pem_decoder.cpp
  *
  * This file contains the unit tests for the ASN.1 DER encoding/ decoding implementation.
  */
@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 
 // Test PKCS#8 format
-TEST(PEMDecoder_Test, decode_pkcs8_rsa_public_key) {
+TEST(PEMDecoder_RSA_Test, decode_pkcs8_rsa_public_key) {
     const std::string testKey = 
         "-----BEGIN PUBLIC KEY-----\n"
         "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCjmcr22TtipralMR7+k8TWRzl8\n"
@@ -36,7 +36,7 @@ TEST(PEMDecoder_Test, decode_pkcs8_rsa_public_key) {
 }
 
 // Test PKCS#1 format
-TEST(PEMDecoder_Test, decode_pkcs1_rsa_public_key) {
+TEST(PEMDecoder_RSA_Test, decode_pkcs1_rsa_public_key) {
     const std::string testKey = 
         "-----BEGIN RSA PUBLIC KEY-----\n"
         "MEgCQQCo9+BpMRYQ/dL3DS2CyJxRF+j6ctbT3/Qp84+KeFhnii7NT7fELilKUSnx\n"
@@ -54,7 +54,7 @@ TEST(PEMDecoder_Test, decode_pkcs1_rsa_public_key) {
     EXPECT_TRUE(expectedKey.e == decodedKey.e);
 }
 
-TEST(PEMDecoder_Test, decode_pkcs1_rsa_private_key) {
+TEST(PEMDecoder_RSA_Test, decode_pkcs1_rsa_private_key) {
     const std::string testKey = 
         "-----BEGIN RSA PRIVATE KEY-----\n"
         "MIIEogIBAAKCAQBiIeFT/8Ej2LSDhq/x9JnhE5A1spHTP357gMMeAm01pjhULdRH\n"
@@ -112,7 +112,7 @@ TEST(PEMDecoder_Test, decode_pkcs1_rsa_private_key) {
     EXPECT_TRUE(expected.getPrivateKey().qInv == decodedKey.getPrivateKey().qInv);
 }
 
-TEST(PEMDecoder_Test, decode_pkcs8_rsa_private_key) {
+TEST(PEMDecoder_RSA_Test, decode_pkcs8_rsa_private_key) {
     const std::string testKey = 
         "-----BEGIN PRIVATE KEY-----\n"
         "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDnOzCx063BxFzP\n"

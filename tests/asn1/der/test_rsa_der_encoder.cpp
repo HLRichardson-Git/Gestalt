@@ -4,12 +4,18 @@
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
 
+ /*
+ * test_rsa_der_encoder.cpp
+ *
+ * This file contains the unit tests for the ASN.1 DER encoding/ decoding implementation.
+ */
+
 #include "asn1/der/der.h"
 
 #include <gtest/gtest.h>
 
 // Test encoding to PKCS#8 format
-TEST(DEREncoder_Test, encode_pkcs8_rsa_public_key) {
+TEST(DEREncoder_RSA_Test, encode_pkcs8_rsa_public_key) {
     RSAPublicKey key = {
         "0xa399caf6d93b62a6b6a5311efe93c4d647397ca05a98fa5cddb72d6816ab16fc85f940efe9cf2233975c8925c60f4cd356767cc8445686313a0caeae32930070ca90591a1b249c2fcef9280f5a11d8f1990579d86a05b2523f52c4a876da2d635ca27fbff195e6f7015f834928f033a20b2cd0216a852958b3e58d0f9bd54233",
         65537
@@ -27,7 +33,7 @@ TEST(DEREncoder_Test, encode_pkcs8_rsa_public_key) {
 }
 
 // Test encoding to PKCS#1 format
-TEST(DEREncoder_Test, encode_pkcs1_rsa_public_key) {
+TEST(DEREncoder_RSA_Test, encode_pkcs1_rsa_public_key) {
     RSAPublicKey key = {
         "0xa8f7e069311610fdd2f70d2d82c89c5117e8fa72d6d3dff429f38f8a7858678a2ecd4fb7c42e294a5129f14b7d1602f4020a8db2535a2b7e0aabe3598cef4301",
         65537
@@ -45,7 +51,7 @@ TEST(DEREncoder_Test, encode_pkcs1_rsa_public_key) {
 }
 
 // Test encoding RSA Private Key to PKCS#1
-TEST(DEREncoder_Test, encode_pkcs1_rsa_private_key) {
+TEST(DEREncoder_RSA_Test, encode_pkcs1_rsa_private_key) {
     RSAKeyPair key = {
         RSAPrivateKey{
             "0x21B49D5E6AA3FE19FAB68A567876993BF3AA3EA75CEB000E038190830836568D071FF2B5CD0F91A65BC2D52A11CDE8B0CE49B5681688475DE79A03F56BE28040A5128BA30617B416F02F07416D0733D278C6D3ACF8394D60B8578DBFE28FA5B4CFDBDB8708A765B3197F89CE6D3983E45D358111372FD431CDE1BD84E7D3EDAD7DB6E776CEC27445920DCD2F0B3515118BEABD9CA6ABCA2CA54E2ED4753BAFBCBE25CB9AEFDA63A076C37C8512190044FC31E91F01E4BF0EE90CA055A779F80FEB7EDF03AEC7555E5F6865F7B7A589AF48A25311F1FB6030B3FB927089E0F66000A7F0A8C007AC55B467AFE1384A6242CF4B4ACBFFA15BEB6296496716966041",
@@ -79,7 +85,7 @@ TEST(DEREncoder_Test, encode_pkcs1_rsa_private_key) {
 }
 
 // Test encoding RSA Private Key to PKCS#8
-TEST(DEREncoder_Test, encode_pkcs8_rsa_private_key) {
+TEST(DEREncoder_RSA_Test, encode_pkcs8_rsa_private_key) {
     RSAKeyPair key = {
         RSAPrivateKey{
             "0x14cc1b949af3e15e2e74d89873dd954327471986f7d01319bda4cb246390963a8f166c80cf3714d1696df19c1692fc076147f78311afb78aaf77e7707821dadaca8a6009d5a7ebc3f082e409ec25e7e31b60d83d4094ef01b2c12a6d2d0ac3cf8bf13a73c93afa49ec5237d27d3de00edd20827ad98321e7b11a3dfe998a1fdde5a4aaf4d02ab204402a13da004d6d61091fcd43df5eec6398b1c2dfc61505b065f82087d26d67c9e9561c12c381a081f353cbbc9a8898bc07b5a4cc440b7ccd6c5ad16d50fab6c75b8349740ced595448bdd52c538d98a848dfee22674e5b5adf9da8a1d5c5f865af136728b86f33413f59fcf69d5aa363b37f838bfbd3b867",
