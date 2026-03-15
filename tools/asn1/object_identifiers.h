@@ -27,6 +27,8 @@ const std::string OID_RSA_OAEP = "2a864886f70d010107";       // 1.2.840.113549.1
 const std::string OID_EC_PUBLIC_KEY = "2a8648ce3d0201";      // 1.2.840.10045.2.1 (ecPublicKey)
 
 // Common elliptic curves
+const std::string OID_SECP192R1 = "2a8648ce3d030101";        // 1.2.840.10045.3.1.1 (prime192v1/secp192r1)
+const std::string OID_SECP224R1 = "2b81040021";              // 1.3.132.0.33 (secp224r1)
 const std::string OID_SECP256R1 = "2a8648ce3d030107";        // 1.2.840.10045.3.1.7 (prime256v1/secp256r1)
 const std::string OID_SECP384R1 = "2b81040022";              // 1.3.132.0.34 (secp384r1)
 const std::string OID_SECP521R1 = "2b81040023";              // 1.3.132.0.35 (secp521r1)

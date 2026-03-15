@@ -464,7 +464,7 @@ RSAKeyPair DERDecoder::decodeRSAPrivateKeyFromPKCS8() {
 
 RSAKeyPair DERDecoder::decodeRSAPrivateKeyFromDER() {
     size_t savedPos = pos;
-    
+
     try {
         // Try PKCS#8 first (more common)
         return decodeRSAPrivateKeyFromPKCS8();
@@ -478,6 +478,246 @@ RSAKeyPair DERDecoder::decodeRSAPrivateKeyFromDER() {
                 "Failed to parse RSA private key. Not valid PKCS#8 or PKCS#1 format.\n"
                 "PKCS#8 error: " + std::string(e.what()) + "\n" +
                 "PKCS#1 error: " + std::string(e2.what())
+            );
+        }
+    }
+}
+
+// ============================================================
+// EC helpers
+// ============================================================
+
+StandardCurve DERDecoder::oidToCurve(const std::string& oid) {
+    if (oid == OID_SECP192R1) return StandardCurve::P192;
+    if (oid == OID_SECP224R1) return StandardCurve::P224;
+    if (oid == OID_SECP256R1) return StandardCurve::P256;
+    if (oid == OID_SECP384R1) return StandardCurve::P384;
+    if (oid == OID_SECP521R1) return StandardCurve::P521;
+    if (oid == OID_SECP256K1) return StandardCurve::secp256k1;
+    throw std::runtime_error("Unknown EC curve OID: " + oid);
+}
+
+std::vector<uint8_t> DERDecoder::readOctetString() {
+    uint8_t tag = readTag();
+    if (tag != 0x04) {
+        std::stringstream ss;
+        ss << "Expected OCTET STRING tag (0x04) at position " << (pos - 1)
+           << ", got: 0x" << std::hex << (int)tag;
+        throw std::runtime_error(ss.str());
+    }
+    size_t length = readLength();
+    if (pos + length > data.size()) {
+        throw std::runtime_error("OCTET STRING length exceeds available data");
+    }
+    std::vector<uint8_t> bytes(data.begin() + pos, data.begin() + pos + length);
+    pos += length;
+    return bytes;
+}
+
+// Parse raw uncompressed EC point bytes: 0x04 || X || Y
+// (No outer DER tag — these are the payload bytes from a BIT STRING or standalone)
+static ECDSAPublicKey parseUncompressedPoint(const std::vector<uint8_t>& pointBytes) {
+    if (pointBytes.empty() || pointBytes[0] != 0x04) {
+        throw std::runtime_error("Expected uncompressed EC point (0x04 prefix)");
+    }
+    size_t coordLen = (pointBytes.size() - 1) / 2;
+    if (pointBytes.size() != 1 + 2 * coordLen) {
+        throw std::runtime_error("Invalid EC point length");
+    }
+
+    Point pt;
+    mpz_import(pt.x, coordLen, 1, 1, 1, 0, pointBytes.data() + 1);
+    mpz_import(pt.y, coordLen, 1, 1, 1, 0, pointBytes.data() + 1 + coordLen);
+    return ECDSAPublicKey(pt);
+}
+
+// ============================================================
+// EC public key decoding
+// ============================================================
+
+// SEC1 public key: raw uncompressed point bytes 0x04 || X || Y (no outer DER wrapper)
+ECDSAPublicKey DERDecoder::decodeECPublicKeyFromSEC1() {
+    if (pos >= data.size() || data[pos] != 0x04) {
+        throw std::runtime_error("Expected uncompressed EC point (0x04) for SEC1 public key");
+    }
+    std::vector<uint8_t> pointBytes(data.begin() + pos, data.end());
+    pos = data.size();
+    return parseUncompressedPoint(pointBytes);
+}
+
+// PKCS8 SubjectPublicKeyInfo:
+// SEQUENCE { SEQUENCE { OID id-ecPublicKey, OID curve }, BIT STRING { 0x00, 0x04, X, Y } }
+ECDSAPublicKey DERDecoder::decodeECPublicKeyFromPKCS8() {
+    size_t outerEnd = readSequence();
+    size_t algIdEnd = readSequence();
+
+    std::string algOid = readObjectIdentifier();
+    if (algOid != OID_EC_PUBLIC_KEY) {
+        throw std::runtime_error("Expected id-ecPublicKey OID, got: " + algOid);
+    }
+
+    std::string curveOid = readObjectIdentifier();
+    StandardCurve curve = oidToCurve(curveOid);
+
+    if (pos > algIdEnd) {
+        throw std::runtime_error("Read past end of AlgorithmIdentifier");
+    }
+    pos = algIdEnd;  // skip any trailing parameters
+
+    // BIT STRING containing the uncompressed point
+    uint8_t tag = readTag();
+    if (tag != 0x03) {
+        std::stringstream ss;
+        ss << "Expected BIT STRING (0x03), got: 0x" << std::hex << (int)tag;
+        throw std::runtime_error(ss.str());
+    }
+    size_t bitStringLen = readLength();
+    if (pos + bitStringLen > data.size()) {
+        throw std::runtime_error("BIT STRING length exceeds available data");
+    }
+    uint8_t unusedBits = data[pos++];
+    if (unusedBits != 0) {
+        throw std::runtime_error("Non-zero unused bits in EC public key BIT STRING");
+    }
+    std::vector<uint8_t> pointBytes(data.begin() + pos, data.begin() + pos + bitStringLen - 1);
+    pos += bitStringLen - 1;
+
+    ECDSAPublicKey pubKey = parseUncompressedPoint(pointBytes);
+    pubKey.setCurve(curve);
+
+    if (pos > outerEnd) {
+        throw std::runtime_error("Read past end of SubjectPublicKeyInfo");
+    }
+    return pubKey;
+}
+
+ECDSAPublicKey DERDecoder::decodeECPublicKeyFromDER() {
+    size_t savedPos = pos;
+    try {
+        return decodeECPublicKeyFromPKCS8();
+    } catch (const std::runtime_error& e) {
+        pos = savedPos;
+        try {
+            return decodeECPublicKeyFromSEC1();
+        } catch (const std::runtime_error& e2) {
+            throw std::runtime_error(
+                "Failed to parse EC public key. Not valid PKCS8 or SEC1 format.\n"
+                "PKCS8 error: " + std::string(e.what()) + "\n" +
+                "SEC1 error: " + std::string(e2.what())
+            );
+        }
+    }
+}
+
+// ============================================================
+// EC private key decoding
+// ============================================================
+
+// SEC1 ECPrivateKey:
+// SEQUENCE { INTEGER version(1), OCTET STRING priv, [0] OID curve, [1] BIT STRING pubKey }
+KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
+    size_t seqEnd = readSequence();
+
+    // version must be 1
+    BigInt version = readIntegerAsBigInt();
+    if (version != 1) {
+        std::cerr << "Warning: EC SEC1 private key version "
+                  << version.toDecimalString() << " (expected 1)" << std::endl;
+    }
+
+    // private key OCTET STRING (raw field element bytes)
+    std::vector<uint8_t> privBytes = readOctetString();
+
+    // [0] EXPLICIT OID curve (optional but always written by this encoder)
+    StandardCurve curve = StandardCurve::secp256k1;
+    if (pos < seqEnd && data[pos] == 0xa0) {
+        pos++;  // consume context tag
+        size_t tag0Len = readLength();
+        size_t tag0End = pos + tag0Len;
+        std::string curveOid = readObjectIdentifier();
+        curve = oidToCurve(curveOid);
+        pos = tag0End;
+    }
+
+    // [1] EXPLICIT BIT STRING public key (optional)
+    ECDSAPublicKey pubKey;
+    if (pos < seqEnd && data[pos] == 0xa1) {
+        pos++;  // consume context tag
+        size_t tag1Len = readLength();
+        size_t tag1End = pos + tag1Len;
+        // BIT STRING inside
+        uint8_t bsTag = readTag();
+        if (bsTag != 0x03) {
+            throw std::runtime_error("Expected BIT STRING inside [1] context tag");
+        }
+        size_t bsLen = readLength();
+        uint8_t unusedBits = data[pos++];
+        if (unusedBits != 0) {
+            throw std::runtime_error("Non-zero unused bits in EC public key BIT STRING");
+        }
+        std::vector<uint8_t> pointBytes(data.begin() + pos, data.begin() + pos + bsLen - 1);
+        pos += bsLen - 1;
+        pubKey = parseUncompressedPoint(pointBytes);
+        pos = tag1End;
+    }
+    pubKey.setCurve(curve);
+
+    // Import private key bytes into mpz_t
+    KeyPair keyPair;
+    mpz_import(keyPair.privateKey, privBytes.size(), 1, 1, 1, 0, privBytes.data());
+    keyPair.publicKey = pubKey;
+
+    return keyPair;
+}
+
+// PKCS8 PrivateKeyInfo for EC:
+// SEQUENCE { INTEGER version(0), SEQUENCE { OID id-ecPublicKey, OID curve }, OCTET STRING { SEC1 } }
+KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
+    size_t outerEnd = readSequence();
+
+    BigInt version = readIntegerAsBigInt();
+    if (version != 0) {
+        std::cerr << "Warning: PKCS8 version " << version.toDecimalString() << " (expected 0)" << std::endl;
+    }
+
+    size_t algIdEnd = readSequence();
+    std::string algOid = readObjectIdentifier();
+    if (algOid != OID_EC_PUBLIC_KEY) {
+        throw std::runtime_error("Expected id-ecPublicKey OID, got: " + algOid);
+    }
+    std::string curveOid = readObjectIdentifier();
+    StandardCurve curve = oidToCurve(curveOid);
+    pos = algIdEnd;  // skip any trailing parameters
+
+    // OCTET STRING containing the SEC1 ECPrivateKey
+    std::vector<uint8_t> sec1Bytes = readOctetString();
+
+    // Parse the SEC1 structure
+    DERDecoder sec1Decoder(sec1Bytes);
+    KeyPair keyPair = sec1Decoder.decodeECPrivateKeyFromSEC1();
+
+    // The curve OID from PKCS8 is authoritative
+    keyPair.publicKey.setCurve(curve);
+
+    if (pos > outerEnd) {
+        throw std::runtime_error("Read past end of PKCS8 PrivateKeyInfo");
+    }
+    return keyPair;
+}
+
+KeyPair DERDecoder::decodeECPrivateKeyFromDER() {
+    size_t savedPos = pos;
+    try {
+        return decodeECPrivateKeyFromPKCS8();
+    } catch (const std::runtime_error& e) {
+        pos = savedPos;
+        try {
+            return decodeECPrivateKeyFromSEC1();
+        } catch (const std::runtime_error& e2) {
+            throw std::runtime_error(
+                "Failed to parse EC private key. Not valid PKCS8 or SEC1 format.\n"
+                "PKCS8 error: " + std::string(e.what()) + "\n" +
+                "SEC1 error: " + std::string(e2.what())
             );
         }
     }

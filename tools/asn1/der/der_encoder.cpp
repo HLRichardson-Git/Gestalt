@@ -369,3 +369,239 @@ std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToDER(const RSAKeyPair& keyP
         return encodeRSAPrivateKeyToPKCS8(keyPair);
     }
 }
+
+// ============================================================
+// EC helpers
+// ============================================================
+
+std::string DEREncoder::curveToOid(StandardCurve curve) {
+    switch (curve) {
+        case StandardCurve::P192:     return OID_SECP192R1;
+        case StandardCurve::P224:     return OID_SECP224R1;
+        case StandardCurve::P256:     return OID_SECP256R1;
+        case StandardCurve::P384:     return OID_SECP384R1;
+        case StandardCurve::P521:     return OID_SECP521R1;
+        case StandardCurve::secp256k1: return OID_SECP256K1;
+        default: throw std::runtime_error("Unknown StandardCurve value");
+    }
+}
+
+size_t DEREncoder::getFieldByteSize(StandardCurve curve) {
+    switch (curve) {
+        case StandardCurve::P192:     return 24;
+        case StandardCurve::P224:     return 28;
+        case StandardCurve::P256:     return 32;
+        case StandardCurve::P384:     return 48;
+        case StandardCurve::P521:     return 66;
+        case StandardCurve::secp256k1: return 32;
+        default: throw std::runtime_error("Unknown StandardCurve value");
+    }
+}
+
+// Encode an EC field element as a fixed-width unsigned big-endian byte vector.
+// Unlike DER INTEGER encoding, field elements are NOT prefixed with a zero pad byte
+// for high-bit values — they are always exactly byteLen bytes, left-padded with zeros.
+std::vector<uint8_t> DEREncoder::encodeFieldElement(const mpz_t& val, size_t byteLen) {
+    std::vector<uint8_t> bytes(byteLen, 0x00);
+    size_t count = 0;
+    mpz_export(bytes.data(), &count, 1, 1, 1, 0, val);
+    // mpz_export writes count bytes starting at the beginning; shift right if shorter than byteLen
+    if (count < byteLen) {
+        std::rotate(bytes.begin(), bytes.begin() + count, bytes.end());
+        // After rotate, the actual bytes are at the end — we want them at the end (big-endian),
+        // zeros at front. mpz_export already wrote to the front of the buffer; move them to end.
+        std::copy_backward(bytes.begin(), bytes.begin() + count, bytes.end());
+        std::fill(bytes.begin(), bytes.begin() + (byteLen - count), 0x00);
+    }
+    return bytes;
+}
+
+// ============================================================
+// EC public key encoding
+// ============================================================
+
+// SEC1 "public key" encoding: uncompressed point bytes 0x04 || X || Y.
+// This is the raw content placed inside a BIT STRING for PKCS8, or returned
+// standalone for SEC1 format.
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const ECDSAPublicKey& key) {
+    clear();
+    StandardCurve curve = key.getPublicKeyCurve();
+    size_t fieldLen = getFieldByteSize(curve);
+    Point pt = key.getPublicKey();
+
+    std::vector<uint8_t> result;
+    result.push_back(0x04);  // uncompressed point marker
+    std::vector<uint8_t> xBytes = encodeFieldElement(pt.x, fieldLen);
+    std::vector<uint8_t> yBytes = encodeFieldElement(pt.y, fieldLen);
+    result.insert(result.end(), xBytes.begin(), xBytes.end());
+    result.insert(result.end(), yBytes.begin(), yBytes.end());
+
+    buffer = result;
+    return buffer;
+}
+
+// PKCS8 SubjectPublicKeyInfo for EC:
+// SEQUENCE {
+//   SEQUENCE { OID id-ecPublicKey, OID curve }
+//   BIT STRING { 0x00, 0x04, X, Y }
+// }
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const ECDSAPublicKey& key) {
+    clear();
+    StandardCurve curve = key.getPublicKeyCurve();
+
+    // AlgorithmIdentifier
+    std::vector<uint8_t> algIdContent;
+    {
+        DEREncoder tmp;
+        tmp.writeObjectIdentifier(OID_EC_PUBLIC_KEY);
+        tmp.writeObjectIdentifier(curveToOid(curve));
+        algIdContent = tmp.getBuffer();
+    }
+    std::vector<uint8_t> algId = wrapInSequence(algIdContent);
+
+    // Uncompressed point
+    std::vector<uint8_t> pointBytes = encodeECPublicKeyToSEC1(key);
+
+    // BIT STRING wrapping the point
+    std::vector<uint8_t> bitStringPayload;
+    bitStringPayload.push_back(0x00);  // unused bits
+    bitStringPayload.insert(bitStringPayload.end(), pointBytes.begin(), pointBytes.end());
+    std::vector<uint8_t> bitString;
+    {
+        DEREncoder tmp;
+        tmp.writeBitString(bitStringPayload);
+        bitString = tmp.getBuffer();
+    }
+
+    std::vector<uint8_t> outerContent;
+    outerContent.insert(outerContent.end(), algId.begin(), algId.end());
+    outerContent.insert(outerContent.end(), bitString.begin(), bitString.end());
+
+    buffer = wrapInSequence(outerContent);
+    return buffer;
+}
+
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToDER(const ECDSAPublicKey& key, KeyFormat format) {
+    if (format == KeyFormat::PKCS1) {
+        return encodeECPublicKeyToSEC1(key);
+    } else {
+        return encodeECPublicKeyToPKCS8(key);
+    }
+}
+
+// ============================================================
+// EC private key encoding
+// ============================================================
+
+// SEC1 ECPrivateKey:
+// SEQUENCE {
+//   INTEGER version (1)
+//   OCTET STRING { raw private key bytes }
+//   [0] EXPLICIT OID curve
+//   [1] EXPLICIT BIT STRING { 0x00, 0x04, X, Y }
+// }
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToSEC1(const KeyPair& keyPair) {
+    clear();
+    StandardCurve curve = keyPair.publicKey.getPublicKeyCurve();
+    size_t fieldLen = getFieldByteSize(curve);
+
+    // version = 1
+    std::vector<uint8_t> version = encodeInteger(BigInt(1));
+
+    // private key OCTET STRING
+    std::vector<uint8_t> privBytes = encodeFieldElement(keyPair.privateKey, fieldLen);
+    std::vector<uint8_t> privOctet;
+    privOctet.push_back(0x04);  // OCTET STRING tag
+    std::vector<uint8_t> privLen = encodeLength(privBytes.size());
+    privOctet.insert(privOctet.end(), privLen.begin(), privLen.end());
+    privOctet.insert(privOctet.end(), privBytes.begin(), privBytes.end());
+
+    // [0] EXPLICIT OID curve
+    std::vector<uint8_t> oidBytes;
+    {
+        DEREncoder tmp;
+        tmp.writeObjectIdentifier(curveToOid(curve));
+        oidBytes = tmp.getBuffer();
+    }
+    std::vector<uint8_t> tag0;
+    tag0.push_back(0xa0);  // context tag [0] constructed
+    std::vector<uint8_t> tag0Len = encodeLength(oidBytes.size());
+    tag0.insert(tag0.end(), tag0Len.begin(), tag0Len.end());
+    tag0.insert(tag0.end(), oidBytes.begin(), oidBytes.end());
+
+    // [1] EXPLICIT BIT STRING { uncompressed point }
+    std::vector<uint8_t> pointBytes = encodeECPublicKeyToSEC1(keyPair.publicKey);
+    std::vector<uint8_t> bitStringPayload;
+    bitStringPayload.push_back(0x00);  // unused bits
+    bitStringPayload.insert(bitStringPayload.end(), pointBytes.begin(), pointBytes.end());
+    std::vector<uint8_t> bitString;
+    {
+        DEREncoder tmp;
+        tmp.writeBitString(bitStringPayload);
+        bitString = tmp.getBuffer();
+    }
+    std::vector<uint8_t> tag1;
+    tag1.push_back(0xa1);  // context tag [1] constructed
+    std::vector<uint8_t> tag1Len = encodeLength(bitString.size());
+    tag1.insert(tag1.end(), tag1Len.begin(), tag1Len.end());
+    tag1.insert(tag1.end(), bitString.begin(), bitString.end());
+
+    std::vector<uint8_t> content;
+    content.insert(content.end(), version.begin(), version.end());
+    content.insert(content.end(), privOctet.begin(), privOctet.end());
+    content.insert(content.end(), tag0.begin(), tag0.end());
+    content.insert(content.end(), tag1.begin(), tag1.end());
+
+    buffer = wrapInSequence(content);
+    return buffer;
+}
+
+// PKCS8 PrivateKeyInfo for EC:
+// SEQUENCE {
+//   INTEGER version (0)
+//   SEQUENCE { OID id-ecPublicKey, OID curve }
+//   OCTET STRING { SEC1 ECPrivateKey DER }
+// }
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToPKCS8(const KeyPair& keyPair) {
+    clear();
+    StandardCurve curve = keyPair.publicKey.getPublicKeyCurve();
+
+    // version = 0
+    std::vector<uint8_t> version = encodeInteger(BigInt(0));
+
+    // AlgorithmIdentifier
+    std::vector<uint8_t> algIdContent;
+    {
+        DEREncoder tmp;
+        tmp.writeObjectIdentifier(OID_EC_PUBLIC_KEY);
+        tmp.writeObjectIdentifier(curveToOid(curve));
+        algIdContent = tmp.getBuffer();
+    }
+    std::vector<uint8_t> algId = wrapInSequence(algIdContent);
+
+    // SEC1 private key DER
+    std::vector<uint8_t> sec1Der = encodeECPrivateKeyToSEC1(keyPair);
+
+    // OCTET STRING wrapping the SEC1 structure
+    std::vector<uint8_t> privOctet;
+    privOctet.push_back(0x04);  // OCTET STRING tag
+    std::vector<uint8_t> privLen = encodeLength(sec1Der.size());
+    privOctet.insert(privOctet.end(), privLen.begin(), privLen.end());
+    privOctet.insert(privOctet.end(), sec1Der.begin(), sec1Der.end());
+
+    std::vector<uint8_t> outerContent;
+    outerContent.insert(outerContent.end(), version.begin(), version.end());
+    outerContent.insert(outerContent.end(), algId.begin(), algId.end());
+    outerContent.insert(outerContent.end(), privOctet.begin(), privOctet.end());
+
+    buffer = wrapInSequence(outerContent);
+    return buffer;
+}
+
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToDER(const KeyPair& keyPair, KeyFormat format) {
+    if (format == KeyFormat::PKCS1) {
+        return encodeECPrivateKeyToSEC1(keyPair);
+    } else {
+        return encodeECPrivateKeyToPKCS8(keyPair);
+    }
+}
