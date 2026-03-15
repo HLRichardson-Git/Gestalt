@@ -12,9 +12,14 @@
 
 #include <string>
 
-enum class KeyFormat {
-    PKCS1,  // Traditional RSA-specific format
-    PKCS8   // Modern algorithm-agnostic format
+enum class RsaKeyFormat {
+    PKCS1,  // Traditional RSA-specific format (PKCS#1)
+    PKCS8   // Modern algorithm-agnostic format (PKCS#8)
+};
+
+enum class EccKeyFormat {
+    SEC1,   // Traditional EC-specific format (SEC1 ECPrivateKey / raw uncompressed point)
+    PKCS8   // Modern algorithm-agnostic format (PKCS#8 / SubjectPublicKeyInfo)
 };
 
 // RSA Algorithm OIDs

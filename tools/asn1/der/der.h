@@ -21,7 +21,7 @@ class DERDecoder {
 private:
     const std::vector<uint8_t> data;
     size_t pos;
-    
+
     // Core DER reading methods
     size_t readSequence();
     void readBitString();
@@ -30,7 +30,7 @@ private:
     uint8_t readTag();
     size_t readLength();
     BigInt readIntegerAsBigInt();
-    
+
     // OID handling methods
     std::string readObjectIdentifier();
     void expectRSAObjectIdentifier();  // Accepts any valid RSA OID
@@ -43,19 +43,19 @@ private:
     // Validation
     void validateRSAPublicKey(const BigInt& modulus, const BigInt& exponent);
     void validateRSAPrivateKey(const RSAPrivateKey& key);
-    
+
 public:
-    explicit DERDecoder(std::vector<uint8_t> input) 
+    explicit DERDecoder(std::vector<uint8_t> input)
         : data(std::move(input)), pos(0) {}
-    
+
     void printDerAtPosition(); // For debugging
-    
-    // Public key decoding methods
+
+    // RSA public key decoding methods
     RSAPublicKey decodeRSAPublicKeyFromPKCS8();
     RSAPublicKey decodeRSAPublicKeyFromPKCS1();
     RSAPublicKey decodeRSAPublicKeyFromDER();  // Auto-detect
-    
-    // Private key decoding methods
+
+    // RSA private key decoding methods
     RSAKeyPair decodeRSAPrivateKeyFromPKCS1();
     RSAKeyPair decodeRSAPrivateKeyFromPKCS8();
     RSAKeyPair decodeRSAPrivateKeyFromDER();  // Auto-detect
@@ -74,7 +74,7 @@ public:
 class DEREncoder {
 private:
     std::vector<uint8_t> buffer;
-    
+
     // Core DER writing methods
     void writeTag(uint8_t tag);
     void writeLength(size_t length);
@@ -83,7 +83,7 @@ private:
     void writeObjectIdentifier(const std::string& oidHex);
     void writeNull();
     void writeBitString(const std::vector<uint8_t>& data);
-    
+
     // Helper methods
     std::vector<uint8_t> encodeLength(size_t length);
     std::vector<uint8_t> encodeInteger(const BigInt& value);
@@ -99,30 +99,28 @@ private:
 
     // Validation
     void validateRSAPublicKey(const RSAPublicKey& key);
-    
+
 public:
     DEREncoder() = default;
-    
-    // Public key encoding methods
+
+    // RSA public key encoding methods
     std::vector<uint8_t> encodeRSAPublicKeyToPKCS1(const RSAPublicKey& key);
     std::vector<uint8_t> encodeRSAPublicKeyToPKCS8(const RSAPublicKey& key);
-    // Generic function that by default encodes in PKCS8 format
-    std::vector<uint8_t> encodeRSAPublicKeyToDER(const RSAPublicKey& key, KeyFormat format = KeyFormat::PKCS8);
+    std::vector<uint8_t> encodeRSAPublicKeyToDER(const RSAPublicKey& key, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
-    // Private key encoding methods
+    // RSA private key encoding methods
     std::vector<uint8_t> encodeRSAPrivateKeyToPKCS1(const RSAKeyPair& keyPair);
     std::vector<uint8_t> encodeRSAPrivateKeyToPKCS8(const RSAKeyPair& keyPair);
-    // Generic function that by default encodes in PKCS8 format
-    std::vector<uint8_t> encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, KeyFormat format = KeyFormat::PKCS8);
+    std::vector<uint8_t> encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
-    // EC public key encoding methods
-    std::vector<uint8_t> encodeECPublicKeyToSEC1(const ECDSAPublicKey& key);
-    std::vector<uint8_t> encodeECPublicKeyToPKCS8(const ECDSAPublicKey& key);
-    std::vector<uint8_t> encodeECPublicKeyToDER(const ECDSAPublicKey& key, KeyFormat format = KeyFormat::PKCS8);
+    // EC public key encoding methods (accept PublicKey& so ECDSAPublicKey and ECDHPublicKey both work)
+    std::vector<uint8_t> encodeECPublicKeyToSEC1(const PublicKey& key);
+    std::vector<uint8_t> encodeECPublicKeyToPKCS8(const PublicKey& key);
+    std::vector<uint8_t> encodeECPublicKeyToDER(const PublicKey& key, EccKeyFormat format = EccKeyFormat::PKCS8);
 
     // EC private key encoding methods
     std::vector<uint8_t> encodeECPrivateKeyToSEC1(const KeyPair& keyPair);
     std::vector<uint8_t> encodeECPrivateKeyToPKCS8(const KeyPair& keyPair);
-    std::vector<uint8_t> encodeECPrivateKeyToDER(const KeyPair& keyPair, KeyFormat format = KeyFormat::PKCS8);
+    std::vector<uint8_t> encodeECPrivateKeyToDER(const KeyPair& keyPair, EccKeyFormat format = EccKeyFormat::PKCS8);
 
 };

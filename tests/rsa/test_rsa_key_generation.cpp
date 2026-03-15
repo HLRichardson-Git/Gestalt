@@ -110,11 +110,11 @@ TEST(RSA_DER_Test, publicKey_PKCS8_roundtrip) {
     RSAPublicKey pubKey(n, e);
 
     // Encode to DER
-    std::vector<uint8_t> der = pubKey.toDER(KeyFormat::PKCS8);
+    std::vector<uint8_t> der = pubKey.toDER(RsaKeyFormat::PKCS8);
 
     // Decode back
     RSAPublicKey decoded;
-    decoded.fromDER(der, KeyFormat::PKCS8);
+    decoded.fromDER(der, RsaKeyFormat::PKCS8);
 
     EXPECT_EQ(pubKey.n, decoded.n);
     EXPECT_EQ(pubKey.e, decoded.e);
@@ -123,9 +123,9 @@ TEST(RSA_DER_Test, publicKey_PKCS8_roundtrip) {
 TEST(RSA_DER_Test, publicKey_PKCS1_roundtrip) {
     RSAPublicKey pubKey(n, e);
 
-    std::vector<uint8_t> der = pubKey.toDER(KeyFormat::PKCS1);
+    std::vector<uint8_t> der = pubKey.toDER(RsaKeyFormat::PKCS1);
     RSAPublicKey decoded;
-    decoded.fromDER(der, KeyFormat::PKCS1);
+    decoded.fromDER(der, RsaKeyFormat::PKCS1);
 
     EXPECT_EQ(pubKey.n, decoded.n);
     EXPECT_EQ(pubKey.e, decoded.e);
@@ -136,11 +136,11 @@ TEST(RSA_DER_Test, privateKey_PKCS8_roundtrip) {
 
     // Encode to DER requires the public key
     RSAPublicKey pubKey(n, e);
-    std::vector<uint8_t> der = privKey.toDER(KeyFormat::PKCS8, &pubKey);
+    std::vector<uint8_t> der = privKey.toDER(RsaKeyFormat::PKCS8, &pubKey);
 
     // Decode back
     RSAPrivateKey decoded;
-    decoded.fromDER(der, KeyFormat::PKCS8);
+    decoded.fromDER(der, RsaKeyFormat::PKCS8);
 
     EXPECT_EQ(privKey.d, decoded.d);
     EXPECT_EQ(privKey.p, decoded.p);
@@ -154,9 +154,9 @@ TEST(RSA_DER_Test, privateKey_PKCS1_roundtrip) {
     RSAPrivateKey privKey(d, p, q);
     RSAPublicKey pubKey(n, e);
 
-    std::vector<uint8_t> der = privKey.toDER(KeyFormat::PKCS1, &pubKey);
+    std::vector<uint8_t> der = privKey.toDER(RsaKeyFormat::PKCS1, &pubKey);
     RSAPrivateKey decoded;
-    decoded.fromDER(der, KeyFormat::PKCS1);
+    decoded.fromDER(der, RsaKeyFormat::PKCS1);
 
     EXPECT_EQ(privKey.d, decoded.d);
     EXPECT_EQ(privKey.p, decoded.p);
@@ -172,12 +172,12 @@ TEST(RSA_DER_Test, roundTrip_PKCS8) {
     RSAKeyPair rsa(priv, pub);
 
     // Encode to DER (PKCS8)
-    std::vector<uint8_t> der = rsa.toDER(KeyFormat::PKCS8);
+    std::vector<uint8_t> der = rsa.toDER(RsaKeyFormat::PKCS8);
     ASSERT_FALSE(der.empty());
 
     // Decode from DER
     RSAKeyPair rsa2(priv, pub);
-    rsa2.fromDER(der, KeyFormat::PKCS8);
+    rsa2.fromDER(der, RsaKeyFormat::PKCS8);
 
     // Check that all components match
     EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
@@ -196,12 +196,12 @@ TEST(RSA_DER_Test, roundTrip_PKCS1) {
     RSAKeyPair rsa(priv, pub);
 
     // Encode to DER (PKCS1)
-    std::vector<uint8_t> der = rsa.toDER(KeyFormat::PKCS1);
+    std::vector<uint8_t> der = rsa.toDER(RsaKeyFormat::PKCS1);
     ASSERT_FALSE(der.empty());
 
     // Decode from DER
     RSAKeyPair rsa2(priv, pub);
-    rsa2.fromDER(der, KeyFormat::PKCS1);
+    rsa2.fromDER(der, RsaKeyFormat::PKCS1);
 
     // Check that all components match
     EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
@@ -218,11 +218,11 @@ TEST(RSA_PEM_Test, publicKey_PKCS8_roundtrip) {
     RSAPublicKey pubKey(n, e);
 
     // Encode to PEM
-    std::string pem = pubKey.toPEM(KeyFormat::PKCS8);
+    std::string pem = pubKey.toPEM(RsaKeyFormat::PKCS8);
 
     // Decode back
     RSAPublicKey decoded;
-    decoded.fromPEM(pem, KeyFormat::PKCS8);
+    decoded.fromPEM(pem, RsaKeyFormat::PKCS8);
 
     EXPECT_EQ(pubKey.n, decoded.n);
     EXPECT_EQ(pubKey.e, decoded.e);
@@ -231,9 +231,9 @@ TEST(RSA_PEM_Test, publicKey_PKCS8_roundtrip) {
 TEST(RSA_PEM_Test, publicKey_PKCS1_roundtrip) {
     RSAPublicKey pubKey(n, e);
 
-    std::string pem = pubKey.toPEM(KeyFormat::PKCS1);
+    std::string pem = pubKey.toPEM(RsaKeyFormat::PKCS1);
     RSAPublicKey decoded;
-    decoded.fromPEM(pem, KeyFormat::PKCS1);
+    decoded.fromPEM(pem, RsaKeyFormat::PKCS1);
 
     EXPECT_EQ(pubKey.n, decoded.n);
     EXPECT_EQ(pubKey.e, decoded.e);
@@ -243,9 +243,9 @@ TEST(RSA_PEM_Test, privateKey_PKCS8_roundtrip) {
     RSAPrivateKey privKey(d, p, q);
     RSAPublicKey pubKey(n, e);
 
-    std::string pem = privKey.toPEM(KeyFormat::PKCS8, &pubKey);
+    std::string pem = privKey.toPEM(RsaKeyFormat::PKCS8, &pubKey);
     RSAPrivateKey decoded;
-    decoded.fromPEM(pem, KeyFormat::PKCS8);
+    decoded.fromPEM(pem, RsaKeyFormat::PKCS8);
 
     EXPECT_EQ(privKey.d, decoded.d);
     EXPECT_EQ(privKey.p, decoded.p);
@@ -259,9 +259,9 @@ TEST(RSA_PEM_Test, privateKey_PKCS1_roundtrip) {
     RSAPrivateKey privKey(d, p, q);
     RSAPublicKey pubKey(n, e);
 
-    std::string pem = privKey.toPEM(KeyFormat::PKCS1, &pubKey);
+    std::string pem = privKey.toPEM(RsaKeyFormat::PKCS1, &pubKey);
     RSAPrivateKey decoded;
-    decoded.fromPEM(pem, KeyFormat::PKCS1);
+    decoded.fromPEM(pem, RsaKeyFormat::PKCS1);
 
     EXPECT_EQ(privKey.d, decoded.d);
     EXPECT_EQ(privKey.p, decoded.p);
@@ -277,12 +277,12 @@ TEST(RSA_PEM_Test, roundTrip_PKCS8) {
     RSAKeyPair rsa(priv, pub);
 
     // Encode to PEM
-    std::string pem = rsa.toPEM(KeyFormat::PKCS8);
+    std::string pem = rsa.toPEM(RsaKeyFormat::PKCS8);
     ASSERT_FALSE(pem.empty());
 
     // Decode from PEM
     RSAKeyPair rsa2(priv, pub);
-    rsa2.fromPEM(pem, KeyFormat::PKCS8);
+    rsa2.fromPEM(pem, RsaKeyFormat::PKCS8);
 
     EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
     EXPECT_EQ(rsa.getPublicKey().e,  rsa2.getPublicKey().e);
@@ -299,11 +299,11 @@ TEST(RSA_PEM_Test, roundTrip_PKCS1) {
     RSAPublicKey pub(n, e);
     RSAKeyPair rsa(priv, pub);
 
-    std::string pem = rsa.toPEM(KeyFormat::PKCS1);
+    std::string pem = rsa.toPEM(RsaKeyFormat::PKCS1);
     ASSERT_FALSE(pem.empty());
 
     RSAKeyPair rsa2(priv, pub);
-    rsa2.fromPEM(pem, KeyFormat::PKCS1);
+    rsa2.fromPEM(pem, RsaKeyFormat::PKCS1);
 
     EXPECT_EQ(rsa.getPublicKey().n,  rsa2.getPublicKey().n);
     EXPECT_EQ(rsa.getPublicKey().e,  rsa2.getPublicKey().e);

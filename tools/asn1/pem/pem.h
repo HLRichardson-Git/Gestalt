@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "rsa/rsa_key_generation/rsaKeyGen.h"
+#include "ecc/eccObjects.h"
 
 class PEMDecoder {
 private:
@@ -28,6 +29,14 @@ public:
     // RSA private keys
     static RSAKeyPair decodeRSAPrivateKeyFromPKCS1(const std::string& pem);
     static RSAKeyPair decodeRSAPrivateKeyFromPKCS8(const std::string& pem);
+
+    // EC public keys
+    static ECDSAPublicKey decodeECPublicKeyFromSEC1(const std::string& pem);
+    static ECDSAPublicKey decodeECPublicKeyFromPKCS8(const std::string& pem);
+
+    // EC private keys
+    static KeyPair decodeECPrivateKeyFromSEC1(const std::string& pem);
+    static KeyPair decodeECPrivateKeyFromPKCS8(const std::string& pem);
 };
 
 class PEMEncoder {
@@ -43,4 +52,12 @@ public:
     // RSA private keys
     static std::string encodeRSAPrivateKeyToPKCS1(const RSAKeyPair& key);
     static std::string encodeRSAPrivateKeyToPKCS8(const RSAKeyPair& key);
+
+    // EC public keys
+    static std::string encodeECPublicKeyToSEC1(const PublicKey& key);
+    static std::string encodeECPublicKeyToPKCS8(const PublicKey& key);
+
+    // EC private keys
+    static std::string encodeECPrivateKeyToSEC1(const KeyPair& keyPair);
+    static std::string encodeECPrivateKeyToPKCS8(const KeyPair& keyPair);
 };

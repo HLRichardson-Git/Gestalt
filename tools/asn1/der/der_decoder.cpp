@@ -579,8 +579,9 @@ ECDSAPublicKey DERDecoder::decodeECPublicKeyFromPKCS8() {
     if (unusedBits != 0) {
         throw std::runtime_error("Non-zero unused bits in EC public key BIT STRING");
     }
-    std::vector<uint8_t> pointBytes(data.begin() + pos, data.begin() + pos + bitStringLen - 1);
-    pos += bitStringLen - 1;
+    size_t pointLen = bitStringLen - 1;
+    std::vector<uint8_t> pointBytes(data.begin() + pos, data.begin() + pos + pointLen);
+    pos += pointLen;
 
     ECDSAPublicKey pubKey = parseUncompressedPoint(pointBytes);
     pubKey.setCurve(curve);
@@ -655,8 +656,9 @@ KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
         if (unusedBits != 0) {
             throw std::runtime_error("Non-zero unused bits in EC public key BIT STRING");
         }
-        std::vector<uint8_t> pointBytes(data.begin() + pos, data.begin() + pos + bsLen - 1);
-        pos += bsLen - 1;
+        size_t pointLen = bsLen - 1;
+        std::vector<uint8_t> pointBytes(data.begin() + pos, data.begin() + pos + pointLen);
+        pos += pointLen;
         pubKey = parseUncompressedPoint(pointBytes);
         pos = tag1End;
     }

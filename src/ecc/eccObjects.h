@@ -13,6 +13,10 @@
 #pragma once
 
 #include "bigInt/bigInt.h"
+#include "asn1/object_identifiers.h"
+
+class DEREncoder;
+class DERDecoder;
 
 class Point {
 public:
@@ -79,6 +83,11 @@ public:
     StandardCurve getPublicKeyCurve() const { return curve; }
 
     void setCurve(const StandardCurve& givenCurve) { curve = givenCurve; }
+
+    std::vector<uint8_t> toDER(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, EccKeyFormat format = EccKeyFormat::PKCS8);
+    std::string toPEM(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
 };
 
 class ECDSAPublicKey : public PublicKey{
@@ -128,6 +137,11 @@ public:
     ~KeyPair() { mpz_clear(privateKey); }
 
     Point getPublicKey() const { return publicKey.getPublicKey(); };
+
+    std::vector<uint8_t> toDER(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, EccKeyFormat format = EccKeyFormat::PKCS8);
+    std::string toPEM(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
 };
 
 class Signature {

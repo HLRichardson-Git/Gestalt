@@ -52,3 +52,27 @@ RSAKeyPair PEMDecoder::decodeRSAPrivateKeyFromPKCS8(const std::string& pem) {
     DERDecoder decoder(der);
     return decoder.decodeRSAPrivateKeyFromPKCS8();
 }
+
+ECDSAPublicKey PEMDecoder::decodeECPublicKeyFromSEC1(const std::string& pem) {
+    auto der = extractDER(pem, "EC PUBLIC KEY");
+    DERDecoder decoder(der);
+    return decoder.decodeECPublicKeyFromSEC1();
+}
+
+ECDSAPublicKey PEMDecoder::decodeECPublicKeyFromPKCS8(const std::string& pem) {
+    auto der = extractDER(pem, "PUBLIC KEY");
+    DERDecoder decoder(der);
+    return decoder.decodeECPublicKeyFromPKCS8();
+}
+
+KeyPair PEMDecoder::decodeECPrivateKeyFromSEC1(const std::string& pem) {
+    auto der = extractDER(pem, "EC PRIVATE KEY");
+    DERDecoder decoder(der);
+    return decoder.decodeECPrivateKeyFromSEC1();
+}
+
+KeyPair PEMDecoder::decodeECPrivateKeyFromPKCS8(const std::string& pem) {
+    auto der = extractDER(pem, "PRIVATE KEY");
+    DERDecoder decoder(der);
+    return decoder.decodeECPrivateKeyFromPKCS8();
+}

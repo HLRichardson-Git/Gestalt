@@ -25,25 +25,25 @@ unsigned int RSAPublicKey::getPublicModulusBitLength() const {
     return mpz_sizeinbase(n.n, 2);
 }
 
-std::vector<uint8_t> RSAPublicKey::toDER(KeyFormat format) const {
+std::vector<uint8_t> RSAPublicKey::toDER(RsaKeyFormat format) const {
     DEREncoder encoder;
     switch (format) {
-        case KeyFormat::PKCS1: return encoder.encodeRSAPublicKeyToPKCS1(*this);
-        case KeyFormat::PKCS8: 
+        case RsaKeyFormat::PKCS1: return encoder.encodeRSAPublicKeyToPKCS1(*this);
+        case RsaKeyFormat::PKCS8: 
         default: return encoder.encodeRSAPublicKeyToPKCS8(*this);
     }
 }
 
-void RSAPublicKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
+void RSAPublicKey::fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format) {
     DERDecoder decoder(der);
     switch (format) {
-        case KeyFormat::PKCS1: {
+        case RsaKeyFormat::PKCS1: {
             RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS1();
             n = decoded.n;
             e = decoded.e;
             break;
         }
-        case KeyFormat::PKCS8:
+        case RsaKeyFormat::PKCS8:
         default: {
             RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS8();
             n = decoded.n;
@@ -53,26 +53,26 @@ void RSAPublicKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
     }
 }
 
-std::string RSAPublicKey::toPEM(KeyFormat format) const {
+std::string RSAPublicKey::toPEM(RsaKeyFormat format) const {
     PEMEncoder encoder;
     switch (format) {
-        case KeyFormat::PKCS1: return encoder.encodeRSAPublicKeyToPKCS1(*this);
-        case KeyFormat::PKCS8: 
+        case RsaKeyFormat::PKCS1: return encoder.encodeRSAPublicKeyToPKCS1(*this);
+        case RsaKeyFormat::PKCS8: 
         default: return encoder.encodeRSAPublicKeyToPKCS8(*this);
     }
 }
 
-void RSAPublicKey::fromPEM(const std::string& pem, KeyFormat format) {
+void RSAPublicKey::fromPEM(const std::string& pem, RsaKeyFormat format) {
     PEMDecoder decoder;
     
     switch (format) {
-        case KeyFormat::PKCS1: {
+        case RsaKeyFormat::PKCS1: {
             RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS1(pem);
             n = decoded.n;
             e = decoded.e;
             break;
         }
-        case KeyFormat::PKCS8:
+        case RsaKeyFormat::PKCS8:
         default: {
             RSAPublicKey decoded = decoder.decodeRSAPublicKeyFromPKCS8(pem);
             n = decoded.n;
@@ -82,47 +82,47 @@ void RSAPublicKey::fromPEM(const std::string& pem, KeyFormat format) {
     }
 }
 
-std::vector<uint8_t> RSAPrivateKey::toDER(KeyFormat format, const RSAPublicKey* pubKey) const {
+std::vector<uint8_t> RSAPrivateKey::toDER(RsaKeyFormat format, const RSAPublicKey* pubKey) const {
     if (!pubKey) {
         throw std::runtime_error("RSAPrivateKey::toDER requires a public key for encoding");
     }
     DEREncoder encoder;
     switch (format) {
-        case KeyFormat::PKCS1: return encoder.encodeRSAPrivateKeyToPKCS1({*this, *pubKey});
-        case KeyFormat::PKCS8: 
+        case RsaKeyFormat::PKCS1: return encoder.encodeRSAPrivateKeyToPKCS1({*this, *pubKey});
+        case RsaKeyFormat::PKCS8: 
         default: return encoder.encodeRSAPrivateKeyToPKCS8({*this, *pubKey});
     }
 }
 
-void RSAPrivateKey::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
+void RSAPrivateKey::fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format) {
     DERDecoder decoder(der);
     RSAKeyPair decoded;
     switch (format) {
-        case KeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(); break;
-        case KeyFormat::PKCS8: 
+        case RsaKeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(); break;
+        case RsaKeyFormat::PKCS8: 
         default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(); break;
     }
     *this = decoded.getPrivateKey();
 }
 
-std::string RSAPrivateKey::toPEM(KeyFormat format, const RSAPublicKey* pubKey) const {
+std::string RSAPrivateKey::toPEM(RsaKeyFormat format, const RSAPublicKey* pubKey) const {
     if (!pubKey) {
         throw std::runtime_error("RSAPrivateKey::toPem requires a public key for encoding");
     }
     PEMEncoder encoder;
     switch (format) {
-        case KeyFormat::PKCS1: return encoder.encodeRSAPrivateKeyToPKCS1({*this, *pubKey});
-        case KeyFormat::PKCS8: 
+        case RsaKeyFormat::PKCS1: return encoder.encodeRSAPrivateKeyToPKCS1({*this, *pubKey});
+        case RsaKeyFormat::PKCS8: 
         default: return encoder.encodeRSAPrivateKeyToPKCS8({*this, *pubKey});
     }
 }
 
-void RSAPrivateKey::fromPEM(const std::string& pem, KeyFormat format) {
+void RSAPrivateKey::fromPEM(const std::string& pem, RsaKeyFormat format) {
     PEMDecoder decoder;
     RSAKeyPair decoded;
     switch (format) {
-        case KeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(pem); break;
-        case KeyFormat::PKCS8: 
+        case RsaKeyFormat::PKCS1: decoded = decoder.decodeRSAPrivateKeyFromPKCS1(pem); break;
+        case RsaKeyFormat::PKCS8: 
         default: decoded = decoder.decodeRSAPrivateKeyFromPKCS8(pem); break;
     }
     *this = decoded.getPrivateKey();
@@ -242,21 +242,21 @@ unsigned int RSAKeyPair::getPrivateExponentBitLength() const {
     return mpz_sizeinbase(privateKey.d.n, 2);
 }
 
-std::vector<uint8_t> RSAKeyPair::toDER(KeyFormat format) {
+std::vector<uint8_t> RSAKeyPair::toDER(RsaKeyFormat format) {
     DEREncoder encoder;
     // Encode private key, include the public key in the DER
     return encoder.encodeRSAPrivateKeyToDER(*this, format);
 }
 
-void RSAKeyPair::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
+void RSAKeyPair::fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format) {
     DERDecoder decoder(der);
     RSAKeyPair decoded;
 
     switch (format) {
-        case KeyFormat::PKCS1:
+        case RsaKeyFormat::PKCS1:
             decoded = decoder.decodeRSAPrivateKeyFromPKCS1();
             break;
-        case KeyFormat::PKCS8:
+        case RsaKeyFormat::PKCS8:
         default:
             decoded = decoder.decodeRSAPrivateKeyFromPKCS8();
             break;
@@ -274,7 +274,7 @@ void RSAKeyPair::fromDER(const std::vector<uint8_t>& der, KeyFormat format) {
     else                     specifiedStrength = RSASecurityStrength::RSA_1024;
 }
 
-std::string RSAKeyPair::toPEM(KeyFormat format) const {
+std::string RSAKeyPair::toPEM(RsaKeyFormat format) const {
     DEREncoder encoder;
     std::vector<uint8_t> der = encoder.encodeRSAPrivateKeyToDER(*this, format); // encode to DER first
 
@@ -283,10 +283,10 @@ std::string RSAKeyPair::toPEM(KeyFormat format) const {
 
     // Break Base64 into 64-character lines
     std::ostringstream oss;
-    const std::string header = (format == KeyFormat::PKCS1) ? 
+    const std::string header = (format == RsaKeyFormat::PKCS1) ? 
         "-----BEGIN RSA PRIVATE KEY-----" : 
         "-----BEGIN PRIVATE KEY-----";
-    const std::string footer = (format == KeyFormat::PKCS1) ? 
+    const std::string footer = (format == RsaKeyFormat::PKCS1) ? 
         "-----END RSA PRIVATE KEY-----" : 
         "-----END PRIVATE KEY-----";
 
@@ -301,10 +301,10 @@ std::string RSAKeyPair::toPEM(KeyFormat format) const {
     return oss.str();
 }
 
-void RSAKeyPair::fromPEM(const std::string& pem, KeyFormat format) {
+void RSAKeyPair::fromPEM(const std::string& pem, RsaKeyFormat format) {
     // Find header and footer
     std::string header, footer;
-    if (format == KeyFormat::PKCS1) {
+    if (format == RsaKeyFormat::PKCS1) {
         header = "-----BEGIN RSA PRIVATE KEY-----";
         footer = "-----END RSA PRIVATE KEY-----";
     } else {

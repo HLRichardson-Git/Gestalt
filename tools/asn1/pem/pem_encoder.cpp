@@ -43,3 +43,27 @@ std::string PEMEncoder::encodeRSAPrivateKeyToPKCS8(const RSAKeyPair& key) {
     auto der = encoder.encodeRSAPrivateKeyToPKCS8(key);
     return wrapDER(der, "PRIVATE KEY");
 }
+
+std::string PEMEncoder::encodeECPublicKeyToSEC1(const PublicKey& key) {
+    DEREncoder encoder;
+    auto der = encoder.encodeECPublicKeyToSEC1(key);
+    return wrapDER(der, "EC PUBLIC KEY");
+}
+
+std::string PEMEncoder::encodeECPublicKeyToPKCS8(const PublicKey& key) {
+    DEREncoder encoder;
+    auto der = encoder.encodeECPublicKeyToPKCS8(key);
+    return wrapDER(der, "PUBLIC KEY");
+}
+
+std::string PEMEncoder::encodeECPrivateKeyToSEC1(const KeyPair& keyPair) {
+    DEREncoder encoder;
+    auto der = encoder.encodeECPrivateKeyToSEC1(keyPair);
+    return wrapDER(der, "EC PRIVATE KEY");
+}
+
+std::string PEMEncoder::encodeECPrivateKeyToPKCS8(const KeyPair& keyPair) {
+    DEREncoder encoder;
+    auto der = encoder.encodeECPrivateKeyToPKCS8(keyPair);
+    return wrapDER(der, "PRIVATE KEY");
+}

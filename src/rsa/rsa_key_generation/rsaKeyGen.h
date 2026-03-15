@@ -49,12 +49,12 @@ struct RSAPublicKey {
     unsigned int getPublicModulusBitLength() const;
 
     // Encode this key to DER (PKCS1 or PKCS8)
-    std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8) const;
-    void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
+    std::vector<uint8_t> toDER(RsaKeyFormat format = RsaKeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
     // Encode this key to PEM (PKCS1 or PKCS8)
-    std::string toPEM(KeyFormat format = KeyFormat::PKCS8) const;
-    void fromPEM(const std::string& pem, KeyFormat format = KeyFormat::PKCS8);
+    std::string toPEM(RsaKeyFormat format = RsaKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 };
 
 struct RSAPrivateKey {
@@ -95,11 +95,11 @@ struct RSAPrivateKey {
         std::cout << "qInv: " << qInv.toHexString() << std::endl;
     }
 
-    std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8, const RSAPublicKey* pubKey = nullptr) const;
-    void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
+    std::vector<uint8_t> toDER(RsaKeyFormat format = RsaKeyFormat::PKCS8, const RSAPublicKey* pubKey = nullptr) const;
+    void fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
-    std::string toPEM(KeyFormat format, const RSAPublicKey* pubKey) const;
-    void fromPEM(const std::string& pem, KeyFormat format);
+    std::string toPEM(RsaKeyFormat format, const RSAPublicKey* pubKey) const;
+    void fromPEM(const std::string& pem, RsaKeyFormat format);
 };
 
 class RSAKeyPair {
@@ -158,11 +158,11 @@ public:
         validatePublicKey(publicKey);
     }
 
-    RSAKeyPair(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8) {
+    RSAKeyPair(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8) {
         fromDER(der, format);
     }
 
-    RSAKeyPair(const std::string& pem, KeyFormat format = KeyFormat::PKCS8) {
+    RSAKeyPair(const std::string& pem, RsaKeyFormat format = RsaKeyFormat::PKCS8) {
         fromPEM(pem, format);
     }
 
@@ -187,9 +187,9 @@ public:
     unsigned int getModulusBitLength() const;
     unsigned int getPrivateExponentBitLength() const;
 
-    std::vector<uint8_t> toDER(KeyFormat format = KeyFormat::PKCS8);
-    void fromDER(const std::vector<uint8_t>& der, KeyFormat format = KeyFormat::PKCS8);
+    std::vector<uint8_t> toDER(RsaKeyFormat format = RsaKeyFormat::PKCS8);
+    void fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
-    std::string toPEM(KeyFormat format = KeyFormat::PKCS8) const;
-    void fromPEM(const std::string& pem, KeyFormat format = KeyFormat::PKCS8);
+    std::string toPEM(RsaKeyFormat format = RsaKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 };

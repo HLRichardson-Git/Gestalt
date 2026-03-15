@@ -271,8 +271,8 @@ std::vector<uint8_t> DEREncoder::encodeRSAPublicKeyToPKCS8(const RSAPublicKey& k
     return buffer;
 }
 
-std::vector<uint8_t> DEREncoder::encodeRSAPublicKeyToDER(const RSAPublicKey& key, KeyFormat format) {
-    if (format == KeyFormat::PKCS1) {
+std::vector<uint8_t> DEREncoder::encodeRSAPublicKeyToDER(const RSAPublicKey& key, RsaKeyFormat format) {
+    if (format == RsaKeyFormat::PKCS1) {
         return encodeRSAPublicKeyToPKCS1(key);
     } else {
         return encodeRSAPublicKeyToPKCS8(key);
@@ -362,8 +362,8 @@ std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToPKCS8(const RSAKeyPair& ke
 }
 
 // Convenience wrapper to choose format
-std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, KeyFormat format) {
-    if (format == KeyFormat::PKCS1) {
+std::vector<uint8_t> DEREncoder::encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, RsaKeyFormat format) {
+    if (format == RsaKeyFormat::PKCS1) {
         return encodeRSAPrivateKeyToPKCS1(keyPair);
     } else {
         return encodeRSAPrivateKeyToPKCS8(keyPair);
@@ -405,11 +405,9 @@ std::vector<uint8_t> DEREncoder::encodeFieldElement(const mpz_t& val, size_t byt
     std::vector<uint8_t> bytes(byteLen, 0x00);
     size_t count = 0;
     mpz_export(bytes.data(), &count, 1, 1, 1, 0, val);
-    // mpz_export writes count bytes starting at the beginning; shift right if shorter than byteLen
+    // mpz_export writes 'count' bytes big-endian at the front of the buffer.
+    // Right-justify them so the result is exactly byteLen bytes with zero padding on the left.
     if (count < byteLen) {
-        std::rotate(bytes.begin(), bytes.begin() + count, bytes.end());
-        // After rotate, the actual bytes are at the end — we want them at the end (big-endian),
-        // zeros at front. mpz_export already wrote to the front of the buffer; move them to end.
         std::copy_backward(bytes.begin(), bytes.begin() + count, bytes.end());
         std::fill(bytes.begin(), bytes.begin() + (byteLen - count), 0x00);
     }
@@ -423,7 +421,7 @@ std::vector<uint8_t> DEREncoder::encodeFieldElement(const mpz_t& val, size_t byt
 // SEC1 "public key" encoding: uncompressed point bytes 0x04 || X || Y.
 // This is the raw content placed inside a BIT STRING for PKCS8, or returned
 // standalone for SEC1 format.
-std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const ECDSAPublicKey& key) {
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const PublicKey& key) {
     clear();
     StandardCurve curve = key.getPublicKeyCurve();
     size_t fieldLen = getFieldByteSize(curve);
@@ -445,7 +443,7 @@ std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const ECDSAPublicKey& k
 //   SEQUENCE { OID id-ecPublicKey, OID curve }
 //   BIT STRING { 0x00, 0x04, X, Y }
 // }
-std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const ECDSAPublicKey& key) {
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const PublicKey& key) {
     clear();
     StandardCurve curve = key.getPublicKeyCurve();
 
@@ -481,8 +479,8 @@ std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const ECDSAPublicKey& 
     return buffer;
 }
 
-std::vector<uint8_t> DEREncoder::encodeECPublicKeyToDER(const ECDSAPublicKey& key, KeyFormat format) {
-    if (format == KeyFormat::PKCS1) {
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToDER(const PublicKey& key, EccKeyFormat format) {
+    if (format == EccKeyFormat::SEC1) {
         return encodeECPublicKeyToSEC1(key);
     } else {
         return encodeECPublicKeyToPKCS8(key);
@@ -598,8 +596,8 @@ std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToPKCS8(const KeyPair& keyPai
     return buffer;
 }
 
-std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToDER(const KeyPair& keyPair, KeyFormat format) {
-    if (format == KeyFormat::PKCS1) {
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToDER(const KeyPair& keyPair, EccKeyFormat format) {
+    if (format == EccKeyFormat::SEC1) {
         return encodeECPrivateKeyToSEC1(keyPair);
     } else {
         return encodeECPrivateKeyToPKCS8(keyPair);
