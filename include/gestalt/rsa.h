@@ -44,13 +44,17 @@ public:
 
     std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey);
     std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters);
+    std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters);
 
     std::string decrypt(const std::string& ciphertext);
     std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
+    std::string decrypt(const std::string& ciphertext, const PKCS1v15Params& parameters);
 
     std::string signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
     std::string signMessage(const std::string& message, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
+    std::string signMessage(const std::string& message, const PKCS1v15Params& parameters);
 
     bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg = HashAlgorithm::None);
     bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters);
 };

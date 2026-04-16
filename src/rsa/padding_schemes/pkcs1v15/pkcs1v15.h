@@ -24,16 +24,16 @@
 
 #include "../rsa_padding.h"
 
-/*
- * NOTICE:
- *     This is all currently not supported as there is a problem I am not sure how to fix yet which
- *     is that GMP strips the leading zeros of the encoded message of PKCS#1v1.5.
- */
+class PKCS1v15Params {
+public:
+    HashAlgorithm hashAlg;
+    PKCS1v15Params(HashAlgorithm hash = HashAlgorithm::SHA256) : hashAlg(hash) {}
+};
 
 std::string getAlgorithmIdentifier(const HashAlgorithm& hashAlg);
 
-std::string encodeForEncryptionPKCS1v15(const std::string& input);
-std::string decodeForEncryptionPKCS1v15(const std::string& input);
+std::string encodeForEncryptionPKCS1v15(const std::string& input, size_t modulusSizeBytes);
+std::string decodeForEncryptionPKCS1v15(const std::string& em, size_t modulusSizeBytes);
 
-std::string encodeForSigningPKCS1v15(const std::string& input, const HashAlgorithm& hashAlg);
-bool verifyForSigningPKCS1v15(const std::string& input, const std::string& EM);
+std::string encodeForSigningPKCS1v15(const std::string& input, const HashAlgorithm& hashAlg, size_t modulusSizeBytes);
+bool verifyForSigningPKCS1v15(const std::string& input, const std::string& em, const HashAlgorithm& hashAlg);
