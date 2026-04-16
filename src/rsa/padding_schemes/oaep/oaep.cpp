@@ -26,6 +26,7 @@
 #include "utils.h"
 
 std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes) {
+    HashAlgorithm mgfHash = (params.mgfHashFunc == HashAlgorithm::None) ? params.hashFunc : params.mgfHashFunc;
     unsigned int hashLength = static_cast<unsigned int>(params.hashFunc);
     unsigned int inputLength = input.length(); // This inheriently means it can only handle ASCII for now
     int psLen = modulusSizeBytes - inputLength - (2 * hashLength) - 2;
@@ -46,13 +47,13 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
         seed = generateRandomHexData(hashLength);
     }
 
-    std::string dbMask = hexToBytes(mgf1(hexToBytes(seed), modulusSizeBytes - hashLength - 1, params.hashFunc));
+    std::string dbMask = hexToBytes(mgf1(hexToBytes(seed), modulusSizeBytes - hashLength - 1, mgfHash));
     std::string maskedDB;
     for (size_t i = 0; i < DB.length(); ++i) {
         maskedDB += DB[i] ^ dbMask[i];
     }
 
-    std::string seedMask = hexToBytes(mgf1(maskedDB, hashLength, params.hashFunc));
+    std::string seedMask = hexToBytes(mgf1(maskedDB, hashLength, mgfHash));
     std::string maskedSeed;
     seed = hexToBytes(seed);
     for (size_t i = 0; i < hashLength; ++i) {
@@ -67,18 +68,19 @@ std::string removeOAEP_Padding(const std::string& input, const OAEPParams& param
         throw std::invalid_argument("Given OAEP message does not begin with 0x00");
     }
 
+    HashAlgorithm mgfHash = (params.mgfHashFunc == HashAlgorithm::None) ? params.hashFunc : params.mgfHashFunc;
     unsigned int hashLength = static_cast<unsigned int>(params.hashFunc);
 
     std::string maskedSeed = input.substr(1, hashLength);
     std::string maskedDB = input.substr(hashLength + 1, input.length());
 
-    std::string seedMask = hexToBytes(mgf1(maskedDB, hashLength, params.hashFunc));
+    std::string seedMask = hexToBytes(mgf1(maskedDB, hashLength, mgfHash));
     std::string seed;
     for (size_t i = 0; i < seedMask.length(); ++i) {
         seed += maskedSeed[i] ^ seedMask[i];
     }
 
-    std::string dbMask = hexToBytes(mgf1(seed, modulusSizeBytes - hashLength - 1, params.hashFunc));
+    std::string dbMask = hexToBytes(mgf1(seed, modulusSizeBytes - hashLength - 1, mgfHash));
 
     std::string DB;
     for (size_t i = 0; i < maskedDB.length(); ++i) {
