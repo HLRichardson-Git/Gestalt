@@ -45,6 +45,7 @@
 
 #include <sstream>
 #include <cstring>
+#include <cstdint>
 
 #include "aesCore.h"
 #include "aesConstants.h"

@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
 // Used for DER <-> PEM conversions
 std::string base64Encode(const std::vector<uint8_t>& hexVector);

@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 class SHA1 {
 private:
