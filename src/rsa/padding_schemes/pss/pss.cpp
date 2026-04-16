@@ -23,6 +23,7 @@ const size_t PADDING1_SIZE = 8;
 
 // Source: https://datatracker.ietf.org/doc/html/rfc3447#section-9.1.1
 std::string encodePSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes) {
+    HashAlgorithm mgfHash = (params.mgfHashFunc == HashAlgorithm::None) ? params.hashFunc : params.mgfHashFunc;
     unsigned int emLen = ((4 * modulusSizeBytes) + 3) / 4; // Simplified equation to calcualte intended EM Length
     unsigned int hLen = static_cast<unsigned int>(params.hashFunc);
     if (emLen < hLen + params.sLen + 2) throw std::invalid_argument("Error PSS Encode: emLen is too short."); // Step 3
@@ -40,7 +41,7 @@ std::string encodePSS_Padding(const std::string& input, const PSSParams& params,
     std::string PS2(ps2Len, 0x00); // Step 7
     std::string DB = PS2 + "\x01" + hexToBytes(salt); // Step 8
 
-    std::string dbMask = hexToBytes(mgf1(H, emLen - hLen - 1, params.hashFunc)); // Step 9
+    std::string dbMask = hexToBytes(mgf1(H, emLen - hLen - 1, mgfHash)); // Step 9
     std::string maskedDB;
     for (size_t i = 0; i < DB.length(); ++i) {
         maskedDB += DB[i] ^ dbMask[i]; // Step 10
@@ -57,6 +58,7 @@ bool verifyPSS_Padding(const std::string& EM, const std::string& message, const 
         throw std::invalid_argument("Error: Given PSS encoded message does not end with 0xbc"); // Step 4
     }
 
+    HashAlgorithm mgfHash = (params.mgfHashFunc == HashAlgorithm::None) ? params.hashFunc : params.mgfHashFunc;
     unsigned int emLen = EM.length();
     unsigned int hLen = static_cast<unsigned int>(params.hashFunc);
     if (emLen < hLen + params.sLen + 2) {
@@ -68,7 +70,7 @@ bool verifyPSS_Padding(const std::string& EM, const std::string& message, const 
     std::string maskedDB = EM.substr(0, emLen - hLen - 1); // Step 5
     std::string H = EM.substr(emLen - hLen - 1, hLen); // Step 5
 
-    std::string dbMask = hexToBytes(mgf1(H, emLen - hLen - 1, params.hashFunc)); // Step 7
+    std::string dbMask = hexToBytes(mgf1(H, emLen - hLen - 1, mgfHash)); // Step 7
     std::string DB;
     for (size_t i = 0; i < maskedDB.length(); ++i) {
         DB += maskedDB[i] ^ dbMask[i]; // Step 8

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2025 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -14,15 +14,19 @@
  * Key features:
  * - Supports both hexadecimal and decimal string-to-GMP conversions.
  * - Implements common arithmetic operators: +, -, *, and %.
+ * - Comparison operators for BigInt and int types.
  * - Memory management functions for GMP integers.
  * - Methods for converting GMP values to hexadecimal and decimal strings.
+ * - Validation methods for DER/cryptographic key parsing.
  * 
  */
 
-# pragma once
+#pragma once
 
 #include <string>
 #include <cstring>
+#include <vector>
+#include <cstdint>
 #include <gmp.h>
 
 inline void stringToGMP(const std::string& str, mpz_t& result) {
@@ -37,6 +41,7 @@ class BigInt {
 public:
     mpz_t n;
 
+    // Constructors
     BigInt() { mpz_init(n); }
     
     BigInt(const std::string& strN) {
@@ -62,6 +67,12 @@ public:
         mpz_init_set(n, mpzN);
     }
 
+    BigInt(const std::vector<uint8_t>& bytes) {
+        mpz_init(n);
+        mpz_import(n, bytes.size(), 1, sizeof(uint8_t), 1, 0, bytes.data());
+    }
+
+    // Assignment operators
     BigInt& operator=(const BigInt& other) {
         if (this != &other) {
             mpz_set(n, other.n);
@@ -89,6 +100,7 @@ public:
         return *this;
     }
 
+    // Arithmetic operators
     BigInt operator+(int intN) const {
         BigInt result;
         mpz_add_ui(result.n, this->n, intN);
@@ -125,18 +137,62 @@ public:
         return result;
     }
 
-    bool operator==(const BigInt& other) {
+    // Comparison operators - BigInt vs BigInt
+    bool operator==(const BigInt& other) const {
         return mpz_cmp(n, other.n) == 0;
     }
 
-    bool operator!=(const BigInt& other) {
+    bool operator!=(const BigInt& other) const {
         return mpz_cmp(n, other.n) != 0;
     }
 
+    bool operator<(const BigInt& other) const {
+        return mpz_cmp(n, other.n) < 0;
+    }
+
+    bool operator>(const BigInt& other) const {
+        return mpz_cmp(n, other.n) > 0;
+    }
+
+    bool operator<=(const BigInt& other) const {
+        return mpz_cmp(n, other.n) <= 0;
+    }
+
+    bool operator>=(const BigInt& other) const {
+        return mpz_cmp(n, other.n) >= 0;
+    }
+
+    // Comparison operators - BigInt vs int
+    bool operator==(int value) const {
+        return mpz_cmp_si(n, value) == 0;
+    }
+
+    bool operator!=(int value) const {
+        return mpz_cmp_si(n, value) != 0;
+    }
+
+    bool operator<(int value) const {
+        return mpz_cmp_si(n, value) < 0;
+    }
+
+    bool operator>(int value) const {
+        return mpz_cmp_si(n, value) > 0;
+    }
+
+    bool operator<=(int value) const {
+        return mpz_cmp_si(n, value) <= 0;
+    }
+
+    bool operator>=(int value) const {
+        return mpz_cmp_si(n, value) >= 0;
+    }
+
+    // Destructor
     ~BigInt() {
         mpz_clear(n);
     }
 
+    // Conversion methods
     std::string toHexString() const {
         char* hexStr = mpz_get_str(nullptr, 16, n);
         std::string result(hexStr);
@@ -152,11 +208,44 @@ public:
         char* decimalStr = mpz_get_str(nullptr, 10, n);
         std::string result(decimalStr);
 
-        // Free the memory allocated by mpz_get_str
         void (*freeFunc)(void*, size_t);
         mp_get_memory_functions(nullptr, nullptr, &freeFunc);
         freeFunc(decimalStr, strlen(decimalStr) + 1);
 
         return result;
+    }
+
+    // Validation and property methods
+    bool isEven() const {
+        return mpz_even_p(n) != 0;
+    }
+
+    bool isOdd() const {
+        return mpz_odd_p(n) != 0;
+    }
+
+    size_t bitLength() const {
+        return mpz_sizeinbase(n, 2);
+    }
+
+    size_t byteLength() const {
+        size_t bits = bitLength();
+        return (bits + 7) / 8;  // Round up to nearest byte
+    }
+
+    bool isZero() const {
+        return mpz_cmp_ui(n, 0) == 0;
+    }
+
+    bool isPositive() const {
+        return mpz_cmp_ui(n, 0) > 0;
+    }
+
+    bool isNegative() const {
+        return mpz_cmp_ui(n, 0) < 0;
+    }
+
+    int sign() const {
+        return mpz_sgn(n);
     }
 };

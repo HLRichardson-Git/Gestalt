@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -16,6 +16,11 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
+
+// Used for DER <-> PEM conversions
+std::string base64Encode(const std::vector<uint8_t>& hexVector);
+std::vector<uint8_t> base64Decode(const std::string& baseSixtyFourString);
 
 /*
  * TODO: these following 9 functions was my first attempt to streamline parsing user inputs.

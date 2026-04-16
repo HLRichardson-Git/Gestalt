@@ -24,16 +24,26 @@
 
 class PSSParams {
 public:
-    HashAlgorithm hashFunc;  // Enum for available hash functions
-    RSA_MGFFunctions mgfFunc;  // Enum for MGF1 with specific hash functions
+    HashAlgorithm hashFunc;     // Hash used for message hashing
+    RSA_MGFFunctions mgfFunc;   // Mask generation function
+    HashAlgorithm mgfHashFunc;  // Hash used inside MGF1 (None = use hashFunc)
     size_t sLen;
-    std::string salt; // Should only be set for testing purposes
+    std::string salt;           // Should only be set for testing purposes
 
-    PSSParams(HashAlgorithm hash = HashAlgorithm::SHA256, 
-              RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1, 
+    PSSParams(HashAlgorithm hash = HashAlgorithm::SHA256,
+              RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1,
               size_t sLen = 0,
               const std::string& salt = "")
-        : hashFunc(hash), mgfFunc(mgf), sLen(sLen), salt(salt) {}
+        : hashFunc(hash), mgfFunc(mgf), mgfHashFunc(HashAlgorithm::None),
+          sLen(sLen), salt(salt) {}
+
+    PSSParams(HashAlgorithm hash,
+              RSA_MGFFunctions mgf,
+              HashAlgorithm mgfHash,
+              size_t sLen = 0,
+              const std::string& salt = "")
+        : hashFunc(hash), mgfFunc(mgf), mgfHashFunc(mgfHash),
+          sLen(sLen), salt(salt) {}
 };
 
 std::string encodePSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes);

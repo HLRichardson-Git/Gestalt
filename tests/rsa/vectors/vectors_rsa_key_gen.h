@@ -5,7 +5,7 @@
  */
 
 /*
- * vectors_rsa_oaep.h
+ * vectors_rsa_key_gen.h
  *
  */
 

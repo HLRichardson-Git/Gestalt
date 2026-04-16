@@ -137,7 +137,7 @@ bool RSA::verifySignature(const std::string& message, const std::string& signatu
     std::string hexString = decryptedHash.toHexString();
     size_t hexStringLength = hexString.length();
     size_t expectedHexLength = modulusSizeInBytes * 2; // 2 hex digits per byte
-    
+
     // Pad with leading zeros
     if (hexStringLength < expectedHexLength) {
         hexString = std::string(expectedHexLength - hexStringLength, '0') + hexString;
@@ -148,4 +148,36 @@ bool RSA::verifySignature(const std::string& message, const std::string& signatu
     bool result = verifyPSS_Padding(decryptedHashBytes, messageHash, parameters, modulusSizeInBytes);
 
     return result;
+}
+
+std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params&) {
+    size_t k = keyPair.getModulusBitLength() / 8;
+    BigInt x = "0x" + convertToHex(encodeForEncryptionPKCS1v15(plaintext, k));
+    return rawEncrypt(x, recipientPublicKey).toHexString();
+}
+
+std::string RSA::decrypt(const std::string& ciphertext, const PKCS1v15Params&) {
+    BigInt y = "0x" + ciphertext;
+    BigInt result = rawDecrypt(y);
+    size_t k = keyPair.getModulusBitLength() / 8;
+    std::string hexString = result.toHexString();
+    if (hexString.length() < k * 2)
+        hexString = std::string(k * 2 - hexString.length(), '0') + hexString;
+    return decodeForEncryptionPKCS1v15(hexToBytes(hexString), k);
+}
+
+std::string RSA::signMessage(const std::string& message, const PKCS1v15Params& parameters) {
+    size_t k = keyPair.getModulusBitLength() / 8;
+    BigInt x = "0x" + convertToHex(encodeForSigningPKCS1v15(message, parameters.hashAlg, k));
+    return rawSignatureGen(x).toHexString();
+}
+
+bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters) {
+    BigInt sigInt = "0x" + signature;
+    BigInt decrypted = rawSignatureVer(sigInt, recipientPublicKey);
+    size_t k = keyPair.getModulusBitLength() / 8;
+    std::string hexString = decrypted.toHexString();
+    if (hexString.length() < k * 2)
+        hexString = std::string(k * 2 - hexString.length(), '0') + hexString;
+    return verifyForSigningPKCS1v15(message, hexToBytes(hexString), parameters.hashAlg);
 }

@@ -24,6 +24,8 @@
 #include <gmp.h>
 
 #include "ecc.h"
+#include "asn1/der/der.h"
+#include "asn1/pem/pem.h"
 
 Point ECC::addPoints(Point P, Point Q) {
     if (isIdentityPoint(P)) return Q;
@@ -246,10 +248,108 @@ void ECC::setKeyPair(const std::string& givenKey) {
     stringToGMP(givenKey, n);
 
     KeyPair result(n, scalarMultiplyPoints(n, ellipticCurve.generator));
-    if(isIdentityPoint(result.publicKey.getPublicKey())) throw 
+    if(isIdentityPoint(result.publicKey.getPublicKey())) throw
         std::invalid_argument("Error: Given Private Key derives identity public key.");
 
     mpz_clear(n);
 
     keyPair = result;
+}
+
+// PublicKey DER/PEM encoding
+
+std::vector<uint8_t> PublicKey::toDER(EccKeyFormat format) const {
+    DEREncoder encoder;
+    switch (format) {
+        case EccKeyFormat::SEC1: return encoder.encodeECPublicKeyToSEC1(*this);
+        case EccKeyFormat::PKCS8:
+        default: return encoder.encodeECPublicKeyToPKCS8(*this);
+    }
+}
+
+void PublicKey::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
+    DERDecoder decoder(der);
+    ECDSAPublicKey decoded;
+    switch (format) {
+        case EccKeyFormat::SEC1:
+            decoded = decoder.decodeECPublicKeyFromSEC1();
+            break;
+        case EccKeyFormat::PKCS8:
+        default:
+            decoded = decoder.decodeECPublicKeyFromPKCS8();
+            break;
+    }
+    *this = PublicKey(decoded.getPublicKey(), decoded.getPublicKeyCurve());
+}
+
+std::string PublicKey::toPEM(EccKeyFormat format) const {
+    switch (format) {
+        case EccKeyFormat::SEC1: return PEMEncoder::encodeECPublicKeyToSEC1(*this);
+        case EccKeyFormat::PKCS8:
+        default: return PEMEncoder::encodeECPublicKeyToPKCS8(*this);
+    }
+}
+
+void PublicKey::fromPEM(const std::string& pem, EccKeyFormat format) {
+    ECDSAPublicKey decoded;
+    switch (format) {
+        case EccKeyFormat::SEC1:
+            decoded = PEMDecoder::decodeECPublicKeyFromSEC1(pem);
+            break;
+        case EccKeyFormat::PKCS8:
+        default:
+            decoded = PEMDecoder::decodeECPublicKeyFromPKCS8(pem);
+            break;
+    }
+    *this = PublicKey(decoded.getPublicKey(), decoded.getPublicKeyCurve());
+}
+
+// KeyPair DER/PEM encoding
+
+std::vector<uint8_t> KeyPair::toDER(EccKeyFormat format) const {
+    DEREncoder encoder;
+    switch (format) {
+        case EccKeyFormat::SEC1: return encoder.encodeECPrivateKeyToSEC1(*this);
+        case EccKeyFormat::PKCS8:
+        default: return encoder.encodeECPrivateKeyToPKCS8(*this);
+    }
+}
+
+void KeyPair::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
+    DERDecoder decoder(der);
+    KeyPair decoded;
+    switch (format) {
+        case EccKeyFormat::SEC1:
+            decoded = decoder.decodeECPrivateKeyFromSEC1();
+            break;
+        case EccKeyFormat::PKCS8:
+        default:
+            decoded = decoder.decodeECPrivateKeyFromPKCS8();
+            break;
+    }
+    mpz_set(privateKey, decoded.privateKey);
+    publicKey = decoded.publicKey;
+}
+
+std::string KeyPair::toPEM(EccKeyFormat format) const {
+    switch (format) {
+        case EccKeyFormat::SEC1: return PEMEncoder::encodeECPrivateKeyToSEC1(*this);
+        case EccKeyFormat::PKCS8:
+        default: return PEMEncoder::encodeECPrivateKeyToPKCS8(*this);
+    }
+}
+
+void KeyPair::fromPEM(const std::string& pem, EccKeyFormat format) {
+    KeyPair decoded;
+    switch (format) {
+        case EccKeyFormat::SEC1:
+            decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);
+            break;
+        case EccKeyFormat::PKCS8:
+        default:
+            decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
+            break;
+    }
+    mpz_set(privateKey, decoded.privateKey);
+    publicKey = decoded.publicKey;
 }

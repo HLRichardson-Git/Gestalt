@@ -43,8 +43,10 @@
  * defined in the AES standard.
  */
 
+#include <algorithm>
 #include <sstream>
 #include <cstring>
+#include <cstdint>
 
 #include "aesCore.h"
 #include "aesConstants.h"

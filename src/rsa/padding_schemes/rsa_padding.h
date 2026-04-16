@@ -19,6 +19,7 @@
 
 class OAEPParams;
 class PSSParams;
+class PKCS1v15Params;
 
 enum RSA_MGFFunctions {
     MGF1
