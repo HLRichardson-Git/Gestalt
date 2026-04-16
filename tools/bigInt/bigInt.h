@@ -26,6 +26,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <cstdint>
 #include <gmp.h>
 
 inline void stringToGMP(const std::string& str, mpz_t& result) {
