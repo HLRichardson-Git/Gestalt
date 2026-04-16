@@ -83,8 +83,8 @@ To see more about the supported algorithms check out our [website](https://gesta
 | HMAC-SHA1      | Message Authentication Code | HMAC using SHA-1                                                   |
 | HMAC-SHA2      | Message Authentication Code | HMAC using SHA-2                                                    |
 | ECDSA              | Asymmetric Signature Scheme| Elliptic Curve Digital Signature Algorithm signing                                           |
-| RSA              | Asymmetric Encryption| Rivest–Shamir–Adleman key encryption with Raw or OAEP padding                                            |
-| RSA              | Asymmetric Signature Scheme| Rivest–Shamir–Adleman message signing with Raw or PSS padding                                          |
+| RSA              | Asymmetric Encryption| Rivest–Shamir–Adleman key encryption with Raw, PKCS1v1.5, or OAEP padding                                            |
+| RSA              | Asymmetric Signature Scheme| Rivest–Shamir–Adleman message signing with Raw, PKCS1v1.5, or PSS padding                                          |
 | ECDH              | Asymmetric Key Agreement| Elliptic Curve Diffie-Hellman Shared Secret computation                                            |
 
 *More algorithms are being implemented very often, see [open issues](https://github.com/HLRichardson-Git/Gestalt/issues) to see algorithms in devlopment*
