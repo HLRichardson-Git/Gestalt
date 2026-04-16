@@ -26,15 +26,25 @@
 class OAEPParams {
 public:
     std::string label;
-    HashAlgorithm hashFunc;  // Enum for available hash functions
-    RSA_MGFFunctions mgfFunc;  // Enum for MGF1 with specific hash functions
-    std::string seed; // Should only be set for testing purposes
+    HashAlgorithm hashFunc;     // Hash used for label hashing
+    RSA_MGFFunctions mgfFunc;   // Mask generation function
+    HashAlgorithm mgfHashFunc;  // Hash used inside MGF1 (None = use hashFunc)
+    std::string seed;           // Should only be set for testing purposes
 
-    OAEPParams(HashAlgorithm hash = HashAlgorithm::SHA256, 
-               RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1, 
+    OAEPParams(HashAlgorithm hash = HashAlgorithm::SHA256,
+               RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1,
                const std::string& label = "",
                const std::string& seed = "")
-        : label(label), hashFunc(hash), mgfFunc(mgf), seed(seed) {}
+        : label(label), hashFunc(hash), mgfFunc(mgf),
+          mgfHashFunc(HashAlgorithm::None), seed(seed) {}
+
+    OAEPParams(HashAlgorithm hash,
+               RSA_MGFFunctions mgf,
+               HashAlgorithm mgfHash,
+               const std::string& label = "",
+               const std::string& seed = "")
+        : label(label), hashFunc(hash), mgfFunc(mgf),
+          mgfHashFunc(mgfHash), seed(seed) {}
 };
 
 std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes);
