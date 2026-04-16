@@ -39,6 +39,10 @@ set (Sources
     src/rsa/rsa_key_generation/rsaKeyGen.cpp
     tools/utils.cpp
     tools/hash_utils/hash_utils.cpp
+    tools/asn1/der/der_decoder.cpp
+    tools/asn1/der/der_encoder.cpp
+    tools/asn1/pem/pem_decoder.cpp
+    tools/asn1/pem/pem_encoder.cpp
 )
 
 add_library (${PROJECT_NAME} STATIC ${Sources})

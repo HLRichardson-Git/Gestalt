@@ -15,7 +15,11 @@
 #include <string>
 
 #include "bigInt/bigInt.h"
+#include "asn1/object_identifiers.h"
 #include "utils.h"
+
+class DEREncoder;
+class DERDecoder;
 
 class Point {
 public:
@@ -113,6 +117,11 @@ public:
 
     void setCurve(const StandardCurve& givenCurve) { curve = givenCurve; }
 
+    std::vector<uint8_t> toDER(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, EccKeyFormat format = EccKeyFormat::PKCS8);
+    std::string toPEM(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
+  
     std::string exportCompressed() const {
         std::string result;
         mpz_t yMod2;
@@ -217,6 +226,11 @@ public:
     ~KeyPair() { mpz_clear(privateKey); }
 
     Point getPublicKey() const { return publicKey.getPublicKey(); };
+
+    std::vector<uint8_t> toDER(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, EccKeyFormat format = EccKeyFormat::PKCS8);
+    std::string toPEM(EccKeyFormat format = EccKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
 };
 
 class Signature {

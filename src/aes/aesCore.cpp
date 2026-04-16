@@ -43,6 +43,7 @@
  * defined in the AES standard.
  */
 
+#include <algorithm>
 #include <sstream>
 #include <cstring>
 #include <cstdint>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -20,6 +20,10 @@
 
 #include "bigInt/bigInt.h"
 #include "rsa/prime_generation/prime_generation.h"
+#include "asn1/object_identifiers.h"
+
+class DEREncoder;
+class DERDecoder;
 
 enum class RSASecurityStrength : unsigned int{
    RSA_1024 = 1024, // 80
@@ -32,6 +36,25 @@ enum class RSASecurityStrength : unsigned int{
 struct RSAKeyGenOptions {
     RSASecurityStrength securityStrength = RSASecurityStrength::RSA_2048;
     RandomPrimeMethod primeMethod = RandomPrimeMethod::probable;
+};
+
+struct RSAPublicKey {
+    BigInt n;
+    BigInt e = 65537;
+
+    RSAPublicKey() = default;
+    RSAPublicKey(const BigInt& n, const BigInt& e)
+    : n(n), e(e) {}
+
+    unsigned int getPublicModulusBitLength() const;
+
+    // Encode this key to DER (PKCS1 or PKCS8)
+    std::vector<uint8_t> toDER(RsaKeyFormat format = RsaKeyFormat::PKCS8) const;
+    void fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8);
+
+    // Encode this key to PEM (PKCS1 or PKCS8)
+    std::string toPEM(RsaKeyFormat format = RsaKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 };
 
 struct RSAPrivateKey {
@@ -71,17 +94,12 @@ struct RSAPrivateKey {
         std::cout << "dQ: " << dQ.toHexString() << std::endl;
         std::cout << "qInv: " << qInv.toHexString() << std::endl;
     }
-};
 
-struct RSAPublicKey {
-    BigInt n;
-    BigInt e = 65537;
+    std::vector<uint8_t> toDER(RsaKeyFormat format = RsaKeyFormat::PKCS8, const RSAPublicKey* pubKey = nullptr) const;
+    void fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
-    RSAPublicKey() = default;
-    RSAPublicKey(const BigInt& n, const BigInt& e)
-    : n(n), e(e) {}
-
-    unsigned int getPublicModulusBitLength() const;
+    std::string toPEM(RsaKeyFormat format, const RSAPublicKey* pubKey) const;
+    void fromPEM(const std::string& pem, RsaKeyFormat format);
 };
 
 class RSAKeyPair {
@@ -124,6 +142,30 @@ public:
         }
     };
 
+    RSAKeyPair(const RSAPrivateKey& priv, const RSAPublicKey& pub)
+        : privateKey(priv), publicKey(pub)
+    {
+        // Infer security strength from modulus size
+        unsigned int nBits = pub.n.bitLength() + 1;
+
+        if      (nBits >= 15360) specifiedStrength = RSASecurityStrength::RSA_15360;
+        else if (nBits >=  7680) specifiedStrength = RSASecurityStrength::RSA_7680;
+        else if (nBits >=  3072) specifiedStrength = RSASecurityStrength::RSA_3072;
+        else if (nBits >=  2048) specifiedStrength = RSASecurityStrength::RSA_2048;
+        else                     specifiedStrength = RSASecurityStrength::RSA_1024;
+
+        validatePrivateKey(privateKey);
+        validatePublicKey(publicKey);
+    }
+
+    RSAKeyPair(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8) {
+        fromDER(der, format);
+    }
+
+    RSAKeyPair(const std::string& pem, RsaKeyFormat format = RsaKeyFormat::PKCS8) {
+        fromPEM(pem, format);
+    }
+
     void setPrivateKey(RSAPrivateKey privateKeyCandidate, RSASecurityStrength specifiedPrivateStrength) {
         specifiedStrength = specifiedPrivateStrength; 
         if (validatePrivateKey(privateKeyCandidate)) {
@@ -144,4 +186,10 @@ public:
     void regenerateKeyPair(const RSAKeyGenOptions& options);
     unsigned int getModulusBitLength() const;
     unsigned int getPrivateExponentBitLength() const;
+
+    std::vector<uint8_t> toDER(RsaKeyFormat format = RsaKeyFormat::PKCS8);
+    void fromDER(const std::vector<uint8_t>& der, RsaKeyFormat format = RsaKeyFormat::PKCS8);
+
+    std::string toPEM(RsaKeyFormat format = RsaKeyFormat::PKCS8) const;
+    void fromPEM(const std::string& pem, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 };
