@@ -14,6 +14,7 @@
  * 
  */
 
+#include <algorithm>
 #include <sstream>
 
 #include "rsaKeyGen.h"
