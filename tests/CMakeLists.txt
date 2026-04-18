@@ -5,6 +5,7 @@ include(GoogleTest)
 set (This tests)
 
 set (Sources
+    secure_bytes/test_secure_bytes.cpp
     aes/test_aes_ecb.cpp
     aes/test_aes_cbc.cpp
     aes/test_aes_functions.cpp
