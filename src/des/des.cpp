@@ -13,6 +13,14 @@
 #include <gestalt/des.h>
 #include "des/desCore.h"
 
+/*
+ * Encrypts an arbitrarily sized input with DES_ECB.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param key        The 64-bit (8 byte) DES key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if the key size is not 8 bytes.
+ */
 SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
@@ -27,6 +35,14 @@ SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key) 
     return blocksToBytes(encryptedBlocks);
 }
 
+/*
+ * Decrypts an arbitrarily sized input with DES_ECB.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param key         The 64-bit (8 byte) DES key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if the key size is not 8 bytes.
+ */
 SecureBytes decryptDESECB(const SecureBytes& ciphertext, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
@@ -40,6 +56,16 @@ SecureBytes decryptDESECB(const SecureBytes& ciphertext, const SecureBytes& key)
     return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }
 
+/*
+ * Encrypts an arbitrarily sized input with 3DES_ECB using an encrypt-decrypt-encrypt (EDE) scheme.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param key1       The first 64-bit (8 byte) DES key as raw bytes.
+ * @param key2       The second 64-bit (8 byte) DES key as raw bytes.
+ * @param key3       The third 64-bit (8 byte) DES key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if any key is not 8 bytes or the key arrangement is invalid.
+ */
 SecureBytes encrypt3DESECB(
     const SecureBytes& plaintext,
     const SecureBytes& key1,
@@ -65,6 +91,16 @@ SecureBytes encrypt3DESECB(
     return blocksToBytes(encryptedBlocks);
 }
 
+/*
+ * Decrypts an arbitrarily sized input with 3DES_ECB using a decrypt-encrypt-decrypt (DED) scheme.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param key1        The first 64-bit (8 byte) DES key as raw bytes.
+ * @param key2        The second 64-bit (8 byte) DES key as raw bytes.
+ * @param key3        The third 64-bit (8 byte) DES key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if any key is not 8 bytes or the key arrangement is invalid.
+ */
 SecureBytes decrypt3DESECB(
     const SecureBytes& ciphertext,
     const SecureBytes& key1,
@@ -89,6 +125,15 @@ SecureBytes decrypt3DESECB(
     return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }
 
+/*
+ * Encrypts an arbitrarily sized input with DES_CBC.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv         The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key        The 64-bit (8 byte) DES key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if the key size is not 8 bytes.
+ */
 SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
@@ -108,6 +153,15 @@ SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, c
     return blocksToBytes(encryptedBlocks);
 }
 
+/*
+ * Decrypts an arbitrarily sized input with DES_CBC.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key         The 64-bit (8 byte) DES key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if the key size is not 8 bytes.
+ */
 SecureBytes decryptDESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
@@ -126,6 +180,17 @@ SecureBytes decryptDESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, 
     return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }
 
+/*
+ * Encrypts an arbitrarily sized input with 3DES_CBC using an encrypt-decrypt-encrypt (EDE) scheme.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv         The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key1       The first 64-bit (8 byte) DES key as raw bytes.
+ * @param key2       The second 64-bit (8 byte) DES key as raw bytes.
+ * @param key3       The third 64-bit (8 byte) DES key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if any key is not 8 bytes or the key arrangement is invalid.
+ */
 SecureBytes encrypt3DESCBC(
     const SecureBytes& plaintext,
     const SecureBytes& iv,
@@ -157,6 +222,17 @@ SecureBytes encrypt3DESCBC(
     return blocksToBytes(encryptedBlocks);
 }
 
+/*
+ * Decrypts an arbitrarily sized input with 3DES_CBC using a decrypt-encrypt-decrypt (DED) scheme.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key1        The first 64-bit (8 byte) DES key as raw bytes.
+ * @param key2        The second 64-bit (8 byte) DES key as raw bytes.
+ * @param key3        The third 64-bit (8 byte) DES key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if any key is not 8 bytes or the key arrangement is invalid.
+ */
 SecureBytes decrypt3DESCBC(
     const SecureBytes& ciphertext,
     const SecureBytes& iv,
