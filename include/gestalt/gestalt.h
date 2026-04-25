@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -10,6 +10,7 @@
  * This file contains the definitions of ALL Gestalts security functions.
  */
 
+#include "secure_bytes.h"
 #include "aes.h"
 #include "des.h"
 #include "sha1.h"
