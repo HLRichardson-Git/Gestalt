@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -13,6 +13,7 @@
 
 #include "gtest/gtest.h"
 
+#include <gestalt/secure_bytes.h>
 #include "aes/aesCore.h"
 #include "utils.h"
 
@@ -23,8 +24,8 @@ private:
 	unsigned char roundKey[AES_BLOCK_SIZE * 15]; // Array to hold round key
 public:
 
-	AES_Functions() : aesObject("10a58869d74be5a374cf867cfb473859") {
-        aesObject.keyExpansion("10a58869d74be5a374cf867cfb473859", roundKey);
+	AES_Functions() : aesObject(SecureBytes::fromHex("10a58869d74be5a374cf867cfb473859")) {
+        aesObject.keyExpansion(SecureBytes::fromHex("10a58869d74be5a374cf867cfb473859"), roundKey);
     }
 	
 	const unsigned char* testKeyExpansion() { return this->roundKey; }
