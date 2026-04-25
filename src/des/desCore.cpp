@@ -10,7 +10,6 @@
  * This file contains the implementation of Gestalts DES security functions.
  */
 
-#include <bitset>
 #include <cstring>
 #include <vector>
 
@@ -111,7 +110,7 @@ uint64_t DES::decryptBlock(uint64_t block) {
     return permute(block, FP, DES_BLOCK_SIZE, FP_SIZE); // Final permutation
 }
 
-SecureBytes applyPCKS5Padding(const SecureBytes& data) {
+SecureBytes applyPKCS5Padding(const SecureBytes& data) {
     size_t paddingLength = 8 - (data.size() % 8);
     SecureBytes result(data.size() + paddingLength);
     std::memcpy(result.data(), data.data(), data.size());

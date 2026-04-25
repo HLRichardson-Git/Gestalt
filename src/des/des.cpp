@@ -25,7 +25,7 @@ SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key) 
     validateKey(key);
     DES des(key);
 
-    SecureBytes padded = applyPCKS5Padding(plaintext);
+    SecureBytes padded = applyPKCS5Padding(plaintext);
     std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
@@ -77,7 +77,7 @@ SecureBytes encrypt3DESECB(
     DES des2(key2);
     DES des3(key3);
 
-    SecureBytes padded = applyPCKS5Padding(plaintext);
+    SecureBytes padded = applyPKCS5Padding(plaintext);
     std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
@@ -138,7 +138,7 @@ SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, c
     validateKey(key);
     DES des(key);
 
-    SecureBytes padded = applyPCKS5Padding(plaintext);
+    SecureBytes padded = applyPKCS5Padding(plaintext);
     std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
@@ -203,7 +203,7 @@ SecureBytes encrypt3DESCBC(
     DES des2(key2);
     DES des3(key3);
 
-    SecureBytes padded = applyPCKS5Padding(plaintext);
+    SecureBytes padded = applyPKCS5Padding(plaintext);
     std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;

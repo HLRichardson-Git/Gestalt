@@ -106,12 +106,12 @@ Using Gestalt is meant to be as simple as possible for developers to quickly use
 #include <iostream>
 
 int main() {
-    std::string key = "10a58869d74be5a374cf867cfb473859"; // 128-bit key
-    std::string iv  = "123456789abcdef123456789abcdef12";
-    std::string message = "Hello, Gestalt!";
-    std::string ciphertext = encryptAESCBC(message, iv, key);
+    const SecureBytes key     = SecureBytes::fromHex("10a58869d74be5a374cf867cfb473859"); // 128-bit key
+    const SecureBytes iv      = SecureBytes::fromHex("123456789abcdef123456789abcdef12");
+    const SecureBytes message = SecureBytes::fromAscii("Hello, Gestalt!");
+    SecureBytes ciphertext = encryptAESCBC(message, iv, key);
 
-    std::cout << "AES-CBC-128: " << ciphertext << std::endl;
+    std::cout << "AES-CBC-128: " << ciphertext.toHex() << std::endl;
 
     return 0;
 }

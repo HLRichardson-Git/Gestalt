@@ -211,7 +211,7 @@ void AES::shiftRows(unsigned char* state) {
 	tmp[14] = state[6];
 	tmp[15] = state[11];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -242,7 +242,7 @@ void AES::mixColumns(unsigned char* state) {
     tmp[14] = state[12] ^ state[13] ^ GF_MUL_TABLE[2][state[14]] ^ GF_MUL_TABLE[3][state[15]];
     tmp[15] = GF_MUL_TABLE[3][state[12]] ^ state[13] ^ state[14] ^ GF_MUL_TABLE[2][state[15]];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -326,7 +326,7 @@ void AES::invShiftRows(unsigned char state[AES_BLOCK_SIZE]) {
 	tmp[14] = state[6];
 	tmp[15] = state[3];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -357,7 +357,7 @@ void AES::invMixColumns(unsigned char state[AES_BLOCK_SIZE]) {
     tmp[14] = GF_MUL_TABLE[13][state[12]] ^ GF_MUL_TABLE[9][state[13]] ^ GF_MUL_TABLE[14][state[14]] ^ GF_MUL_TABLE[11][state[15]];
     tmp[15] = GF_MUL_TABLE[11][state[12]] ^ GF_MUL_TABLE[13][state[13]] ^ GF_MUL_TABLE[9][state[14]] ^ GF_MUL_TABLE[14][state[15]];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
