@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -16,13 +16,14 @@
 #include <gestalt/des.h>
 #include "des/desCore.h"
 #include "des/desConstants.h"
+#include "utils.h"
 #include "vectors/vectors_des.h"
 
 class DES_Functions {
 private:
     DES des;
 public:
-    explicit DES_Functions(const std::string& hexKey) : des(hexKey) {};
+    explicit DES_Functions(const SecureBytes& key) : des(key) {};
 
     std::string getKey(size_t index) { return std::bitset<DES_KEY_SIZE>(des.roundKeys[index]).to_string(); };
     std::string initialPermutation(uint64_t in) { 
@@ -60,7 +61,7 @@ const std::string expectedExpandedKey[16] = {
 };
 
 TEST(DES_Functions, keyExpansion) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
 
     for (size_t i = 0; i < 16; i++) {
         EXPECT_EQ(tester.getKey(i), expectedExpandedKey[i]);
@@ -68,7 +69,7 @@ TEST(DES_Functions, keyExpansion) {
 }
 
 TEST(DES_Functions, encryptBlock) {
-    DES tester("752878397493CB70");
+    DES tester(SecureBytes::fromHex("752878397493CB70"));
     uint64_t plaintext = 0x1122334455667788;
     uint64_t ciphertext = tester.encryptBlock(plaintext);
     uint64_t expected = 0xB5219EE81AA7499D;
@@ -77,7 +78,7 @@ TEST(DES_Functions, encryptBlock) {
 }
 
 TEST(DES_Functions, decryptBlock) {
-    DES tester("752878397493CB70");
+    DES tester(SecureBytes::fromHex("752878397493CB70"));
     uint64_t ciphertext = 0xB5219EE81AA7499D;
     uint64_t plaintext = tester.decryptBlock(ciphertext);
     uint64_t expected = 0x1122334455667788;
@@ -86,7 +87,7 @@ TEST(DES_Functions, decryptBlock) {
 }
 
 TEST(DES_Functions, initialPermutation) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
     uint64_t input = 0x1122334455667788;
     std::string output =  tester.initialPermutation(input);
     std::string expected = "0111100001010101011110000101010110000000011001101000000001100110";
@@ -95,7 +96,7 @@ TEST(DES_Functions, initialPermutation) {
 }
 
 TEST(DES_Functions, expansion) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
     uint32_t input = 0x80668066;
     std::string output =  tester.expansion(input);
     std::string expected = "010000000000001100001101010000000000001100001101";
@@ -104,7 +105,7 @@ TEST(DES_Functions, expansion) {
 }
 
 TEST(DES_Functions, substitution) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
     uint64_t input = 0x78AFE2065547;
     std::string output =  tester.sbox(input);
     std::string expected = "01111011110001101110001001011000";
@@ -113,7 +114,7 @@ TEST(DES_Functions, substitution) {
 }
 
 TEST(DES_Functions, permutation) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
     uint32_t input = 0x7BC6E258;
     std::string output =  tester.permutation(input);
     std::string expected = "01001011011111011101001110000010";
@@ -122,7 +123,7 @@ TEST(DES_Functions, permutation) {
 }
 
 TEST(DES_Functions, f) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
     uint32_t input = 0x80668066;
     std::string output =  tester.f(input);
     std::string expected = "01001011011111011101001110000010";
@@ -131,24 +132,24 @@ TEST(DES_Functions, f) {
 }
 
 TEST(DES_Functions, finalPermutation) {
-    DES_Functions tester("752878397493CB70");
+    DES_Functions tester(SecureBytes::fromHex("752878397493CB70"));
     uint64_t input = 0x4895A5E3AD2BDC34;
     std::string output =  tester.finalPermutation(input);
     std::string expected = "1011010100100001100111101110100000011010101001110100100110011101";
-    
+
     EXPECT_EQ(output, expected);
 }
 
 TEST(DES_Errors, singleKeyInvalidSize) {
-    std::string smallKey = "abc";
+    SecureBytes smallKey(3, 0x00);   // 3 bytes — too small for DES
     EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
 
-    std::string largeKey = "10a58869d74be5a374cf867cfb473859";
-    EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
+    SecureBytes largeKey(16, 0x00);  // 16 bytes — too large for DES
+    EXPECT_THROW(encryptDESECB(plaintext, largeKey), std::invalid_argument);
 }
 
 TEST(TDES_Errors, invalidKeyArrangement) {
-    std::string largeKey = "10a58869d74be5a374cf867cfb473859";
+    SecureBytes largeKey(16, 0x00);  // 16 bytes — too large for DES
     EXPECT_THROW(encrypt3DESECB(plaintext, largeKey, key2, key3), std::invalid_argument);
     EXPECT_THROW(encrypt3DESECB(plaintext, key, key, key3), std::invalid_argument);
     EXPECT_THROW(encrypt3DESECB(plaintext, key, key2, key2), std::invalid_argument);

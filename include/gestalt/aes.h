@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -12,8 +12,10 @@
 
 #pragma once
 
-std::string encryptAESECB(const std::string& msg, std::string key);
-std::string decryptAESECB(const std::string& hexMsg, std::string key);
+#include <gestalt/secure_bytes.h>
 
-std::string encryptAESCBC(const std::string& msg, std::string iv, std::string key);
-std::string decryptAESCBC(const std::string& hexMsg, std::string iv, std::string key);
+SecureBytes encryptAESECB(const SecureBytes& msg, const SecureBytes& key);
+SecureBytes decryptAESECB(const SecureBytes& ciphertext, const SecureBytes& key);
+
+SecureBytes encryptAESCBC(const SecureBytes& msg, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);

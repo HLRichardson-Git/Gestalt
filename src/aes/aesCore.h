@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <gestalt/secure_bytes.h>
+
 const size_t AES_BLOCK_SIZE = 16;
 
 class AES {
@@ -43,15 +45,15 @@ private:
 	void invShiftRows(unsigned char* state);
 	void invMixColumns(unsigned char* state);
 
-	void keyExpansion(const std::string& key, unsigned char* roundKey);
+	void keyExpansion(const SecureBytes& key, unsigned char* roundKey);
 	void rotWord(unsigned char temp[4]);
 	void subWord(unsigned char temp[4]);
 	void rcon(unsigned char temp[4], int round);
-	
+
 	friend class AES_Functions;
 public:
 
-	explicit AES(const std::string& key);
+	explicit AES(const SecureBytes& key);
 	~AES();
 
     AES(AES& other);
@@ -61,5 +63,5 @@ public:
 	void decryptBlock(unsigned char* state);
 };
 
-std::string applyPKCS7Padding(const std::string& data);
-std::string removePKCS7Padding(const std::string& data);
+SecureBytes applyPKCS7Padding(const SecureBytes& data);
+SecureBytes removePKCS7Padding(const SecureBytes& data);

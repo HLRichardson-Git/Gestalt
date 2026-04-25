@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -12,34 +12,36 @@
 
 #pragma once
 
-std::string encryptDESECB(const std::string& plaintext, const std::string& key);
-std::string decryptDESECB(const std::string& ciphertext, const std::string& key);
-std::string encrypt3DESECB(
-    const std::string& plaintext, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+#include <gestalt/secure_bytes.h>
+
+SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key);
+SecureBytes decryptDESECB(const SecureBytes& ciphertext, const SecureBytes& key);
+SecureBytes encrypt3DESECB(
+    const SecureBytes& plaintext,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 );
-std::string decrypt3DESECB(
-    const std::string& ciphertext, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes decrypt3DESECB(
+    const SecureBytes& ciphertext,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 );
 
-std::string encryptDESCBC(const std::string& plaintext, const std::string& iv, const std::string& key);
-std::string decryptDESCBC(const std::string& ciphertext, const std::string& iv, const std::string& key);
-std::string encrypt3DESCBC(
-    const std::string& plaintext,
-    const std::string& iv, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptDESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes encrypt3DESCBC(
+    const SecureBytes& plaintext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 );
-std::string decrypt3DESCBC(
-    const std::string& ciphertext,
-    const std::string& iv, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes decrypt3DESCBC(
+    const SecureBytes& ciphertext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 );

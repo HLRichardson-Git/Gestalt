@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -12,12 +12,14 @@
 
 #pragma once
 
-const std::string key = "752878397493CB70";
-const std::string key2 = "10316E028C8F3B4A";
-const std::string key3 = "7CA110454A1A6E57";
-const std::string nonce = "0102030405060708";
-const std::string plaintext = "Hello, Gestalt!";
-const std::string multiBlockPT = 
+#include <gestalt/secure_bytes.h>
+
+const SecureBytes key  = SecureBytes::fromHex("752878397493CB70");
+const SecureBytes key2 = SecureBytes::fromHex("10316E028C8F3B4A");
+const SecureBytes key3 = SecureBytes::fromHex("7CA110454A1A6E57");
+const SecureBytes nonce = SecureBytes::fromHex("0102030405060708");
+const SecureBytes plaintext = SecureBytes::fromAscii("Hello, Gestalt!");
+const SecureBytes multiBlockPT = SecureBytes::fromAscii(
     "In the spring of her twenty-second year, Sumire fell in love for the first time in her life. An intense love, "
     "a veritable tornado sweeping across the plains flattening everything in its path, tossing things up in the air, "
-    "ripping them to shreds, crushing them to bits.";
+    "ripping them to shreds, crushing them to bits.");
