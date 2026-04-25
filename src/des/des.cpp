@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -10,55 +10,49 @@
  * This file contains the implementation of Gestalts DES & 3DES security functions.
  */
 
-#include <string>
-
 #include <gestalt/des.h>
 #include "des/desCore.h"
 
-std::string encryptDESECB(const std::string& plaintext, const std::string& key) {
+SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
 
-    std::string paddedPlaintext = applyPCKS5Padding(plaintext);
-    std::vector<uint64_t> blocks = stringToBlocks(paddedPlaintext);
+    SecureBytes padded = applyPCKS5Padding(plaintext);
+    std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
-    for (uint64_t block : blocks) {
+    for (uint64_t block : blocks)
         encryptedBlocks.push_back(des.encryptBlock(block));
-    }
 
-    return blocksToHexString(encryptedBlocks);
+    return blocksToBytes(encryptedBlocks);
 }
 
-std::string decryptDESECB(const std::string& ciphertext, const std::string& key) {
+SecureBytes decryptDESECB(const SecureBytes& ciphertext, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
 
-    std::vector<uint64_t> blocks = hexStringToBlocks(ciphertext);
+    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
 
     std::vector<uint64_t> decryptedBlocks;
-    for (uint64_t block : blocks) {
+    for (uint64_t block : blocks)
         decryptedBlocks.push_back(des.decryptBlock(block));
-    }
 
-    std::string decryptedString = blocksToString(decryptedBlocks);
-
-    return removePKCS5Padding(decryptedString);
+    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }
 
-std::string encrypt3DESECB(
-    const std::string& plaintext, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes encrypt3DESECB(
+    const SecureBytes& plaintext,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 ) {
     validateKeys(key1, key2, key3);
     DES des1(key1);
     DES des2(key2);
     DES des3(key3);
 
-    std::string paddedPlaintext = applyPCKS5Padding(plaintext);
-    std::vector<uint64_t> blocks = stringToBlocks(paddedPlaintext);
+    SecureBytes padded = applyPCKS5Padding(plaintext);
+    std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
     for (uint64_t block : blocks) {
@@ -68,21 +62,21 @@ std::string encrypt3DESECB(
         encryptedBlocks.push_back(encryptedBlock);
     }
 
-    return blocksToHexString(encryptedBlocks);
+    return blocksToBytes(encryptedBlocks);
 }
 
-std::string decrypt3DESECB(
-    const std::string& ciphertext, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes decrypt3DESECB(
+    const SecureBytes& ciphertext,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 ) {
     validateKeys(key1, key2, key3);
     DES des1(key1);
     DES des2(key2);
     DES des3(key3);
 
-    std::vector<uint64_t> blocks = hexStringToBlocks(ciphertext);
+    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
 
     std::vector<uint64_t> decryptedBlocks;
     for (uint64_t block : blocks) {
@@ -92,22 +86,18 @@ std::string decrypt3DESECB(
         decryptedBlocks.push_back(decryptedBlock);
     }
 
-    std::string decryptedString = blocksToString(decryptedBlocks);
-
-    return removePKCS5Padding(decryptedString);
+    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }
 
-std::string encryptDESCBC(const std::string& plaintext, const std::string& iv, const std::string& key) {
+SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
 
-    std::string paddedPlaintext = applyPCKS5Padding(plaintext);
-    std::vector<uint64_t> blocks = stringToBlocks(paddedPlaintext);
-
-    uint64_t ivVec = hexStringToUint64(iv);
+    SecureBytes padded = applyPCKS5Padding(plaintext);
+    std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
-    uint64_t currentIV = ivVec;
+    uint64_t currentIV = bytesToUint64(iv);
     for (uint64_t block : blocks) {
         block ^= currentIV;
         uint64_t encryptedBlock = des.encryptBlock(block);
@@ -115,49 +105,44 @@ std::string encryptDESCBC(const std::string& plaintext, const std::string& iv, c
         currentIV = encryptedBlock;
     }
 
-    return blocksToHexString(encryptedBlocks);
+    return blocksToBytes(encryptedBlocks);
 }
 
-std::string decryptDESCBC(const std::string& ciphertext, const std::string& iv, const std::string& key) {
+SecureBytes decryptDESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
 
-    std::vector<uint64_t> blocks = hexStringToBlocks(ciphertext);
-    uint64_t ivVec = hexStringToUint64(iv);
+    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
 
     std::vector<uint64_t> decryptedBlocks;
-    uint64_t currentIV = ivVec;
+    uint64_t currentIV = bytesToUint64(iv);
     for (uint64_t block : blocks) {
         uint64_t decryptedBlock = des.decryptBlock(block);
         decryptedBlock ^= currentIV;
         decryptedBlocks.push_back(decryptedBlock);
-        currentIV = block; // Update IV to the current ciphertext block
+        currentIV = block;
     }
 
-    std::string decryptedString = blocksToString(decryptedBlocks);
-
-    return removePKCS5Padding(decryptedString);
+    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }
 
-std::string encrypt3DESCBC(
-    const std::string& plaintext,
-    const std::string& iv, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes encrypt3DESCBC(
+    const SecureBytes& plaintext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 ) {
     validateKeys(key1, key2, key3);
     DES des1(key1);
     DES des2(key2);
     DES des3(key3);
 
-    std::string paddedPlaintext = applyPCKS5Padding(plaintext);
-    std::vector<uint64_t> blocks = stringToBlocks(paddedPlaintext);
-
-    uint64_t ivVec = hexStringToUint64(iv);
+    SecureBytes padded = applyPCKS5Padding(plaintext);
+    std::vector<uint64_t> blocks = bytesToBlocks(padded);
 
     std::vector<uint64_t> encryptedBlocks;
-    uint64_t currentIV = ivVec;
+    uint64_t currentIV = bytesToUint64(iv);
     for (uint64_t block : blocks) {
         block ^= currentIV;
 
@@ -169,26 +154,25 @@ std::string encrypt3DESCBC(
         currentIV = encryptedBlock;
     }
 
-    return blocksToHexString(encryptedBlocks);
+    return blocksToBytes(encryptedBlocks);
 }
 
-std::string decrypt3DESCBC(
-    const std::string& ciphertext,
-    const std::string& iv, 
-    const std::string& key1, 
-    const std::string& key2, 
-    const std::string& key3
+SecureBytes decrypt3DESCBC(
+    const SecureBytes& ciphertext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
 ) {
     validateKeys(key1, key2, key3);
     DES des1(key1);
     DES des2(key2);
     DES des3(key3);
 
-    std::vector<uint64_t> blocks = hexStringToBlocks(ciphertext);
-    uint64_t ivVec = hexStringToUint64(iv);
+    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
 
     std::vector<uint64_t> decryptedBlocks;
-    uint64_t currentIV = ivVec;
+    uint64_t currentIV = bytesToUint64(iv);
     for (uint64_t block : blocks) {
         uint64_t decryptedBlock = des3.decryptBlock(block);
         decryptedBlock = des2.encryptBlock(decryptedBlock);
@@ -196,10 +180,8 @@ std::string decrypt3DESCBC(
 
         decryptedBlock ^= currentIV;
         decryptedBlocks.push_back(decryptedBlock);
-        currentIV = block; // Update IV to the current ciphertext block
+        currentIV = block;
     }
 
-    std::string decryptedString = blocksToString(decryptedBlocks);
-
-    return removePKCS5Padding(decryptedString);
+    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
 }

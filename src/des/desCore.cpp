@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -10,10 +10,8 @@
  * This file contains the implementation of Gestalts DES security functions.
  */
 
-#include <iomanip>
-#include <string>
 #include <bitset>
-#include <sstream>
+#include <cstring>
 #include <vector>
 
 #include "desCore.h"
@@ -41,8 +39,7 @@ uint32_t DES::leftRotate(uint32_t key, int shifts) {
     return ((key << shifts) & 0x0FFFFFFF) | (key >> (28 - shifts));
 }
 
-void DES::generateRoundKeys(const std::string& binaryKey) {
-    uint64_t key = std::bitset<64>(binaryKey).to_ullong();
+void DES::generateRoundKeys(uint64_t key) {
     uint64_t permutedKey = permute(key, PC1, 64, PC1_SIZE);
 
     uint32_t left = (permutedKey >> 28) & 0xFFFFFFF;
@@ -114,103 +111,64 @@ uint64_t DES::decryptBlock(uint64_t block) {
     return permute(block, FP, DES_BLOCK_SIZE, FP_SIZE); // Final permutation
 }
 
-std::string applyPCKS5Padding(const std::string& data) {
-    size_t blockSize = 8;
-    size_t paddingLength = blockSize - (data.size() % blockSize);
-    std::string paddedData = data;
-    paddedData.append(paddingLength, static_cast<char>(paddingLength));
-    return paddedData;
-}
-
-std::string removePKCS5Padding(const std::string& data) {
-    if (data.empty()) {
-        throw std::runtime_error("Data is empty, cannot remove padding.");
-    }
-    size_t paddingLength = static_cast<uint8_t>(data.back());
-    if (paddingLength > data.size() || paddingLength > 8) {
-        throw std::runtime_error("Invalid padding length.");
-    }
-    return data.substr(0, data.size() - paddingLength);
-}
-
-uint64_t hexStringToUint64(const std::string& hexStr) {
-    if (hexStr.length() != 16) {
-        throw std::invalid_argument("Hex string must be 16 characters long");
-    }
-    
-    uint64_t result = 0;
-    std::stringstream ss;
-    ss << std::hex << hexStr;
-    ss >> result;
-    
-    if (ss.fail()) {
-        throw std::invalid_argument("Invalid hex string");
-    }
-    
+SecureBytes applyPCKS5Padding(const SecureBytes& data) {
+    size_t paddingLength = 8 - (data.size() % 8);
+    SecureBytes result(data.size() + paddingLength);
+    std::memcpy(result.data(), data.data(), data.size());
+    std::memset(result.data() + data.size(), static_cast<int>(paddingLength), paddingLength);
     return result;
 }
 
-std::vector<uint64_t> stringToBlocks(const std::string& str) {
+SecureBytes removePKCS5Padding(const SecureBytes& data) {
+    if (data.empty()) {
+        throw std::runtime_error("Data is empty, cannot remove padding.");
+    }
+    size_t paddingLength = data[data.size() - 1];
+    if (paddingLength > data.size() || paddingLength > 8) {
+        throw std::runtime_error("Invalid padding length.");
+    }
+    SecureBytes result(data.size() - paddingLength);
+    std::memcpy(result.data(), data.data(), result.size());
+    return result;
+}
+
+uint64_t bytesToUint64(const SecureBytes& bytes) {
+    if (bytes.size() != 8) {
+        throw std::invalid_argument("Must be 8 bytes");
+    }
+    uint64_t result = 0;
+    for (size_t i = 0; i < 8; ++i)
+        result = (result << 8) | bytes[i];
+    return result;
+}
+
+std::vector<uint64_t> bytesToBlocks(const SecureBytes& bytes) {
     std::vector<uint64_t> blocks;
-    for (size_t i = 0; i < str.size(); i += 8) {
+    for (size_t i = 0; i < bytes.size(); i += 8) {
         uint64_t block = 0;
-        for (size_t j = 0; j < 8 && i + j < str.size(); ++j) {
-            block <<= 8;
-            block |= static_cast<uint8_t>(str[i + j]);
-        }
+        for (size_t j = 0; j < 8 && i + j < bytes.size(); ++j)
+            block = (block << 8) | bytes[i + j];
         blocks.push_back(block);
     }
     return blocks;
 }
 
-std::vector<uint64_t> hexStringToBlocks(const std::string& hex) {
-    std::vector<uint64_t> blocks;
-    for (size_t i = 0; i < hex.size(); i += 16) {
-        uint64_t block = 0;
-        for (size_t j = 0; j < 16 && i + j < hex.size(); ++j) {
-            block <<= 4;
-            char hexChar = hex[i + j];
-            if (hexChar >= '0' && hexChar <= '9') {
-                block |= (hexChar - '0');
-            } else if (hexChar >= 'A' && hexChar <= 'F') {
-                block |= (hexChar - 'A' + 10);
-            } else if (hexChar >= 'a' && hexChar <= 'f') {
-                block |= (hexChar - 'a' + 10);
-            } else {
-                throw std::runtime_error("Invalid hex character.");
-            }
-        }
-        blocks.push_back(block);
-    }
-    return blocks;
+SecureBytes blocksToBytes(const std::vector<uint64_t>& blocks) {
+    SecureBytes result(blocks.size() * 8);
+    for (size_t b = 0; b < blocks.size(); ++b)
+        for (int i = 7; i >= 0; --i)
+            result[b * 8 + (7 - i)] = static_cast<uint8_t>((blocks[b] >> (i * 8)) & 0xFF);
+    return result;
 }
 
-std::string blocksToHexString(const std::vector<uint64_t>& blocks) {
-    std::ostringstream oss;
-    for (uint64_t block : blocks) {
-        oss << std::hex << std::setw(16) << std::setfill('0') << block;
-    }
-    return oss.str();
-}
-
-std::string blocksToString(const std::vector<uint64_t>& blocks) {
-    std::string str;
-    for (uint64_t block : blocks) {
-        for (int i = 7; i >= 0; --i) {
-            str += static_cast<char>((block >> (i * 8)) & 0xFF);
-        }
-    }
-    return str;
-}
-
-void validateKey(const std::string& key) {
-    if (key.size() != 16) {
+void validateKey(const SecureBytes& key) {
+    if (key.size() != 8) {
         throw std::invalid_argument("DES key must be 8 bytes.");
     }
 }
 
-void validateKeys(const std::string& key1, const std::string& key2, const std::string& key3) {
-    if (key1.size() != 16 || key2.size() != 16 || key3.size() != 16) {
+void validateKeys(const SecureBytes& key1, const SecureBytes& key2, const SecureBytes& key3) {
+    if (key1.size() != 8 || key2.size() != 8 || key3.size() != 8) {
         throw std::invalid_argument("Each DES key must be 8 bytes.");
     }
 
