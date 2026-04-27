@@ -124,10 +124,10 @@ int main() {
 #include <iostream>
 
 int main() {
-    std::string message = "Hello, Gestalt!";
-    std::string hash = hashSHA256(message);
+    const SecureBytes message = SecureBytes::fromAscii("Hello, Gestalt!");
+    SecureBytes hash = hashSHA256(message);
 
-    std::cout << "SHA2-256: " << hash << std::endl;
+    std::cout << "SHA2-256: " << hash.toHex() << std::endl;
 
     return 0;
 }
