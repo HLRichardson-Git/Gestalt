@@ -15,26 +15,26 @@
 #include <gestalt/sha2.h>
 #include "hmac/hmac.h"
 
-inline std::string hmacSHA224(const std::string& key, const std::string& input) {
-    return HMAC(SHA224).keyedHash(key, input, [](const std::string& in) { return hashSHA224(SecureBytes::fromAscii(in)).toHex(); });
+inline SecureBytes hmacSHA224(const SecureBytes& key, const SecureBytes& input) {
+    return HMAC(SHA224).keyedHash(key, input, hashSHA224);
 }
 
-inline std::string hmacSHA256(const std::string& key, const std::string& input) {
-    return HMAC(SHA256).keyedHash(key, input, [](const std::string& in) { return hashSHA256(SecureBytes::fromAscii(in)).toHex(); });
+inline SecureBytes hmacSHA256(const SecureBytes& key, const SecureBytes& input) {
+    return HMAC(SHA256).keyedHash(key, input, hashSHA256);
 }
 
-inline std::string hmacSHA384(const std::string& key, const std::string& input) {
-    return HMAC(SHA384).keyedHash(key, input, [](const std::string& in) { return hashSHA384(SecureBytes::fromAscii(in)).toHex(); });
+inline SecureBytes hmacSHA384(const SecureBytes& key, const SecureBytes& input) {
+    return HMAC(SHA384).keyedHash(key, input, hashSHA384);
 }
 
-inline std::string hmacSHA512(const std::string& key, const std::string& input) {
-    return HMAC(SHA512).keyedHash(key, input, [](const std::string& in) { return hashSHA512(SecureBytes::fromAscii(in)).toHex(); });
+inline SecureBytes hmacSHA512(const SecureBytes& key, const SecureBytes& input) {
+    return HMAC(SHA512).keyedHash(key, input, hashSHA512);
 }
 
-inline std::string hmacSHA512_224(const std::string& key, const std::string& input) {
-    return HMAC(SHA512_224).keyedHash(key, input, [](const std::string& in) { return hashSHA512_224(SecureBytes::fromAscii(in)).toHex(); });
+inline SecureBytes hmacSHA512_224(const SecureBytes& key, const SecureBytes& input) {
+    return HMAC(SHA512_224).keyedHash(key, input, hashSHA512_224);
 }
 
-inline std::string hmacSHA512_256(const std::string& key, const std::string& input) {
-    return HMAC(SHA512_256).keyedHash(key, input, [](const std::string& in) { return hashSHA512_256(SecureBytes::fromAscii(in)).toHex(); });
+inline SecureBytes hmacSHA512_256(const SecureBytes& key, const SecureBytes& input) {
+    return HMAC(SHA512_256).keyedHash(key, input, hashSHA512_256);
 }
