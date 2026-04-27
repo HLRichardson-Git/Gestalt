@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -16,12 +16,12 @@
  * (NIST) and RFC 3174.
  *
  * This header provides the declaration of the SHA1 class, which encapsulates the functionality to generate SHA-1
- * hashes from input strings.
+ * hashes from input data.
  */
 
 #pragma once
 
-#include <string>
+#include <gestalt/secure_bytes.h>
 #include <cstdint>
 
 class SHA1 {
@@ -36,10 +36,10 @@ private:
     uint32_t h3 = 0x10325476;
     uint32_t h4 = 0xc3d2e1f0;
 
-    std::string digest();
+    SecureBytes digest();
     void reset();
-    void fillBlock(std::string in, uint32_t w[BLOCK_SIZE]);
-    void applySha1Padding(std::string& in);
+    void fillBlock(const SecureBytes& in, std::size_t offset, uint32_t w[BLOCK_SIZE]);
+    void applySha1Padding(SecureBytes& in);
 
     friend class SHA1_Test;
 public:
@@ -47,5 +47,5 @@ public:
 	SHA1();
 	~SHA1() {}
 
-    std::string hash(std::string in);
+    SecureBytes hash(const SecureBytes& in);
 };

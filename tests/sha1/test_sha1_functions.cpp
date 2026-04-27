@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -11,11 +11,9 @@
  */
 
 #include "gtest/gtest.h"
-#include <string>
 
 #include <gestalt/sha1.h>
 #include "sha1/sha1Core.h"
-#include "utils.h"
 
 class SHA1_Test : public ::testing::Test {
 private:
@@ -24,18 +22,19 @@ private:
     SHA1 SHA1Object;
 public:
 
-    void testSHA1FillBlock(std::string in, uint32_t computedW[BLOCK_SIZE]) {
-        SHA1Object.applySha1Padding(in);
-        this->SHA1Object.fillBlock(in, computedW);
+    void testSHA1FillBlock(const std::string& in, uint32_t computedW[BLOCK_SIZE]) {
+        SecureBytes sb = SecureBytes::fromAscii(in);
+        SHA1Object.applySha1Padding(sb);
+        this->SHA1Object.fillBlock(sb, 0, computedW);
     }
-    void testSHA1Padding(std::string& in){
+    void testSHA1Padding(SecureBytes& in){
         this->SHA1Object.applySha1Padding(in);
     }
 };
 
 // Unit test for fillBlock function.
 TEST_F(SHA1_Test, fillBlock) {
-    std::string in = "abc";
+    const std::string in = "abc";
     uint32_t expectedW[80] = {
         0x61626380, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
         0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000018, 
@@ -65,48 +64,44 @@ TEST_F(SHA1_Test, fillBlock) {
 }
 
 // Known Answer Test(KAT) for SHA1 Padding from https://nvlpubs.nist.gov/nistpubs/Legacy/FIPS/fipspub180-1.pdf
-TEST_F(SHA1_Test, paddingKatSHA1) { 
+TEST_F(SHA1_Test, paddingKatSHA1) {
     // See pg.12 for test vector.
-    std::string shortKAT = "abc";
-    const std::string expectedShortKAT = 
+    SecureBytes shortKAT = SecureBytes::fromAscii("abc");
+    const std::string expectedShortKAT =
         "6162638000000000000000000000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000000000000000000000000018";
 
     testSHA1Padding(shortKAT);
-    
-    EXPECT_EQ(convertToHex(shortKAT), expectedShortKAT);
+    EXPECT_EQ(shortKAT.toHex(), expectedShortKAT);
 
     // See pg.15 for test vector.
-    std::string longKAT = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
-    const std::string expectedLongKAT = 
+    SecureBytes longKAT = SecureBytes::fromAscii("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+    const std::string expectedLongKAT =
         "6162636462636465636465666465666765666768666768696768696a68696a6b"
         "696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f70718000000000000000"
         "0000000000000000000000000000000000000000000000000000000000000000"
         "00000000000000000000000000000000000000000000000000000000000001c0";
 
     testSHA1Padding(longKAT);
+    EXPECT_EQ(longKAT.toHex(), expectedLongKAT);
 
-    EXPECT_EQ(convertToHex(longKAT), expectedLongKAT);
-
-    std::string longLongKAT = 
+    SecureBytes longLongKAT = SecureBytes::fromAscii(
         "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmn"
-        "hijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
-    const std::string expectedLongLongKAT = 
+        "hijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
+    const std::string expectedLongLongKAT =
         "61626364656667686263646566676869636465666768696a6465666768696a6b"
         "65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f"
         "696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f70717273"
         "6d6e6f70717273746e6f70717273747580000000000000000000000000000380";
 
     testSHA1Padding(longLongKAT);
+    EXPECT_EQ(longLongKAT.toHex(), expectedLongLongKAT);
 
-    EXPECT_EQ(convertToHex(longLongKAT), expectedLongLongKAT);
-
-    std::string emptyStringKAT = "";
-    const std::string expectedEmptyStringKAT = 
+    SecureBytes emptyStringKAT;
+    const std::string expectedEmptyStringKAT =
         "8000000000000000000000000000000000000000000000000000000000000000"
         "0000000000000000000000000000000000000000000000000000000000000000";
 
     testSHA1Padding(emptyStringKAT);
-
-    EXPECT_EQ(convertToHex(emptyStringKAT), expectedEmptyStringKAT);
+    EXPECT_EQ(emptyStringKAT.toHex(), expectedEmptyStringKAT);
 }

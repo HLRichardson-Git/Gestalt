@@ -25,15 +25,15 @@ std::function<std::string(const std::string&)> hash(HashAlgorithm hashAlg) {
         case HashAlgorithm::None:
             return [](const std::string& in) { return in; };
         case HashAlgorithm::SHA1:
-            return hashSHA1;
+            return [](const std::string& in) { return hashSHA1(SecureBytes::fromAscii(in)).toHex(); };
         case HashAlgorithm::SHA224:
-            return hashSHA224;
+            return [](const std::string& in) { return hashSHA224(SecureBytes::fromAscii(in)).toHex(); };
         case HashAlgorithm::SHA256:
-            return hashSHA256;
+            return [](const std::string& in) { return hashSHA256(SecureBytes::fromAscii(in)).toHex(); };
         case HashAlgorithm::SHA384:
-            return hashSHA384;
+            return [](const std::string& in) { return hashSHA384(SecureBytes::fromAscii(in)).toHex(); };
         case HashAlgorithm::SHA512:
-            return hashSHA512;
+            return [](const std::string& in) { return hashSHA512(SecureBytes::fromAscii(in)).toHex(); };
         default:
             throw std::invalid_argument("Unsupported hash function");
     }

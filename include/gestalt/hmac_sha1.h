@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -16,5 +16,5 @@
 #include "hmac/hmac.h"
 
 inline std::string hmacSHA1(const std::string& key, const std::string& input) {
-    return HMAC(SHA1).keyedHash(key, input, hashSHA1);
+    return HMAC(SHA1).keyedHash(key, input, [](const std::string& in) { return hashSHA1(SecureBytes::fromAscii(in)).toHex(); });
 }
