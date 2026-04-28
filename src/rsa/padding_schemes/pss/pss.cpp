@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -28,14 +28,14 @@ std::string encodePSS_Padding(const std::string& input, const PSSParams& params,
     unsigned int hLen = static_cast<unsigned int>(params.hashFunc);
     if (emLen < hLen + params.sLen + 2) throw std::invalid_argument("Error PSS Encode: emLen is too short."); // Step 3
     
-    std::string mHash = hexToBytes(hash(params.hashFunc)(input)); // Step 1 & 2
+    std::string mHash = hexToBytes(hash(params.hashFunc)(SecureBytes::fromHex(input)).toHex()); // Step 1 & 2
 
     std::string salt = params.salt;
     if (salt.empty()) salt = generateRandomHexData(params.sLen); // Step 4
 
     std::string PS1(PADDING1_SIZE, 0x00);
     std::string mPrime = PS1 + mHash + hexToBytes(salt); // Step 5
-    std::string H = hexToBytes(hash(params.hashFunc)(mPrime)); // Step 6
+    std::string H = hexToBytes(hash(params.hashFunc)(SecureBytes::fromAscii(mPrime)).toHex()); // Step 6
 
     int ps2Len = emLen - params.sLen - hLen - 2;
     std::string PS2(ps2Len, 0x00); // Step 7
@@ -65,7 +65,7 @@ bool verifyPSS_Padding(const std::string& EM, const std::string& message, const 
         throw std::invalid_argument("Error PSS Verification: emLen is too short."); // Step 3
     }
 
-    std::string mHash = hexToBytes(hash(params.hashFunc)(message)); // Step 1 & 2
+    std::string mHash = hexToBytes(hash(params.hashFunc)(SecureBytes::fromHex(message)).toHex()); // Step 1 & 2
 
     std::string maskedDB = EM.substr(0, emLen - hLen - 1); // Step 5
     std::string H = EM.substr(emLen - hLen - 1, hLen); // Step 5
@@ -92,7 +92,7 @@ bool verifyPSS_Padding(const std::string& EM, const std::string& message, const 
     std::string salt = DB.substr(DB.length() - params.sLen, params.sLen); // Step 11
     std::string PS1(PADDING1_SIZE, 0x00);
     std::string mPrime = PS1 + mHash + salt; // Step 12
-    std::string hPrime = hexToBytes(hash(params.hashFunc)(mPrime)); // Step 13
+    std::string hPrime = hexToBytes(hash(params.hashFunc)(SecureBytes::fromAscii(mPrime)).toHex()); // Step 13
     
     if (H == hPrime) return true; // Step 14
 

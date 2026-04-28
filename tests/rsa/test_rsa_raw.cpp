@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -18,6 +18,7 @@
 
 #include <gestalt/rsa.h>
 #include "vectors/vectors_rsa.h"
+#include "utils.h"
 
 TEST(RSA_Raw, encrypt) {
     std::string computedCiphertext = rsa.encrypt(pt, publicKeyVector);
@@ -30,12 +31,12 @@ TEST(RSA_Raw, decrypt) {
 }
 
 TEST(RSA_Raw, signatureGeneration) {
-    std::string computedSignature = rsa.signMessage(messageToSign);
+    std::string computedSignature = rsa.signMessage(hexToBytes(messageToSign));
     EXPECT_TRUE(computedSignature == expectedSignature);
 }
 
 TEST(RSA_Raw, signatureVerification) {
-    bool signatureResult = rsa.verifySignature(messageToSign, expectedSignature, publicKeyVector);
+    bool signatureResult = rsa.verifySignature(hexToBytes(messageToSign), expectedSignature, publicKeyVector);
     EXPECT_TRUE(signatureResult);
 }
 

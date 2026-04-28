@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -83,7 +83,7 @@ std::string decodeForEncryptionPKCS1v15(const std::string& em, size_t modulusSiz
 
 // RFC 8017 §9.2
 std::string encodeForSigningPKCS1v15(const std::string& input, const HashAlgorithm& hashAlg, size_t modulusSizeBytes) {
-    std::string H = hexToBytes(hash(hashAlg)(input));
+    std::string H = hash(hashAlg)(SecureBytes::fromAscii(input)).toAscii();
     std::string T = hexToBytes(getAlgorithmIdentifier(hashAlg)) + H;
 
     size_t tLen = T.length();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -26,7 +26,7 @@
 
 #include <gestalt/ecdh.h>
 
-std::string ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
+SecureBytes ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
     std::string validationError = isValidPublicKey(givenPeerPublicKey.getPublicKey());
     if (!validationError.empty()) {
         throw std::invalid_argument(validationError);
@@ -35,11 +35,12 @@ std::string ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
     Point sharedPoint = scalarMultiplyPoints(keyPair.privateKey, givenPeerPublicKey.getPublicKey());
     if(isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
     fieldElementToInteger(sharedPoint.x, sharedPoint.x);
-    return keyToString(sharedPoint);
+    return pointToSecureBytes(sharedPoint);
 }
 
-std::string ECDH::keyToString(const Point& point) const {
-    char *cStr = mpz_get_str(NULL, 16, point.x);
-    std::string str = cStr;
-    return str;
+SecureBytes ECDH::pointToSecureBytes(const Point& point) const {
+    size_t count = (mpz_sizeinbase(point.x, 2) + 7) / 8;
+    SecureBytes result(count);
+    mpz_export(result.data(), nullptr, 1, 1, 1, 0, point.x);
+    return result;
 }

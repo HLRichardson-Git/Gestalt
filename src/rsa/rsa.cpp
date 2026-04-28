@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -106,20 +106,20 @@ std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parame
 }
 
 std::string RSA::signMessage(const std::string& message, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
     BigInt x = "0x" + messageHash;
     return rawSignatureGen(x).toHexString();
 }
 
 std::string RSA::signMessage(const std::string& message, const PSSParams& parameters, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
     BigInt x = "0x" + convertToHex(encodePSS_Padding(messageHash, parameters, modulusSizeInBytes));
     return rawSignatureGen(x).toHexString();
 }
 
 bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
     
     BigInt sigInt = BigInt("0x" + signature);
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
@@ -128,7 +128,7 @@ bool RSA::verifySignature(const std::string& message, const std::string& signatu
 }
 
 bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
 
     BigInt sigInt = BigInt("0x" + signature);
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);

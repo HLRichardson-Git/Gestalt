@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -32,7 +32,7 @@ Point ECC::addPoints(Point P, Point Q) {
     if (isIdentityPoint(Q)) return P;
 
     if (mpz_cmp(P.x, Q.x) == 0 && mpz_cmp(P.y, Q.y) == 0) return doublePoint(P);
-    if (mpz_cmp(P.x, Q.x) == 0 && mpz_cmp(P.y, Q.y) != 0) return Point("0", "0");
+    if (mpz_cmp(P.x, Q.x) == 0 && mpz_cmp(P.y, Q.y) != 0) return Point();
 
     Point R;
     mpz_t s;
@@ -109,7 +109,7 @@ Point ECC::doublePoint(Point P) {
 
 // Implementation of the double-and-add algoirthm
 Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
-    if(mpz_cmp(k, ellipticCurve.n) == 0) return Point("0", "0");
+    if(mpz_cmp(k, ellipticCurve.n) == 0) return Point();
 
     Point result;
     Point temp = P;
@@ -242,16 +242,10 @@ void ECC::setKeyPair(const KeyPair& newKeyPair) {
     keyPair = newKeyPair;
 }
 
-void ECC::setKeyPair(const std::string& givenKey) {
-    mpz_t n;
-    mpz_init(n);
-    stringToGMP(givenKey, n);
-
-    KeyPair result(n, scalarMultiplyPoints(n, ellipticCurve.generator));
+void ECC::setKeyPair(const BigInt& key) {
+    KeyPair result(key.n, scalarMultiplyPoints(key.n, ellipticCurve.generator));
     if(isIdentityPoint(result.publicKey.getPublicKey())) throw
         std::invalid_argument("Error: Given Private Key derives identity public key.");
-
-    mpz_clear(n);
 
     keyPair = result;
 }

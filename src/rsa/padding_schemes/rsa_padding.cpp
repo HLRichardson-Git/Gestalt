@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -30,7 +30,7 @@ std::string mgf1(const std::string& seed, unsigned int maskLen, HashAlgorithm ha
         C[2] = (i >> 8) & 0xFF;
         C[3] = i & 0xFF;
 
-        std::string computedHash = hash(hashAlg)(seed + std::string(reinterpret_cast<char*>(C), 4));
+        std::string computedHash = hash(hashAlg)(SecureBytes::fromAscii(seed + std::string(reinterpret_cast<char*>(C), 4))).toHex();
         mask += computedHash;
     }
 

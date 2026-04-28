@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -57,7 +57,7 @@ public:
     KeyPair generateKeyPair();
 
     void setKeyPair(const KeyPair& newKeyPair);
-    void setKeyPair(const std::string& strKey);
+    void setKeyPair(const BigInt& key);
     void setCurve(StandardCurve curveType) { 
         ellipticCurve = getCurveParams(curveType);
         keyPair.publicKey.setCurve(curveType); 

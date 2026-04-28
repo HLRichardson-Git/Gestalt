@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -20,20 +20,14 @@
 #include <gestalt/sha1.h>
 #include <gestalt/sha2.h>
 
-std::function<std::string(const std::string&)> hash(HashAlgorithm hashAlg) {
+std::function<SecureBytes(const SecureBytes&)> hash(HashAlgorithm hashAlg) {
     switch (hashAlg) {
-        case HashAlgorithm::None:
-            return [](const std::string& in) { return in; };
-        case HashAlgorithm::SHA1:
-            return [](const std::string& in) { return hashSHA1(SecureBytes::fromAscii(in)).toHex(); };
-        case HashAlgorithm::SHA224:
-            return [](const std::string& in) { return hashSHA224(SecureBytes::fromAscii(in)).toHex(); };
-        case HashAlgorithm::SHA256:
-            return [](const std::string& in) { return hashSHA256(SecureBytes::fromAscii(in)).toHex(); };
-        case HashAlgorithm::SHA384:
-            return [](const std::string& in) { return hashSHA384(SecureBytes::fromAscii(in)).toHex(); };
-        case HashAlgorithm::SHA512:
-            return [](const std::string& in) { return hashSHA512(SecureBytes::fromAscii(in)).toHex(); };
+        case HashAlgorithm::None:    return [](const SecureBytes& in) { return in; };
+        case HashAlgorithm::SHA1:    return hashSHA1;
+        case HashAlgorithm::SHA224:  return hashSHA224;
+        case HashAlgorithm::SHA256:  return hashSHA256;
+        case HashAlgorithm::SHA384:  return hashSHA384;
+        case HashAlgorithm::SHA512:  return hashSHA512;
         default:
             throw std::invalid_argument("Unsupported hash function");
     }

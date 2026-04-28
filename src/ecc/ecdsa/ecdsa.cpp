@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -25,20 +25,10 @@
 
 #include <gestalt/ecdsa.h>
 
-void ECDSA::prepareMessage(const std::string& messageHash, mpz_t& result) {
-    std::string hashWithoutPrefix = messageHash;
-    if (messageHash.compare(0, 2, "0x") == 0) {
-        hashWithoutPrefix = messageHash.substr(2);
-    }
-
-    size_t hashBitLength = hashWithoutPrefix.length() * 4;
-
-    if (hashBitLength >= ellipticCurve.bitLength) {
-        std::string truncatedHash = hashWithoutPrefix.substr(0, ellipticCurve.bitLength / 4);
-        mpz_set_str(result, truncatedHash.c_str(), 16);
-    } else {
-        mpz_set_str(result, hashWithoutPrefix.c_str(), 16);
-    }
+void ECDSA::prepareMessage(const SecureBytes& messageHash, mpz_t& result) {
+    size_t maxBytes = (ellipticCurve.bitLength + 7) / 8;
+    size_t useBytes = std::min(messageHash.size(), maxBytes);
+    mpz_import(result, useBytes, 1, 1, 1, 0, messageHash.data());
 }
 
 bool ECDSA::isInvalidSignature(Signature S) {
@@ -46,8 +36,8 @@ bool ECDSA::isInvalidSignature(Signature S) {
     return (mpz_cmp_ui(S.r, 0) == 0 || mpz_cmp_ui(S.s, 0) == 0);
 }
 
-Signature ECDSA::signMessage(const std::string& message, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+Signature ECDSA::signMessage(const SecureBytes& message, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
 
     mpz_t e;
     mpz_init(e);
@@ -68,8 +58,8 @@ Signature ECDSA::signMessage(const std::string& message, HashAlgorithm hashAlg) 
     return signature;
 }
 
-Signature ECDSA::signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+Signature ECDSA::signMessage(const SecureBytes& message, BigInt& K, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
 
     mpz_t e;
     mpz_init(e);
@@ -114,8 +104,8 @@ Signature ECDSA::generateSignature(const mpz_t& e, mpz_t& k) {
     return signature;
 }
 
-bool ECDSA::verifySignature(const std::string& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(message);
+bool ECDSA::verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
 
     mpz_t e;
     mpz_init(e);

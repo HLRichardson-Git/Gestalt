@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -23,6 +23,7 @@
 #include "oaep.h"
 #include <gestalt/sha1.h>
 #include <gestalt/sha2.h>
+#include <gestalt/secure_bytes.h>
 #include "utils.h"
 
 std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes) {
@@ -40,7 +41,7 @@ std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params
     // because it is doing it correctly, but since the output of hashSHA256 is in hex, and the length of DB
     // is expected as bytes its "counting the byte twice", so its adding 32 to the length
     // Maybe this is an overall flaw of the SHA implementations I have...
-    std::string DB = hexToBytes(hash(params.hashFunc)(params.label)) + PS + "\x01" + input;
+    std::string DB = hash(params.hashFunc)(SecureBytes::fromAscii(params.label)).toAscii() + PS + "\x01" + input;
 
     std::string seed = params.seed;
     if (seed.empty()) {
@@ -87,7 +88,7 @@ std::string removeOAEP_Padding(const std::string& input, const OAEPParams& param
         DB += maskedDB[i] ^ dbMask[i];
     }
 
-    std::string lhash = hexToBytes(hash(params.hashFunc)(params.label));
+    std::string lhash = hash(params.hashFunc)(SecureBytes::fromAscii(params.label)).toAscii();
     if (DB.substr(0, hashLength) != lhash) {
         throw std::invalid_argument("OAEP Decode Error: The encoded lhash and computed lhash are not the same.");
     }

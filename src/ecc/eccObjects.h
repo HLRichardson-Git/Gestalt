@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -17,6 +17,7 @@
 #include "bigInt/bigInt.h"
 #include "asn1/object_identifiers.h"
 #include "utils.h"
+#include <gestalt/secure_bytes.h>
 
 class DEREncoder;
 class DERDecoder;
@@ -26,10 +27,10 @@ public:
     mpz_t x, y;
 
     Point() { mpz_inits(x, y, NULL); }
-    Point(const std::string& strX, const std::string& strY) {
+    Point(const BigInt& bX, const BigInt& bY) {
         mpz_inits(x, y, NULL);
-        stringToGMP(strX, x);
-        stringToGMP(strY, y);
+        mpz_set(x, bX.n);
+        mpz_set(y, bY.n);
     }
 
     Point(const Point& other) {
@@ -53,7 +54,7 @@ public:
         mpz_clear(y);
     }
 
-    Point setPoint(const std::string& strX, const std::string& strY) { return Point(strX, strY); };
+    Point setPoint(const BigInt& bX, const BigInt& bY) { return Point(bX, bY); };
 };
 
 #include "standardCurves.h"
@@ -100,11 +101,11 @@ private:
 public:
     // Constructors
     PublicKey() : curve(StandardCurve::P256) {}
-    PublicKey(const std::string& strX, const std::string& strY) : point(Point(strX, strY)) {
+    PublicKey(const BigInt& bX, const BigInt& bY) : point(Point(bX, bY)) {
         curve = guessCurve(point);
     }
-    PublicKey(const std::string& compressedPublicKey, const StandardCurve& curve) : curve(curve) {
-        importCompressed(compressedPublicKey);
+    PublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : curve(curve) {
+        importCompressed(compressedKey);
     }
     PublicKey(const Point& publicKey) : point(publicKey) {
         curve = guessCurve(publicKey);
@@ -122,29 +123,28 @@ public:
     std::string toPEM(EccKeyFormat format = EccKeyFormat::PKCS8) const;
     void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
   
-    std::string exportCompressed() const {
-        std::string result;
+    SecureBytes exportCompressed() const {
         mpz_t yMod2;
         mpz_init(yMod2);
         mpz_mod_ui(yMod2, point.y, 2);
-        result += (mpz_cmp_ui(yMod2, 0) == 0) ? '\x02' : '\x03';
 
         // Serialize x
         size_t count = (mpz_sizeinbase(point.x, 2) + 7) / 8;
-        result.resize(1 + count);
-        mpz_export(&result[1], nullptr, 1, 1, 1, 0, point.x);
+        SecureBytes result(1 + count);
+        result[0] = (mpz_cmp_ui(yMod2, 0) == 0) ? 0x02 : 0x03;
+        mpz_export(result.data() + 1, nullptr, 1, 1, 1, 0, point.x);
         mpz_clear(yMod2);
-        return bytesToHex(result);
+        return result;
     }
 
-    void importCompressed(const std::string& compressedHexKey) {
-        if (compressedHexKey.length() < 4 || compressedHexKey.length() % 2 != 0) {
-            throw std::invalid_argument("Invalid hex-encoded compressed key");
+    void importCompressed(const SecureBytes& compressedKey) {
+        if (compressedKey.size() < 2) {
+            throw std::invalid_argument("Invalid compressed key");
         }
 
-        // Check the compression byte (first 2 hex characters)
-        std::string compressionByte = compressedHexKey.substr(0, 2);
-        if (compressionByte != "02" && compressionByte != "03") {
+        // Check the compression byte (first byte)
+        uint8_t prefix = compressedKey[0];
+        if (prefix != 0x02 && prefix != 0x03) {
             throw std::invalid_argument("Invalid compressed ECC key format");
         }
 
@@ -152,9 +152,8 @@ public:
         mpz_t x, y, rhs;
         mpz_inits(x, y, rhs, nullptr);
 
-        // Extract x coordinate (skip first 2 hex characters)
-        std::string xCoordHex = compressedHexKey.substr(2);
-        mpz_set_str(x, xCoordHex.c_str(), 16);
+        // Extract x coordinate (skip first byte)
+        mpz_import(x, compressedKey.size() - 1, 1, 1, 1, 0, compressedKey.data() + 1);
 
         // Calculate y^2 = x^3 + ax + b mod p
         mpz_powm_ui(rhs, x, 3, curve.p);
@@ -166,7 +165,7 @@ public:
         if (!found) throw std::runtime_error("Failed to compute sqrt for compressed key");
 
         // Check compression byte to determine which y to use
-        bool isOddCompression = (compressionByte == "03");
+        bool isOddCompression = (prefix == 0x03);
         if ((isOddCompression && mpz_even_p(y)) || (!isOddCompression && mpz_odd_p(y))) {
             mpz_sub(y, curve.p, y);
         }
@@ -180,8 +179,8 @@ public:
 class ECDSAPublicKey : public PublicKey{
 public:
     ECDSAPublicKey() : PublicKey() {}
-    ECDSAPublicKey(const std::string& strX, const std::string& strY) : PublicKey(strX, strY) {}
-    ECDSAPublicKey(const std::string& compressedPublicKey, const StandardCurve& curve) : PublicKey(compressedPublicKey, curve) {}
+    ECDSAPublicKey(const BigInt& bX, const BigInt& bY) : PublicKey(bX, bY) {}
+    ECDSAPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : PublicKey(compressedKey, curve) {}
     ECDSAPublicKey(const Point& point) : PublicKey(point) {}
     ECDSAPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
 };
@@ -189,8 +188,8 @@ public:
 class ECDHPublicKey : public PublicKey{
 public:
     ECDHPublicKey() : PublicKey() {}
-    ECDHPublicKey(const std::string& strX, const std::string& strY) : PublicKey(strX, strY) {}
-    ECDHPublicKey(const std::string& compressedPublicKey, const StandardCurve& curve) : PublicKey(compressedPublicKey, curve) {}
+    ECDHPublicKey(const BigInt& bX, const BigInt& bY) : PublicKey(bX, bY) {}
+    ECDHPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : PublicKey(compressedKey, curve) {}
     ECDHPublicKey(const Point& point) : PublicKey(point) {}
     ECDHPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
 };
@@ -207,10 +206,10 @@ public:
         publicKey = strPub;
     }
 
-    KeyPair(const std::string& strPriv, const ECDSAPublicKey& strPub) {
+    KeyPair(const BigInt& priv, const ECDSAPublicKey& pub) {
         mpz_init(privateKey);
-        stringToGMP(strPriv, privateKey);
-        publicKey = strPub;
+        mpz_set(privateKey, priv.n);
+        publicKey = pub;
     }
 
     KeyPair(const KeyPair& other) {
@@ -238,10 +237,10 @@ public:
     mpz_t r, s;
 
     Signature() { mpz_inits(r, s, NULL); }
-    Signature(const std::string& strR, const std::string& strS) {
+    Signature(const BigInt& bR, const BigInt& bS) {
         mpz_inits(r, s, NULL);
-        stringToGMP(strR, r);
-        stringToGMP(strS, s);
+        mpz_set(r, bR.n);
+        mpz_set(s, bS.n);
     }
 
     Signature(const Signature& other) {

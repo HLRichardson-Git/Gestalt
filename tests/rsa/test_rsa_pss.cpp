@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -22,12 +22,12 @@
 #include "vectors/vectors_rsa_pss.h"
 
 TEST(RSA_PSS, encode) {
-    std::string result = encodePSS_Padding(hexToBytes(inputMsg), parameters, 128);
+    std::string result = encodePSS_Padding(inputMsg, parameters, 128);
     EXPECT_EQ(convertToHex(result), expectedEncodedMessage);
 }
 
 TEST(RSA_PSS, verify) {
-    bool result = verifyPSS_Padding(hexToBytes(expectedEncodedMessage), hexToBytes(inputMsg), parameters, 128);
+    bool result = verifyPSS_Padding(hexToBytes(expectedEncodedMessage), inputMsg, parameters, 128);
     EXPECT_TRUE(result);
 }
 
@@ -86,14 +86,14 @@ TEST(RSA_PSS, EmLenTooShort) {
 }
 
 TEST(RSA_PSS, NonZeroLeftmostDbOctets) {
-    std::string EM = hexToBytes(
+    std::string EM =
         "12ab6707d2fb5368109d5f2860888afe19ef019f89bcebdf1a896f9d8bc816d97cd7a2c43bad546fbe8cfebc6707d2fb5368109d5f2860"
         "888afe19ef019f89bcebdf1a896f9d8bc816d97cd7a2c43bad546fbe8cfebc6707d2fb5368109d5f2860888afe19ef019f89bcebdf1a89"
-        "6f9d8bc816d97cd7a2c43bad546fbe8cfebc");
+        "6f9d8bc816d97cd7a2c43bad546fbe8cfebc";
 
     EXPECT_THROW({
         try {
-            verifyPSS_Padding(EM, "Padding check message", parameters, 128);
+            verifyPSS_Padding(hexToBytes(EM), bytesToHex("Padding check message"), parameters, 128);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Inconsistent: Leftmost octets of DB are not zero.", e.what());
             throw;
@@ -102,14 +102,14 @@ TEST(RSA_PSS, NonZeroLeftmostDbOctets) {
 }
 
 TEST(RSA_PSS, Missing0x01AtSpecifiedPosition) {
-    std::string EM = hexToBytes(
+    std::string EM =
         "66e4672e836ad121ba244bed6576b867d9a447c28a6e66a5b87dee7fbc7e65af5057f86fae8984d9ba7f969ad6fe02a4d75f7445fefdd8"
         "5b6d3a477c28d24ba1e3756f792dd1dce8ca94440ecb5279ecd3183a311fc8748c7cb641d2d26e036d3b682cf2d40cfe556e63df1a896f"
-        "9d8bc816d97cd7a2c43bad546fbe8cfebc");
+        "9d8bc816d97cd7a2c43bad546fbe8cfebc";
 
     EXPECT_THROW({
         try {
-            verifyPSS_Padding(EM, "0x01 position check", parameters, 128);
+            verifyPSS_Padding(hexToBytes(EM), bytesToHex("0x01 position check"), parameters, 128);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Inconsistent: The specified position in DB does not contain 0x01.", e.what());
             throw;

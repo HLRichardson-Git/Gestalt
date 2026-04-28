@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -18,9 +18,8 @@
 
 # pragma once
 
-#include <iostream>
-#include <string>
 #include <functional>
+#include <gestalt/secure_bytes.h>
 
 enum class HashAlgorithm : unsigned int{
     None = 0,
@@ -31,4 +30,4 @@ enum class HashAlgorithm : unsigned int{
     SHA512 = 64 // 64-Bytes
 };
 
-std::function<std::string(const std::string&)> hash(HashAlgorithm hashAlg);
+std::function<SecureBytes(const SecureBytes&)> hash(HashAlgorithm hashAlg);
