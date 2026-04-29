@@ -13,7 +13,7 @@
  * while providing a high level of security, making it suitable for a wide range of applications
  * such as secure communication protocols and digital authentication systems.
  *
- * This class provides functionality for signature generation, signature verification, and other 
+ * This class provides functionality for signature generation, signature verification, and other
  * operations necessary for implementing ECDSA-based security protocols.
  *
  * References:
@@ -33,10 +33,10 @@
 class ECDSA : public ECC {
 private:
 
-    void prepareMessage(const SecureBytes& messageHash, mpz_t& result);
-    bool isInvalidSignature(Signature S);
+    BigInt prepareMessage(const SecureBytes& messageHash);
+    bool isInvalidSignature(const Signature& S);
 
-    Signature generateSignature(const mpz_t& e, mpz_t& k);
+    Signature generateSignature(const BigInt& e, const BigInt& k);
 
     friend class ECDSA_Test;
 public:
@@ -47,11 +47,11 @@ public:
     ECDSA(StandardCurve curve, const BigInt& privKey) : ECC(curve) { setKeyPair(privKey); }
     ECDSA(const BigInt& privKey) : ECC(StandardCurve::secp256k1) { setKeyPair(privKey); }
 
-	~ECDSA() {}
+    ~ECDSA() {}
 
     ECDSAPublicKey getPublicKey() const { return keyPair.publicKey; };
 
     Signature signMessage(const SecureBytes& message, HashAlgorithm hashAlg = HashAlgorithm::None);
-    Signature signMessage(const SecureBytes& message, BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
+    Signature signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
     bool verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

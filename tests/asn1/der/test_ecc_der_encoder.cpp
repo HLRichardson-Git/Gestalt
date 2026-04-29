@@ -39,8 +39,8 @@ TEST(DEREncoder_ECC_Test, encode_sec1_ec_public_key) {
     Point orig = kp.publicKey.getPublicKey();
     Point dec  = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(orig.x, dec.x) == 0);
-    EXPECT_TRUE(mpz_cmp(orig.y, dec.y) == 0);
+    EXPECT_EQ(orig.x, dec.x);
+    EXPECT_EQ(orig.y, dec.y);
 }
 
 // EC Public Key — PKCS8 (SubjectPublicKeyInfo)
@@ -57,8 +57,8 @@ TEST(DEREncoder_ECC_Test, encode_pkcs8_ec_public_key) {
     Point orig = kp.publicKey.getPublicKey();
     Point dec  = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(orig.x, dec.x) == 0);
-    EXPECT_TRUE(mpz_cmp(orig.y, dec.y) == 0);
+    EXPECT_EQ(orig.x, dec.x);
+    EXPECT_EQ(orig.y, dec.y);
     EXPECT_EQ(kp.publicKey.getPublicKeyCurve(), decoded.getPublicKeyCurve());
 }
 
@@ -76,9 +76,9 @@ TEST(DEREncoder_ECC_Test, encode_sec1_ec_private_key) {
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.x, decPub.x) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.y, decPub.y) == 0);
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
+    EXPECT_EQ(origPub.x, decPub.x);
+    EXPECT_EQ(origPub.y, decPub.y);
 }
 
 // EC Private Key — PKCS8 (PrivateKeyInfo)
@@ -95,9 +95,9 @@ TEST(DEREncoder_ECC_Test, encode_pkcs8_ec_private_key) {
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.x, decPub.x) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.y, decPub.y) == 0);
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
+    EXPECT_EQ(origPub.x, decPub.x);
+    EXPECT_EQ(origPub.y, decPub.y);
     EXPECT_EQ(kp.publicKey.getPublicKeyCurve(), decoded.publicKey.getPublicKeyCurve());
 }
 

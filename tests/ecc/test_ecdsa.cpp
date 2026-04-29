@@ -30,8 +30,8 @@ TEST_P(ECDSASignatureGenTest, sigGen) {
 
     Signature expected(BigInt(test.expected_r), BigInt(test.expected_s));
 
-    EXPECT_TRUE(mpz_cmp(signature.r, expected.r) == 0);
-    EXPECT_TRUE(mpz_cmp(signature.s, expected.s) == 0);
+    EXPECT_EQ(signature.r, expected.r);
+    EXPECT_EQ(signature.s, expected.s);
 }
 
 TEST_P(ECDSASignatureVerTest, sigVer) {
@@ -61,8 +61,8 @@ TEST(ECDSA, PWCT)  {
     Signature expected(BigInt("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC"),
                        BigInt("0x8BF77819CA05A6B2786C76262BF7371CEF97B218E96F175A3CCDDA2ACC058903"));
 
-    EXPECT_TRUE(mpz_cmp(signature.r, expected.r) == 0);
-    EXPECT_TRUE(mpz_cmp(signature.s, expected.s) == 0);
+    EXPECT_EQ(signature.r, expected.r);
+    EXPECT_EQ(signature.s, expected.s);
 
     bool verify = ecdsa.verifySignature(digest, ecdsa.getPublicKey(), signature);
 

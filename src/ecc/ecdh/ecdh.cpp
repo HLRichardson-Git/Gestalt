@@ -17,12 +17,10 @@
  *
  * References:
  * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
- * - "FIPS SP800-56Ar3 Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm 
+ * - "NIST SP800-56Ar3 Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm
  *    Cryptography" by NIST
  *
  */
-
-#include <gmp.h>
 
 #include <gestalt/ecdh.h>
 
@@ -33,14 +31,11 @@ SecureBytes ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
     }
 
     Point sharedPoint = scalarMultiplyPoints(keyPair.privateKey, givenPeerPublicKey.getPublicKey());
-    if(isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
-    fieldElementToInteger(sharedPoint.x, sharedPoint.x);
+    if (isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
+    sharedPoint.x = fieldElementToInteger(sharedPoint.x);
     return pointToSecureBytes(sharedPoint);
 }
 
 SecureBytes ECDH::pointToSecureBytes(const Point& point) const {
-    size_t count = (mpz_sizeinbase(point.x, 2) + 7) / 8;
-    SecureBytes result(count);
-    mpz_export(result.data(), nullptr, 1, 1, 1, 0, point.x);
-    return result;
+    return SecureBytes::fromVector(point.x.toBytes());
 }

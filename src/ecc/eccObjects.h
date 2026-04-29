@@ -24,37 +24,15 @@ class DERDecoder;
 
 class Point {
 public:
-    mpz_t x, y;
+    BigInt x, y;
 
-    Point() { mpz_inits(x, y, NULL); }
-    Point(const BigInt& bX, const BigInt& bY) {
-        mpz_inits(x, y, NULL);
-        mpz_set(x, bX.n);
-        mpz_set(y, bY.n);
-    }
+    Point() = default;
+    Point(const BigInt& bX, const BigInt& bY) : x(bX), y(bY) {}
+    Point(const Point& other) = default;
+    Point& operator=(const Point& other) = default;
+    ~Point() = default;
 
-    Point(const Point& other) {
-        mpz_init_set(x, other.x);
-        mpz_init_set(y, other.y);
-    }
-
-    Point(const mpz_t xVal, const mpz_t yVal) {
-        mpz_inits(x, y, NULL);
-        mpz_set(x, xVal);
-        mpz_set(y, yVal);
-    }
-
-    void operator =(const Point& other) {
-        mpz_set(this->x, other.x);
-        mpz_set(this->y, other.y);
-    }
-
-    ~Point() {
-        mpz_clear(x);
-        mpz_clear(y);
-    }
-
-    Point setPoint(const BigInt& bX, const BigInt& bY) { return Point(bX, bY); };
+    Point setPoint(const BigInt& bX, const BigInt& bY) { return Point(bX, bY); }
 };
 
 #include "standardCurves.h"
@@ -65,7 +43,7 @@ private:
     StandardCurve curve;
 
     StandardCurve guessCurve(const Point& point) {
-        size_t sizeInBytes = (mpz_sizeinbase(point.x, 2) + 7) / 8;
+        size_t sizeInBytes = point.x.byteLength();
         if (sizeInBytes == 32) {
             return StandardCurve::P256;
         } else if (sizeInBytes == 48) {
@@ -77,23 +55,13 @@ private:
         }
     }
 
-    bool modular_sqrt(const mpz_t n, const mpz_t p, mpz_t result) {
+    bool modular_sqrt(const BigInt& n, const BigInt& p, BigInt& result) {
         // Only works if p ≡ 3 mod 4
-        if (mpz_congruent_ui_p(p, 3, 4)) {
-            mpz_t exp;
-            mpz_init(exp);
-            mpz_add_ui(exp, p, 1);
-            mpz_fdiv_q_ui(exp, exp, 4);
-            mpz_powm(result, n, exp, p);
-            mpz_clear(exp);
-
-            // Check if result^2 ≡ n mod p
-            mpz_t check;
-            mpz_init(check);
-            mpz_powm_ui(check, result, 2, p);
-            bool isValid = (mpz_cmp(check, n) == 0);
-            mpz_clear(check);
-            return isValid;
+        if (p.isCongruent(3, 4)) {
+            BigInt exp = (p + 1).floorDiv(4);
+            result = n.modPow(exp, p);
+            BigInt check = result.modPow(2UL, p);
+            return check == n;
         }
         return false;  // For full generality, implement Tonelli-Shanks
     }
@@ -124,16 +92,10 @@ public:
     void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
   
     SecureBytes exportCompressed() const {
-        mpz_t yMod2;
-        mpz_init(yMod2);
-        mpz_mod_ui(yMod2, point.y, 2);
-
-        // Serialize x
-        size_t count = (mpz_sizeinbase(point.x, 2) + 7) / 8;
-        SecureBytes result(1 + count);
-        result[0] = (mpz_cmp_ui(yMod2, 0) == 0) ? 0x02 : 0x03;
-        mpz_export(result.data() + 1, nullptr, 1, 1, 1, 0, point.x);
-        mpz_clear(yMod2);
+        auto xBytes = point.x.toBytes();
+        SecureBytes result(1 + xBytes.size());
+        result[0] = point.y.isOdd() ? 0x03 : 0x02;
+        std::copy(xBytes.begin(), xBytes.end(), result.begin() + 1);
         return result;
     }
 
@@ -142,36 +104,27 @@ public:
             throw std::invalid_argument("Invalid compressed key");
         }
 
-        // Check the compression byte (first byte)
         uint8_t prefix = compressedKey[0];
         if (prefix != 0x02 && prefix != 0x03) {
             throw std::invalid_argument("Invalid compressed ECC key format");
         }
 
         Curve curve = getCurveParams(this->curve);
-        mpz_t x, y, rhs;
-        mpz_inits(x, y, rhs, nullptr);
-
-        // Extract x coordinate (skip first byte)
-        mpz_import(x, compressedKey.size() - 1, 1, 1, 1, 0, compressedKey.data() + 1);
+        BigInt x = BigInt::fromBytes(compressedKey.data() + 1, compressedKey.size() - 1);
 
         // Calculate y^2 = x^3 + ax + b mod p
-        mpz_powm_ui(rhs, x, 3, curve.p);
-        mpz_addmul(rhs, curve.a, x);
-        mpz_add(rhs, rhs, curve.b);
-        mpz_mod(rhs, rhs, curve.p);
+        BigInt rhs = (x.modPow(3UL, curve.p) + curve.a * x + curve.b) % curve.p;
 
+        BigInt y;
         bool found = modular_sqrt(rhs, curve.p, y);
         if (!found) throw std::runtime_error("Failed to compute sqrt for compressed key");
 
-        // Check compression byte to determine which y to use
         bool isOddCompression = (prefix == 0x03);
-        if ((isOddCompression && mpz_even_p(y)) || (!isOddCompression && mpz_odd_p(y))) {
-            mpz_sub(y, curve.p, y);
+        if ((isOddCompression && y.isEven()) || (!isOddCompression && y.isOdd())) {
+            y = curve.p - y;
         }
 
         point = Point(x, y);
-        mpz_clears(x, y, rhs, nullptr);
     }
 
 };
@@ -196,33 +149,14 @@ public:
 
 class KeyPair {
 public:
-    mpz_t privateKey;
+    BigInt privateKey;
     ECDSAPublicKey publicKey;
 
-    KeyPair() { mpz_init(privateKey); }
-    KeyPair(const mpz_t& gmpPriv, const ECDSAPublicKey& strPub) {
-        mpz_init(privateKey);
-        mpz_set(privateKey, gmpPriv);
-        publicKey = strPub;
-    }
-
-    KeyPair(const BigInt& priv, const ECDSAPublicKey& pub) {
-        mpz_init(privateKey);
-        mpz_set(privateKey, priv.n);
-        publicKey = pub;
-    }
-
-    KeyPair(const KeyPair& other) {
-        mpz_init_set(privateKey, other.privateKey);
-        publicKey = other.publicKey;
-    }
-
-    void operator =(const KeyPair& R) {
-        mpz_set(this->privateKey, R.privateKey);
-        this->publicKey = R.publicKey;
-    } 
-
-    ~KeyPair() { mpz_clear(privateKey); }
+    KeyPair() = default;
+    KeyPair(const BigInt& priv, const ECDSAPublicKey& pub) : privateKey(priv), publicKey(pub) {}
+    KeyPair(const KeyPair& other) = default;
+    KeyPair& operator=(const KeyPair& other) = default;
+    ~KeyPair() = default;
 
     Point getPublicKey() const { return publicKey.getPublicKey(); };
 
@@ -234,27 +168,11 @@ public:
 
 class Signature {
 public:
-    mpz_t r, s;
+    BigInt r, s;
 
-    Signature() { mpz_inits(r, s, NULL); }
-    Signature(const BigInt& bR, const BigInt& bS) {
-        mpz_inits(r, s, NULL);
-        mpz_set(r, bR.n);
-        mpz_set(s, bS.n);
-    }
-
-    Signature(const Signature& other) {
-        mpz_init_set(r, other.r);
-        mpz_init_set(s, other.s);
-    }
-    
-    void operator =(const Signature& other) {
-        mpz_set(this->r, other.r);
-        mpz_set(this->s, other.s);
-    }
-
-    ~Signature() {
-        mpz_clear(r);
-        mpz_clear(s);
-    }
+    Signature() = default;
+    Signature(const BigInt& bR, const BigInt& bS) : r(bR), s(bS) {}
+    Signature(const Signature& other) = default;
+    Signature& operator=(const Signature& other) = default;
+    ~Signature() = default;
 };

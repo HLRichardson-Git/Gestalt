@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -526,8 +526,8 @@ static ECDSAPublicKey parseUncompressedPoint(const std::vector<uint8_t>& pointBy
     }
 
     Point pt;
-    mpz_import(pt.x, coordLen, 1, 1, 1, 0, pointBytes.data() + 1);
-    mpz_import(pt.y, coordLen, 1, 1, 1, 0, pointBytes.data() + 1 + coordLen);
+    pt.x = BigInt::fromBytes(pointBytes.data() + 1, coordLen);
+    pt.y = BigInt::fromBytes(pointBytes.data() + 1 + coordLen, coordLen);
     return ECDSAPublicKey(pt);
 }
 
@@ -666,7 +666,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
 
     // Import private key bytes into mpz_t
     KeyPair keyPair;
-    mpz_import(keyPair.privateKey, privBytes.size(), 1, 1, 1, 0, privBytes.data());
+    keyPair.privateKey = BigInt::fromBytes(privBytes.data(), privBytes.size());
     keyPair.publicKey = pubKey;
 
     return keyPair;

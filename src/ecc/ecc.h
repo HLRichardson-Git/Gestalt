@@ -33,11 +33,10 @@ private:
 
     Point addPoints(Point P, Point Q);
     Point doublePoint(Point P);
-    Point scalarMultiplyPoints(const mpz_t& k, Point P);
+    Point scalarMultiplyPoints(const BigInt& k, Point P);
 
-    void getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
-    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result);
-    bool isInDomainRange(const mpz_t k);
+    BigInt fieldElementToInteger(const BigInt& fieldElement);
+    bool isInDomainRange(const BigInt& k);
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
     std::string isValidPublicKey(const ECDSAPublicKey P);

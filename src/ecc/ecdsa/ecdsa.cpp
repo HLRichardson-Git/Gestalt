@@ -13,7 +13,7 @@
  * authentication and integrity verification in various applications such as secure messaging,
  * digital certificates, and blockchain technology.
  *
- * This class provides functionality for signature generation, signature verification, and other 
+ * This class provides functionality for signature generation, signature verification, and other
  * operations necessary for implementing ECDSA-based security protocols.
  *
  * References:
@@ -25,128 +25,82 @@
 
 #include <gestalt/ecdsa.h>
 
-void ECDSA::prepareMessage(const SecureBytes& messageHash, mpz_t& result) {
+BigInt ECDSA::prepareMessage(const SecureBytes& messageHash) {
     size_t maxBytes = (ellipticCurve.bitLength + 7) / 8;
     size_t useBytes = std::min(messageHash.size(), maxBytes);
-    mpz_import(result, useBytes, 1, 1, 1, 0, messageHash.data());
+    return BigInt::fromBytes(messageHash.data(), useBytes);
 }
 
-bool ECDSA::isInvalidSignature(Signature S) {
-    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
-    return (mpz_cmp_ui(S.r, 0) == 0 || mpz_cmp_ui(S.s, 0) == 0);
+bool ECDSA::isInvalidSignature(const Signature& S) {
+    return (S.r.isZero() || S.s.isZero());
 }
 
 Signature ECDSA::signMessage(const SecureBytes& message, HashAlgorithm hashAlg) {
     SecureBytes messageHash = hash(hashAlg)(message);
-
-    mpz_t e;
-    mpz_init(e);
-    prepareMessage(messageHash, e);
-
-    mpz_t randomNumber, minBound;
-    mpz_init(randomNumber);
-    mpz_init_set_ui(minBound, 1); // Its easier to set minBound here as mpz_t rather than in getRandomNumber
+    BigInt e = prepareMessage(messageHash);
 
     Signature signature;
+    BigInt randomNumber;
     do {
-        getRandomNumber(minBound, ellipticCurve.n - 1, randomNumber);
+        randomNumber = BigInt::random(BigInt(1), ellipticCurve.n - 1);
         signature = generateSignature(e, randomNumber);
-    } while(isInvalidSignature(signature)); // Check if r = 0 or s = 0
-
-    mpz_clears(randomNumber, e, minBound, NULL);
+    } while (isInvalidSignature(signature)); // Check if r = 0 or s = 0
 
     return signature;
 }
 
-Signature ECDSA::signMessage(const SecureBytes& message, BigInt& K, HashAlgorithm hashAlg) {
+Signature ECDSA::signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg) {
     SecureBytes messageHash = hash(hashAlg)(message);
+    BigInt e = prepareMessage(messageHash);
 
-    mpz_t e;
-    mpz_init(e);
-    prepareMessage(messageHash, e);
+    Signature signature = generateSignature(e, K);
 
-    Signature signature = generateSignature(e, K.n);
-
-    if(isInvalidSignature(signature)) throw std::invalid_argument("Error: Private key derives invalid signature.");
-
-    mpz_clear(e);
+    if (isInvalidSignature(signature)) throw std::invalid_argument("Error: Private key derives invalid signature.");
 
     return signature;
 }
 
-Signature ECDSA::generateSignature(const mpz_t& e, mpz_t& k) {
-    // Calculate R = k*A (where A is the generator point)
+Signature ECDSA::generateSignature(const BigInt& e, const BigInt& k) {
+    // Calculate R = k*G (where G is the generator point)
     Point R = scalarMultiplyPoints(k, ellipticCurve.generator);
 
-    // Take the x-coordiante of R and make sure it is a valid integer.
-    mpz_t xCoordinateOfR;
-    mpz_init(xCoordinateOfR);
-    fieldElementToInteger(R.x, xCoordinateOfR);
+    // Take the x-coordinate of R and make sure it is a valid integer
+    BigInt xCoordinateOfR = fieldElementToInteger(R.x);
 
     // Calculate r = xCoordinateOfR mod n
     Signature signature;
-    mpz_mod(signature.r, xCoordinateOfR, ellipticCurve.n);
+    signature.r = xCoordinateOfR % ellipticCurve.n;
 
-    mpz_t kInverse;
-    mpz_init(kInverse);
-    mpz_invert(kInverse, k, ellipticCurve.n);
+    BigInt kInverse = k.modInverse(ellipticCurve.n);
 
-    // Calculate s = (e + d * r) kInverse mod n
-    mpz_t temp;
-    mpz_init(temp);
-    mpz_mul(temp, keyPair.privateKey, signature.r); // temp = privateKey * r
-    mpz_add(temp, e, temp); // temp = e + privateKey * r
-    mpz_mul(temp, temp, kInverse); // temp = (e + privateKey * r) * kInverse
-    mpz_mod(signature.s, temp, ellipticCurve.n); // s = (e + privateKey * r) * kInverse mod n
-
-    mpz_clears(xCoordinateOfR, kInverse, temp, NULL);
+    // Calculate s = (e + d * r) * kInverse mod n
+    signature.s = ((e + keyPair.privateKey * signature.r) * kInverse) % ellipticCurve.n;
 
     return signature;
 }
 
 bool ECDSA::verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg) {
     SecureBytes messageHash = hash(hashAlg)(message);
-
-    mpz_t e;
-    mpz_init(e);
-    prepareMessage(messageHash, e);
+    BigInt e = prepareMessage(messageHash);
 
     Curve peerCurve = getCurveParams(peerPublicKey.getPublicKeyCurve());
 
-    mpz_t sInverse;
-    mpz_init(sInverse);
-    mpz_invert(sInverse, signature.s, peerCurve.n);
+    BigInt sInverse = signature.s.modInverse(peerCurve.n);
 
     // Calculate u1 = sInverse * e mod n
-    mpz_t u1;
-    mpz_init(u1);
-    mpz_mul(u1, sInverse, e);
-    mpz_mod(u1, u1, peerCurve.n);
+    BigInt u1 = (sInverse * e) % peerCurve.n;
 
     // Calculate u2 = sInverse * r mod n
-    mpz_t u2;
-    mpz_init(u2);
-    mpz_mul(u2, sInverse, signature.r);
-    mpz_mod(u2, u2, peerCurve.n);
+    BigInt u2 = (sInverse * signature.r) % peerCurve.n;
 
     // Calculate P = u1*G + u2*publicKey
-    Point P = addPoints(scalarMultiplyPoints(u1, peerCurve.generator), 
+    Point P = addPoints(scalarMultiplyPoints(u1, peerCurve.generator),
                         scalarMultiplyPoints(u2, peerPublicKey.getPublicKey()));
 
-    // Take the x-coordiante of R and make sure it is a valid integer.
-    mpz_t xCoordinateOfP;
-    mpz_init(xCoordinateOfP);
-    fieldElementToInteger(P.x, xCoordinateOfP);
-
-    // Calculate P.x mod n
-    mpz_t P_mod_n;
-    mpz_init(P_mod_n);
-    mpz_mod(P_mod_n, xCoordinateOfP, peerCurve.n);
+    // Take the x-coordinate of P and make sure it is a valid integer
+    BigInt xCoordinateOfP = fieldElementToInteger(P.x);
 
     // Compare r with P.x mod n
-    bool verified = (mpz_cmp(signature.r, P_mod_n) == 0);
-
-    mpz_clears(e, sInverse, u1, u2, xCoordinateOfP, P_mod_n, NULL);
-
-    return verified;
+    BigInt P_mod_n = xCoordinateOfP % peerCurve.n;
+    return (signature.r == P_mod_n);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -401,10 +401,10 @@ size_t DEREncoder::getFieldByteSize(StandardCurve curve) {
 // Encode an EC field element as a fixed-width unsigned big-endian byte vector.
 // Unlike DER INTEGER encoding, field elements are NOT prefixed with a zero pad byte
 // for high-bit values — they are always exactly byteLen bytes, left-padded with zeros.
-std::vector<uint8_t> DEREncoder::encodeFieldElement(const mpz_t& val, size_t byteLen) {
+std::vector<uint8_t> DEREncoder::encodeFieldElement(const BigInt& val, size_t byteLen) {
     std::vector<uint8_t> bytes(byteLen, 0x00);
     size_t count = 0;
-    mpz_export(bytes.data(), &count, 1, 1, 1, 0, val);
+    mpz_export(bytes.data(), &count, 1, 1, 1, 0, val.n);
     // mpz_export writes 'count' bytes big-endian at the front of the buffer.
     // Right-justify them so the result is exactly byteLen bytes with zero padding on the left.
     if (count < byteLen) {

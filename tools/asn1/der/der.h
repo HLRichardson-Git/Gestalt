@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -93,7 +93,7 @@ private:
     void clear() { buffer.clear(); }
 
     // EC helpers
-    std::vector<uint8_t> encodeFieldElement(const mpz_t& val, size_t byteLen);
+    std::vector<uint8_t> encodeFieldElement(const BigInt& val, size_t byteLen);
     std::string curveToOid(StandardCurve curve);
     size_t getFieldByteSize(StandardCurve curve);
 

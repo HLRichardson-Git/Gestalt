@@ -21,8 +21,6 @@
  *
  */
 
-#include <gmp.h>
-
 #include "ecc.h"
 #include "asn1/der/der.h"
 #include "asn1/pem/pem.h"
@@ -31,156 +29,80 @@ Point ECC::addPoints(Point P, Point Q) {
     if (isIdentityPoint(P)) return Q;
     if (isIdentityPoint(Q)) return P;
 
-    if (mpz_cmp(P.x, Q.x) == 0 && mpz_cmp(P.y, Q.y) == 0) return doublePoint(P);
-    if (mpz_cmp(P.x, Q.x) == 0 && mpz_cmp(P.y, Q.y) != 0) return Point();
+    if (P.x == Q.x && P.y == Q.y) return doublePoint(P);
+    if (P.x == Q.x && P.y != Q.y) return Point();
 
-    Point R;
-    mpz_t s;
-    mpz_init(s);
+    const BigInt& p = ellipticCurve.p;
 
-    mpz_t temp1, temp2;
-    mpz_init(temp1);
-    mpz_init(temp2);
+    // s = (y2 - y1) / (x2 - x1) mod p
+    BigInt s = ((Q.y - P.y) * (Q.x - P.x).modInverse(p)) % p;
 
-    // s = (y2 - y1) / (x2 - x1)
-    mpz_sub(temp1, Q.y, P.y);
-    mpz_sub(temp2, Q.x, P.x);
-    mpz_invert(temp2, temp2, ellipticCurve.p);
-    mpz_mul(s, temp1, temp2);
-    mpz_mod(s, s, ellipticCurve.p);
+    // rx = s^2 - x1 - x2 mod p
+    BigInt rx = (s * s - P.x - Q.x) % p;
 
-    // rx = s^2 - x1 - x2
-    mpz_mul(R.x, s, s);
-    mpz_sub(R.x, R.x, P.x);
-    mpz_sub(R.x, R.x, Q.x);
-    mpz_mod(R.x, R.x, ellipticCurve.p);
+    // ry = s(x1 - rx) - y1 mod p
+    BigInt ry = (s * (P.x - rx) - P.y) % p;
 
-    // ry = s(x1 - rx) - y1
-    mpz_sub(temp1, P.x, R.x);
-    mpz_mul(R.y, s, temp1);
-    mpz_sub(R.y, R.y, P.y);
-    mpz_mod(R.y, R.y, ellipticCurve.p);
-
-    mpz_clear(s);
-    mpz_clear(temp1);
-    mpz_clear(temp2);
-
-    return R;
+    return Point(rx, ry);
 }
 
 Point ECC::doublePoint(Point P) {
     if (isIdentityPoint(P)) return P;
 
-    Point R;
-    mpz_t s;
-    mpz_init(s);
+    const BigInt& p = ellipticCurve.p;
 
-    mpz_t temp1, temp2;
-    mpz_init(temp1);
-    mpz_init(temp2);
+    // s = (3x^2 + a) / (2y) mod p
+    BigInt s = ((P.x * P.x * BigInt(3) + ellipticCurve.a) * (P.y * BigInt(2)).modInverse(p)) % p;
 
-    // s = (3x^2 + a) / (2y)
-    mpz_mul(temp1, P.x, P.x);
-    mpz_mul_ui(temp1, temp1, 3);
-    mpz_add(temp1, temp1, ellipticCurve.a);
-    mpz_mul_ui(temp2, P.y, 2);
-    mpz_invert(temp2, temp2, ellipticCurve.p);
-    mpz_mul(s, temp1, temp2);
-    mpz_mod(s, s, ellipticCurve.p);
+    // rx = s^2 - 2x mod p
+    BigInt rx = (s * s - P.x * BigInt(2)) % p;
 
-    // rx = s^2 - 2x
-    mpz_mul(R.x, s, s);
-    mpz_mul_ui(temp1, P.x, 2);
-    mpz_sub(R.x, R.x, temp1);
-    mpz_mod(R.x, R.x, ellipticCurve.p);
+    // ry = s(x - rx) - y mod p
+    BigInt ry = (s * (P.x - rx) - P.y) % p;
 
-    // ry = s(x - rx) - y
-    mpz_sub(temp1, P.x, R.x);
-    mpz_mul(R.y, s, temp1);
-    mpz_sub(R.y, R.y, P.y);
-    mpz_mod(R.y, R.y, ellipticCurve.p);
-
-    mpz_clear(s);
-    mpz_clear(temp1);
-    mpz_clear(temp2);
-
-    return R;
+    return Point(rx, ry);
 }
 
-// Implementation of the double-and-add algoirthm
-Point ECC::scalarMultiplyPoints(const mpz_t& k, Point P) {
-    if(mpz_cmp(k, ellipticCurve.n) == 0) return Point();
+// Implementation of the double-and-add algorithm
+Point ECC::scalarMultiplyPoints(const BigInt& k, Point P) {
+    if (k == ellipticCurve.n) return Point();
 
     Point result;
-    Point temp = P;
-
-    size_t n_bits = mpz_sizeinbase(k, 2);
-    for (int i = n_bits - 1; i >= 0; --i) {
+    size_t nBits = k.bitLength();
+    for (int i = nBits - 1; i >= 0; --i) {
         result = doublePoint(result);
-        
+
         // If the current bit of the scalar is 1, add the base point
-        if (mpz_tstbit(k, i)) result = addPoints(result, temp);
+        if (k.testBit(i)) result = addPoints(result, P);
     }
 
     return result;
 }
 
-void ECC::getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result) {
-    // Initialize GMP random state
-    gmp_randstate_t state;
-    gmp_randinit_default(state);
-
-    // Calculate the range
-    mpz_t range;
-    mpz_init(range);
-    mpz_sub(range, max, min);
-
-    // Generate a random number within the range
-    mpz_urandomm(result, state, range);
-
-    // Add the minimum value to the random number to shift it into the desired range
-    mpz_add(result, result, min);
-
-    mpz_clear(range);
-    gmp_randclear(state);
-}
-
-void ECC::fieldElementToInteger(const mpz_t& fieldElement, mpz_t result) {
-    mpz_t temp, element;
-    mpz_inits(temp, element, NULL);
-    mpz_set(element, fieldElement);
-
-    // If the modulus is an odd prime, no conversion is needed
-    if (mpz_odd_p(ellipticCurve.n) && mpz_probab_prime_p(ellipticCurve.n, 25)) {
-        mpz_set(result, element);
-    } else {
-        mpz_set_ui(result, 0);
-        mpz_set_ui(temp, 1);
-        // Convert the field element to an integer by evaluating the binary polynomial at x = 2
-        while (mpz_cmp_ui(element, 0) > 0) {
-            if (mpz_odd_p(element)) {
-                mpz_add(result, result, temp);
-            }
-            mpz_mul_2exp(temp, temp, 1);
-            mpz_fdiv_q_2exp(element, element, 1);
-        }
+BigInt ECC::fieldElementToInteger(const BigInt& fieldElement) {
+    if (ellipticCurve.n.isOdd() && ellipticCurve.n.isProbablyPrime()) {
+        return fieldElement;
     }
 
-    mpz_clears(temp, element, NULL);
+    // Convert a binary field element to an integer by evaluating the polynomial at x = 2
+    BigInt result(0), temp(1), element = fieldElement;
+    while (element > 0) {
+        if (element.isOdd()) result = result + temp;
+        temp = temp * BigInt(2);
+        element = element.shiftRight(1);
+    }
+    return result;
 }
 
-bool ECC::isInDomainRange(const mpz_t k) {
-    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
-    return (mpz_cmp_ui(k, 0) >= 0 && mpz_cmp(k, ellipticCurve.p) < 0);
+bool ECC::isInDomainRange(const BigInt& k) {
+    return (k >= 0 && k < ellipticCurve.p);
 }
 
 bool ECC::isIdentityPoint(Point P) {
-    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
-    return (mpz_cmp_ui(P.x, 0) == 0 && mpz_cmp_ui(P.y, 0) == 0);
+    return (P.x.isZero() && P.y.isZero());
 }
 
 bool ECC::isPointOnCurve(Point P) {
-    // mpz_cmp returns a positive value if l > r, 0 if l = r, and a negative value if l < r
     return (isInDomainRange(P.x)) && (isInDomainRange(P.y));
 }
 
@@ -204,7 +126,7 @@ std::string ECC::isValidKeyPair(const KeyPair& K) {
 
     // Check d*G = pubKey
     Point result = scalarMultiplyPoints(K.privateKey, ellipticCurve.generator);
-    if (mpz_cmp(result.x, K.publicKey.getPublicKey().x) != 0 || mpz_cmp(result.y, K.publicKey.getPublicKey().y) != 0) {
+    if (result.x != K.publicKey.getPublicKey().x || result.y != K.publicKey.getPublicKey().y) {
         return "Error: Pair-wise consistency check failed.";
     }
 
@@ -212,26 +134,14 @@ std::string ECC::isValidKeyPair(const KeyPair& K) {
 }
 
 KeyPair ECC::generateKeyPair() {
-    mpz_t temp;
-    mpz_init(temp);
-
-    // Generate a random private key between 1 and curve order - 1
-    mpz_t min;
-    mpz_init(min);
-    mpz_set_ui(min, 1);
-
+    BigInt privKey;
     Point pubKeyPoint;
     do {
-        getRandomNumber(min, ellipticCurve.n - 1, temp);
-        pubKeyPoint = scalarMultiplyPoints(temp, ellipticCurve.generator);
-    } while(isIdentityPoint(pubKeyPoint)); // ensure the public key is not the identity element
+        privKey = BigInt::random(BigInt(1), ellipticCurve.n - 1);
+        pubKeyPoint = scalarMultiplyPoints(privKey, ellipticCurve.generator);
+    } while (isIdentityPoint(pubKeyPoint)); // ensure the public key is not the identity element
 
-    KeyPair result(temp, pubKeyPoint);
-
-    mpz_clear(min);
-    mpz_clear(temp);
-
-    return result;
+    return KeyPair(privKey, ECDSAPublicKey(pubKeyPoint));
 }
 
 void ECC::setKeyPair(const KeyPair& newKeyPair) {
@@ -243,8 +153,8 @@ void ECC::setKeyPair(const KeyPair& newKeyPair) {
 }
 
 void ECC::setKeyPair(const BigInt& key) {
-    KeyPair result(key.n, scalarMultiplyPoints(key.n, ellipticCurve.generator));
-    if(isIdentityPoint(result.publicKey.getPublicKey())) throw
+    KeyPair result(key, scalarMultiplyPoints(key, ellipticCurve.generator));
+    if (isIdentityPoint(result.publicKey.getPublicKey())) throw
         std::invalid_argument("Error: Given Private Key derives identity public key.");
 
     keyPair = result;
@@ -321,7 +231,7 @@ void KeyPair::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
             decoded = decoder.decodeECPrivateKeyFromPKCS8();
             break;
     }
-    mpz_set(privateKey, decoded.privateKey);
+    privateKey = decoded.privateKey;
     publicKey = decoded.publicKey;
 }
 
@@ -344,6 +254,6 @@ void KeyPair::fromPEM(const std::string& pem, EccKeyFormat format) {
             decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
             break;
     }
-    mpz_set(privateKey, decoded.privateKey);
+    privateKey = decoded.privateKey;
     publicKey = decoded.publicKey;
 }

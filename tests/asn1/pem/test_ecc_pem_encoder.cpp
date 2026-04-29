@@ -39,8 +39,9 @@ TEST(PEMEncoder_ECC_Test, encode_sec1_ec_public_key) {
     ECDSAPublicKey decoded = PEMDecoder::decodeECPublicKeyFromSEC1(pem);
     Point orig = kp.publicKey.getPublicKey();
     Point dec  = decoded.getPublicKey();
-    EXPECT_TRUE(mpz_cmp(orig.x, dec.x) == 0);
-    EXPECT_TRUE(mpz_cmp(orig.y, dec.y) == 0);
+    
+    EXPECT_EQ(orig.x, dec.x);
+    EXPECT_EQ(orig.y, dec.y);
 }
 
 // EC Public Key — PKCS8
@@ -56,8 +57,9 @@ TEST(PEMEncoder_ECC_Test, encode_pkcs8_ec_public_key) {
     ECDSAPublicKey decoded = PEMDecoder::decodeECPublicKeyFromPKCS8(pem);
     Point orig = kp.publicKey.getPublicKey();
     Point dec  = decoded.getPublicKey();
-    EXPECT_TRUE(mpz_cmp(orig.x, dec.x) == 0);
-    EXPECT_TRUE(mpz_cmp(orig.y, dec.y) == 0);
+
+    EXPECT_EQ(orig.x, dec.x);
+    EXPECT_EQ(orig.y, dec.y);
     EXPECT_EQ(kp.publicKey.getPublicKeyCurve(), decoded.getPublicKeyCurve());
 }
 
@@ -72,12 +74,14 @@ TEST(PEMEncoder_ECC_Test, encode_sec1_ec_private_key) {
 
     // Round-trip
     KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
+
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
 
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
-    EXPECT_TRUE(mpz_cmp(origPub.x, decPub.x) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.y, decPub.y) == 0);
+
+    EXPECT_EQ(origPub.x, decPub.x);
+    EXPECT_EQ(origPub.y, decPub.y);
 }
 
 // EC Private Key — PKCS8
@@ -91,12 +95,14 @@ TEST(PEMEncoder_ECC_Test, encode_pkcs8_ec_private_key) {
 
     // Round-trip
     KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
+
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
 
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
-    EXPECT_TRUE(mpz_cmp(origPub.x, decPub.x) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.y, decPub.y) == 0);
+
+    EXPECT_EQ(origPub.x, decPub.x);
+    EXPECT_EQ(origPub.y, decPub.y);
     EXPECT_EQ(kp.publicKey.getPublicKeyCurve(), decoded.publicKey.getPublicKeyCurve());
 }
 
