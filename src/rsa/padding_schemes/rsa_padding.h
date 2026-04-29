@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -28,4 +28,6 @@ enum RSA_MGFFunctions {
     //SHAKE256
 };
 
-std::string mgf1(const std::string& seed, unsigned int maskLen, HashAlgorithm hashAlg);
+#include <gestalt/secure_bytes.h>
+
+SecureBytes mgf1(const SecureBytes& seed, unsigned int maskLen, HashAlgorithm hashAlg);

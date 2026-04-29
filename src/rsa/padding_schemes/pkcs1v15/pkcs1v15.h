@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -32,8 +32,8 @@ public:
 
 std::string getAlgorithmIdentifier(const HashAlgorithm& hashAlg);
 
-std::string encodeForEncryptionPKCS1v15(const std::string& input, size_t modulusSizeBytes);
-std::string decodeForEncryptionPKCS1v15(const std::string& em, size_t modulusSizeBytes);
+SecureBytes encodeForEncryptionPKCS1v15(const SecureBytes& input, size_t modulusSizeBytes);
+SecureBytes decodeForEncryptionPKCS1v15(const SecureBytes& em, size_t modulusSizeBytes);
 
-std::string encodeForSigningPKCS1v15(const std::string& input, const HashAlgorithm& hashAlg, size_t modulusSizeBytes);
-bool verifyForSigningPKCS1v15(const std::string& input, const std::string& em, const HashAlgorithm& hashAlg);
+SecureBytes encodeForSigningPKCS1v15(const SecureBytes& input, const HashAlgorithm& hashAlg, size_t modulusSizeBytes);
+bool verifyForSigningPKCS1v15(const SecureBytes& input, const SecureBytes& em, const HashAlgorithm& hashAlg);

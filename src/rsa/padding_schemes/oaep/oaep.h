@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -29,12 +29,12 @@ public:
     HashAlgorithm hashFunc;     // Hash used for label hashing
     RSA_MGFFunctions mgfFunc;   // Mask generation function
     HashAlgorithm mgfHashFunc;  // Hash used inside MGF1 (None = use hashFunc)
-    std::string seed;           // Should only be set for testing purposes
+    SecureBytes seed;           // Should only be set for testing purposes
 
     OAEPParams(HashAlgorithm hash = HashAlgorithm::SHA256,
                RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1,
                const std::string& label = "",
-               const std::string& seed = "")
+               const SecureBytes& seed = SecureBytes{})
         : label(label), hashFunc(hash), mgfFunc(mgf),
           mgfHashFunc(HashAlgorithm::None), seed(seed) {}
 
@@ -42,10 +42,10 @@ public:
                RSA_MGFFunctions mgf,
                HashAlgorithm mgfHash,
                const std::string& label = "",
-               const std::string& seed = "")
+               const SecureBytes& seed = SecureBytes{})
         : label(label), hashFunc(hash), mgfFunc(mgf),
           mgfHashFunc(mgfHash), seed(seed) {}
 };
 
-std::string applyOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes);
-std::string removeOAEP_Padding(const std::string& input, const OAEPParams& params, unsigned int modulusSizeBytes);
+SecureBytes applyOAEP_Padding(const SecureBytes& input, const OAEPParams& params, unsigned int modulusSizeBytes);
+SecureBytes removeOAEP_Padding(const SecureBytes& input, const OAEPParams& params, unsigned int modulusSizeBytes);

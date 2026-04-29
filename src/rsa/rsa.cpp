@@ -7,14 +7,14 @@
 /*
  * rsa.cpp
  *
- * RSA is a widely used asymmetric encryption algorithm that relies on the difficulty of factoring 
- * large numbers. The class provides both basic RSA operations (without padding) and secure 
+ * RSA is a widely used asymmetric encryption algorithm that relies on the difficulty of factoring
+ * large numbers. The class provides both basic RSA operations (without padding) and secure
  * operations with padding schemes for enhanced security.
- * 
- * This file defines the RSA class, which provides functionality for RSA encryption, 
- * decryption, digital signatures, and signature verification. The RSA class supports 
+ *
+ * This file defines the RSA class, which provides functionality for RSA encryption,
+ * decryption, digital signatures, and signature verification. The RSA class supports
  * both raw RSA operations and padded encryption/signature schemes (e.g., OAEP and PSS).
- * 
+ *
  */
 
 #include <gestalt/rsa.h>
@@ -22,7 +22,6 @@
 #include "rsa/padding_schemes/pss/pss.h"
 #include "rsa/padding_schemes/pkcs1v15/pkcs1v15.h"
 #include "hash_utils/hash_utils.h"
-#include "utils.h"
 
 BigInt RSA::rawEncrypt(const BigInt& plaintext, const RSAPublicKey& recipientPublicKey) const {
     BigInt result;
@@ -68,116 +67,119 @@ BigInt RSA::rawSignatureVer(const BigInt& signature, const RSAPublicKey& recipie
     return rawEncrypt(signature, recipientPublicKey);
 }
 
-std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey) {
-    BigInt x = "0x" + plaintext;
-    return rawEncrypt(x, recipientPublicKey).toHexString();
+static std::string padToEvenHex(std::string hex) {
+    if (hex.size() % 2 != 0) hex = "0" + hex;
+    return hex;
 }
 
-std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
+SecureBytes RSA::encrypt(const SecureBytes& plaintext, const RSAPublicKey& recipientPublicKey) {
+    BigInt x = "0x" + plaintext.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawEncrypt(x, recipientPublicKey).toHexString()));
+}
+
+SecureBytes RSA::encrypt(const SecureBytes& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters) {
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
-    BigInt x = "0x" + convertToHex(applyOAEP_Padding(plaintext, parameters, modulusSizeInBytes));
-    return rawEncrypt(x, recipientPublicKey).toHexString();
+    SecureBytes padded = applyOAEP_Padding(plaintext, parameters, modulusSizeInBytes);
+    BigInt x = "0x" + padded.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawEncrypt(x, recipientPublicKey).toHexString()));
 }
 
-std::string RSA::decrypt(const std::string& ciphertext) {
-    BigInt y = "0x" + ciphertext;
-    return rawDecrypt(y).toHexString();
+SecureBytes RSA::decrypt(const SecureBytes& ciphertext) {
+    BigInt y = "0x" + ciphertext.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawDecrypt(y).toHexString()));
 }
 
-std::string RSA::decrypt(const std::string& ciphertext, const OAEPParams& parameters) {
-    BigInt y = "0x" + ciphertext;
+SecureBytes RSA::decrypt(const SecureBytes& ciphertext, const OAEPParams& parameters) {
+    BigInt y = "0x" + ciphertext.toHex();
     BigInt result = rawDecrypt(y);
 
-    /* 
+    /*
      * GMP which is the library providing multiple precision numbers and maths operations strips leading zeros
      * so the following segement of code corrects this if needed.
      */
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
     std::string hexString = result.toHexString();
-    size_t hexStringLength = hexString.length();
     size_t expectedHexLength = modulusSizeInBytes * 2; // 2 hex digits per byte
-    
+
     // Pad with leading zeros
-    if (hexStringLength < expectedHexLength) {
-        hexString = std::string(expectedHexLength - hexStringLength, '0') + hexString;
+    if (hexString.length() < expectedHexLength) {
+        hexString = std::string(expectedHexLength - hexString.length(), '0') + hexString;
     }
 
-    return convertToHex(removeOAEP_Padding(hexToBytes(hexString), parameters, modulusSizeInBytes));
+    return removeOAEP_Padding(SecureBytes::fromHex(hexString), parameters, modulusSizeInBytes);
 }
 
-std::string RSA::signMessage(const std::string& message, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
-    BigInt x = "0x" + messageHash;
-    return rawSignatureGen(x).toHexString();
+SecureBytes RSA::signMessage(const SecureBytes& message, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
+    BigInt x = "0x" + messageHash.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawSignatureGen(x).toHexString()));
 }
 
-std::string RSA::signMessage(const std::string& message, const PSSParams& parameters, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
+SecureBytes RSA::signMessage(const SecureBytes& message, const PSSParams& parameters, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
-    BigInt x = "0x" + convertToHex(encodePSS_Padding(messageHash, parameters, modulusSizeInBytes));
-    return rawSignatureGen(x).toHexString();
+    SecureBytes padded = encodePSS_Padding(messageHash, parameters, modulusSizeInBytes);
+    BigInt x = "0x" + padded.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawSignatureGen(x).toHexString()));
 }
 
-bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
-    
-    BigInt sigInt = BigInt("0x" + signature);
+bool RSA::verifySignature(const SecureBytes& message, const SecureBytes& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
+
+    BigInt sigInt = BigInt("0x" + signature.toHex());
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
 
-    return decryptedHash == BigInt("0x" + messageHash);;
+    return decryptedHash == BigInt("0x" + messageHash.toHex());
 }
 
-bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg) {
-    std::string messageHash = hash(hashAlg)(SecureBytes::fromAscii(message)).toHex();
+bool RSA::verifySignature(const SecureBytes& message, const SecureBytes& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg) {
+    SecureBytes messageHash = hash(hashAlg)(message);
 
-    BigInt sigInt = BigInt("0x" + signature);
+    BigInt sigInt = BigInt("0x" + signature.toHex());
     BigInt decryptedHash = rawSignatureVer(sigInt, recipientPublicKey);
 
     size_t modulusSizeInBytes = keyPair.getModulusBitLength() / 8;
     std::string hexString = decryptedHash.toHexString();
-    size_t hexStringLength = hexString.length();
     size_t expectedHexLength = modulusSizeInBytes * 2; // 2 hex digits per byte
 
     // Pad with leading zeros
-    if (hexStringLength < expectedHexLength) {
-        hexString = std::string(expectedHexLength - hexStringLength, '0') + hexString;
+    if (hexString.length() < expectedHexLength) {
+        hexString = std::string(expectedHexLength - hexString.length(), '0') + hexString;
     }
 
-    std::string decryptedHashBytes = hexToBytes(hexString);
-
-    bool result = verifyPSS_Padding(decryptedHashBytes, messageHash, parameters, modulusSizeInBytes);
-
-    return result;
+    return verifyPSS_Padding(SecureBytes::fromHex(hexString), messageHash, parameters, modulusSizeInBytes);
 }
 
-std::string RSA::encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params&) {
+SecureBytes RSA::encrypt(const SecureBytes& plaintext, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params&) {
     size_t k = keyPair.getModulusBitLength() / 8;
-    BigInt x = "0x" + convertToHex(encodeForEncryptionPKCS1v15(plaintext, k));
-    return rawEncrypt(x, recipientPublicKey).toHexString();
+    SecureBytes padded = encodeForEncryptionPKCS1v15(plaintext, k);
+    BigInt x = "0x" + padded.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawEncrypt(x, recipientPublicKey).toHexString()));
 }
 
-std::string RSA::decrypt(const std::string& ciphertext, const PKCS1v15Params&) {
-    BigInt y = "0x" + ciphertext;
+SecureBytes RSA::decrypt(const SecureBytes& ciphertext, const PKCS1v15Params&) {
+    BigInt y = "0x" + ciphertext.toHex();
     BigInt result = rawDecrypt(y);
     size_t k = keyPair.getModulusBitLength() / 8;
     std::string hexString = result.toHexString();
     if (hexString.length() < k * 2)
         hexString = std::string(k * 2 - hexString.length(), '0') + hexString;
-    return decodeForEncryptionPKCS1v15(hexToBytes(hexString), k);
+    return decodeForEncryptionPKCS1v15(SecureBytes::fromHex(hexString), k);
 }
 
-std::string RSA::signMessage(const std::string& message, const PKCS1v15Params& parameters) {
+SecureBytes RSA::signMessage(const SecureBytes& message, const PKCS1v15Params& parameters) {
     size_t k = keyPair.getModulusBitLength() / 8;
-    BigInt x = "0x" + convertToHex(encodeForSigningPKCS1v15(message, parameters.hashAlg, k));
-    return rawSignatureGen(x).toHexString();
+    SecureBytes padded = encodeForSigningPKCS1v15(message, parameters.hashAlg, k);
+    BigInt x = "0x" + padded.toHex();
+    return SecureBytes::fromHex(padToEvenHex(rawSignatureGen(x).toHexString()));
 }
 
-bool RSA::verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters) {
-    BigInt sigInt = "0x" + signature;
+bool RSA::verifySignature(const SecureBytes& message, const SecureBytes& signature, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters) {
+    BigInt sigInt = "0x" + signature.toHex();
     BigInt decrypted = rawSignatureVer(sigInt, recipientPublicKey);
     size_t k = keyPair.getModulusBitLength() / 8;
     std::string hexString = decrypted.toHexString();
     if (hexString.length() < k * 2)
         hexString = std::string(k * 2 - hexString.length(), '0') + hexString;
-    return verifyForSigningPKCS1v15(message, hexToBytes(hexString), parameters.hashAlg);
+    return verifyForSigningPKCS1v15(message, SecureBytes::fromHex(hexString), parameters.hashAlg);
 }

@@ -7,27 +7,26 @@
 /*
  * test_rsa_pss.cpp
  *
- * This file contains unit tests for the RSA Probabilistic Signature Scheme (PSS), covering padding encoding and 
- * verification, as well as the signing and verification of messages using RSA keys. Tests ensure correct handling of 
+ * This file contains unit tests for the RSA Probabilistic Signature Scheme (PSS), covering padding encoding and
+ * verification, as well as the signing and verification of messages using RSA keys. Tests ensure correct handling of
  * PSS padding and error conditions.
- * 
+ *
  */
 
 #include "gtest/gtest.h"
 
 #include <gestalt/rsa.h>
-#include "utils.h"
 #include "rsa/padding_schemes/rsa_padding.h"
 #include "rsa/padding_schemes/pss/pss.h"
 #include "vectors/vectors_rsa_pss.h"
 
 TEST(RSA_PSS, encode) {
-    std::string result = encodePSS_Padding(inputMsg, parameters, 128);
-    EXPECT_EQ(convertToHex(result), expectedEncodedMessage);
+    SecureBytes result = encodePSS_Padding(SecureBytes::fromHex(inputMsg), parameters, 128);
+    EXPECT_EQ(result.toHex(), expectedEncodedMessage);
 }
 
 TEST(RSA_PSS, verify) {
-    bool result = verifyPSS_Padding(hexToBytes(expectedEncodedMessage), inputMsg, parameters, 128);
+    bool result = verifyPSS_Padding(SecureBytes::fromHex(expectedEncodedMessage), SecureBytes::fromHex(inputMsg), parameters, 128);
     EXPECT_TRUE(result);
 }
 
@@ -36,9 +35,9 @@ TEST_P(RSA_PSS_Test, sign) {
     SCOPED_TRACE(test.name);
 
     RSA rsa(test.keySecurityStrength, test.privateKey, test.publicKey);
-    std::string computedSignature = rsa.signMessage(hexToBytes(test.pt), test.parameters);
+    SecureBytes computedSignature = rsa.signMessage(SecureBytes::fromHex(test.pt), test.parameters);
 
-    EXPECT_TRUE(computedSignature == test.ct);
+    EXPECT_TRUE(computedSignature == SecureBytes::fromHex(test.ct));
 }
 
 TEST_P(RSA_PSS_Test, verify) {
@@ -46,8 +45,8 @@ TEST_P(RSA_PSS_Test, verify) {
     SCOPED_TRACE(test.name);
 
     RSA rsa(test.keySecurityStrength, test.privateKey, test.publicKey);
-    std::string computedSignature = rsa.signMessage(hexToBytes(test.pt), test.parameters);
-    bool result = rsa.verifySignature(hexToBytes(test.pt), computedSignature, test.publicKey, test.parameters);
+    SecureBytes computedSignature = rsa.signMessage(SecureBytes::fromHex(test.pt), test.parameters);
+    bool result = rsa.verifySignature(SecureBytes::fromHex(test.pt), computedSignature, test.publicKey, test.parameters);
 
     EXPECT_TRUE(result);
 }
@@ -55,7 +54,7 @@ TEST_P(RSA_PSS_Test, verify) {
 TEST(RSA_PSS, EncodeEmLenTooShort) {
     EXPECT_THROW({
         try {
-            encodePSS_Padding("Test message", parameters, 32);
+            encodePSS_Padding(SecureBytes::fromAscii("Test message"), parameters, 32);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Error PSS Encode: emLen is too short.", e.what());
             throw;
@@ -66,7 +65,7 @@ TEST(RSA_PSS, EncodeEmLenTooShort) {
 TEST(RSA_PSS, EndsWithIncorrectByte) {
     EXPECT_THROW({
         try {
-            verifyPSS_Padding("abcd...", "Test message", parameters, 128);
+            verifyPSS_Padding(SecureBytes::fromAscii("abcd..."), SecureBytes::fromAscii("Test message"), parameters, 128);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Error: Given PSS encoded message does not end with 0xbc", e.what());
             throw;
@@ -77,7 +76,7 @@ TEST(RSA_PSS, EndsWithIncorrectByte) {
 TEST(RSA_PSS, EmLenTooShort) {
     EXPECT_THROW({
         try {
-            verifyPSS_Padding(hexToBytes("1234bc"), "Another test message", parameters, 128);
+            verifyPSS_Padding(SecureBytes::fromHex("1234bc"), SecureBytes::fromAscii("Another test message"), parameters, 128);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Error PSS Verification: emLen is too short.", e.what());
             throw;
@@ -93,7 +92,7 @@ TEST(RSA_PSS, NonZeroLeftmostDbOctets) {
 
     EXPECT_THROW({
         try {
-            verifyPSS_Padding(hexToBytes(EM), bytesToHex("Padding check message"), parameters, 128);
+            verifyPSS_Padding(SecureBytes::fromHex(EM), SecureBytes::fromAscii("Padding check message"), parameters, 128);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Inconsistent: Leftmost octets of DB are not zero.", e.what());
             throw;
@@ -109,7 +108,7 @@ TEST(RSA_PSS, Missing0x01AtSpecifiedPosition) {
 
     EXPECT_THROW({
         try {
-            verifyPSS_Padding(hexToBytes(EM), bytesToHex("0x01 position check"), parameters, 128);
+            verifyPSS_Padding(SecureBytes::fromHex(EM), SecureBytes::fromAscii("0x01 position check"), parameters, 128);
         } catch (const std::invalid_argument& e) {
             EXPECT_STREQ("Inconsistent: The specified position in DB does not contain 0x01.", e.what());
             throw;
