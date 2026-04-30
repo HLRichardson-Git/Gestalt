@@ -21,15 +21,15 @@ static const std::string kPriv = "0x1";
 static const std::string kPubX = "0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";
 static const std::string kPubY = "0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8";
 
-static KeyPair makeTestKeyPair() {
+static ECCKeyPair makeTestKeyPair() {
     ECDSAPublicKey pub(Point(kPubX, kPubY), StandardCurve::secp256k1);
-    return KeyPair(kPriv, pub);
+    return ECCKeyPair(kPriv, pub);
 }
 
 // EC Public Key — SEC1
 
 TEST(PEMEncoder_ECC_Test, encode_sec1_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPublicKeyToSEC1(kp.publicKey);
 
     EXPECT_NE(pem.find("-----BEGIN EC PUBLIC KEY-----"), std::string::npos);
@@ -47,7 +47,7 @@ TEST(PEMEncoder_ECC_Test, encode_sec1_ec_public_key) {
 // EC Public Key — PKCS8
 
 TEST(PEMEncoder_ECC_Test, encode_pkcs8_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPublicKeyToPKCS8(kp.publicKey);
 
     EXPECT_NE(pem.find("-----BEGIN PUBLIC KEY-----"), std::string::npos);
@@ -66,14 +66,14 @@ TEST(PEMEncoder_ECC_Test, encode_pkcs8_ec_public_key) {
 // EC Private Key — SEC1
 
 TEST(PEMEncoder_ECC_Test, encode_sec1_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPrivateKeyToSEC1(kp);
 
     EXPECT_NE(pem.find("-----BEGIN EC PRIVATE KEY-----"), std::string::npos);
     EXPECT_NE(pem.find("-----END EC PRIVATE KEY-----"),   std::string::npos);
 
     // Round-trip
-    KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);
+    ECCKeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);
 
     EXPECT_EQ(kp.privateKey, decoded.privateKey);
 
@@ -87,14 +87,14 @@ TEST(PEMEncoder_ECC_Test, encode_sec1_ec_private_key) {
 // EC Private Key — PKCS8
 
 TEST(PEMEncoder_ECC_Test, encode_pkcs8_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPrivateKeyToPKCS8(kp);
 
     EXPECT_NE(pem.find("-----BEGIN PRIVATE KEY-----"), std::string::npos);
     EXPECT_NE(pem.find("-----END PRIVATE KEY-----"),   std::string::npos);
 
     // Round-trip
-    KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
+    ECCKeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
 
     EXPECT_EQ(kp.privateKey, decoded.privateKey);
 
@@ -115,7 +115,7 @@ static const std::string testKey =
     "-----END PUBLIC KEY-----\n";
 
 TEST(PEMEncoder_ECC_Test, encode_pkcs8_ec_public_key_kat) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPublicKeyToPKCS8(kp.publicKey);
     EXPECT_EQ(pem, testKey);
 }

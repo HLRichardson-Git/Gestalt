@@ -20,15 +20,15 @@ static const std::string kPriv = "0x1";
 static const std::string kPubX = "0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";
 static const std::string kPubY = "0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8";
 
-static KeyPair makeTestKeyPair() {
+static ECCKeyPair makeTestKeyPair() {
     ECDSAPublicKey pub(Point(kPubX, kPubY), StandardCurve::secp256k1);
-    return KeyPair(kPriv, pub);
+    return ECCKeyPair(kPriv, pub);
 }
 
 // EC Public Key — SEC1 (raw uncompressed point)
 
 TEST(DEREncoder_ECC_Test, encode_sec1_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> encoded = encoder.encodeECPublicKeyToSEC1(kp.publicKey);
@@ -46,7 +46,7 @@ TEST(DEREncoder_ECC_Test, encode_sec1_ec_public_key) {
 // EC Public Key — PKCS8 (SubjectPublicKeyInfo)
 
 TEST(DEREncoder_ECC_Test, encode_pkcs8_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> encoded = encoder.encodeECPublicKeyToPKCS8(kp.publicKey);
@@ -65,13 +65,13 @@ TEST(DEREncoder_ECC_Test, encode_pkcs8_ec_public_key) {
 // EC Private Key — SEC1 (ECPrivateKey)
 
 TEST(DEREncoder_ECC_Test, encode_sec1_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> encoded = encoder.encodeECPrivateKeyToSEC1(kp);
 
     DERDecoder decoder(encoded);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromSEC1();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromSEC1();
 
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
@@ -84,13 +84,13 @@ TEST(DEREncoder_ECC_Test, encode_sec1_ec_private_key) {
 // EC Private Key — PKCS8 (PrivateKeyInfo)
 
 TEST(DEREncoder_ECC_Test, encode_pkcs8_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> encoded = encoder.encodeECPrivateKeyToPKCS8(kp);
 
     DERDecoder decoder(encoded);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromPKCS8();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromPKCS8();
 
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
@@ -126,14 +126,14 @@ static const std::vector<uint8_t> testSec1ECPublicKey = {
 };
 
 TEST(DEREncoder_ECC_Test, encode_pkcs8_ec_public_key_kat) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     DEREncoder encoder;
     std::vector<uint8_t> encoded = encoder.encodeECPublicKeyToPKCS8(kp.publicKey);
     EXPECT_EQ(encoded, testPkcs8ECPublicKey);
 }
 
 TEST(DEREncoder_ECC_Test, encode_sec1_ec_public_key_kat) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     DEREncoder encoder;
     std::vector<uint8_t> encoded = encoder.encodeECPublicKeyToSEC1(kp.publicKey);
     EXPECT_EQ(encoded, testSec1ECPublicKey);

@@ -119,7 +119,7 @@ std::string ECC::isValidPublicKey(const ECDSAPublicKey P) {
     return ""; // Return an empty string if the public key is valid
 }
 
-std::string ECC::isValidKeyPair(const KeyPair& K) {
+std::string ECC::isValidKeyPair(const ECCKeyPair& K) {
     if (!isInDomainRange(K.privateKey)) return "Error: Given Private Key is not in range [1, n - 1].";
     std::string temp = isValidPublicKey(K.publicKey);
     if (temp != "") return temp;
@@ -133,7 +133,7 @@ std::string ECC::isValidKeyPair(const KeyPair& K) {
     return ""; // Return an empty string if the key pair is valid
 }
 
-KeyPair ECC::generateKeyPair() {
+ECCKeyPair ECC::generateKeyPair() {
     BigInt privKey;
     Point pubKeyPoint;
     do {
@@ -141,10 +141,10 @@ KeyPair ECC::generateKeyPair() {
         pubKeyPoint = scalarMultiplyPoints(privKey, ellipticCurve.generator);
     } while (isIdentityPoint(pubKeyPoint)); // ensure the public key is not the identity element
 
-    return KeyPair(privKey, ECDSAPublicKey(pubKeyPoint));
+    return ECCKeyPair(privKey, ECDSAPublicKey(pubKeyPoint));
 }
 
-void ECC::setKeyPair(const KeyPair& newKeyPair) {
+void ECC::setKeyPair(const ECCKeyPair& newKeyPair) {
     std::string validationError = isValidKeyPair(newKeyPair);
     if (!validationError.empty()) {
         throw std::invalid_argument(validationError);
@@ -153,16 +153,16 @@ void ECC::setKeyPair(const KeyPair& newKeyPair) {
 }
 
 void ECC::setKeyPair(const BigInt& key) {
-    KeyPair result(key, scalarMultiplyPoints(key, ellipticCurve.generator));
+    ECCKeyPair result(key, scalarMultiplyPoints(key, ellipticCurve.generator));
     if (isIdentityPoint(result.publicKey.getPublicKey())) throw
         std::invalid_argument("Error: Given Private Key derives identity public key.");
 
     keyPair = result;
 }
 
-// PublicKey DER/PEM encoding
+// ECCPublicKey DER/PEM encoding
 
-std::vector<uint8_t> PublicKey::toDER(EccKeyFormat format) const {
+std::vector<uint8_t> ECCPublicKey::toDER(EccKeyFormat format) const {
     DEREncoder encoder;
     switch (format) {
         case EccKeyFormat::SEC1: return encoder.encodeECPublicKeyToSEC1(*this);
@@ -171,7 +171,7 @@ std::vector<uint8_t> PublicKey::toDER(EccKeyFormat format) const {
     }
 }
 
-void PublicKey::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
+void ECCPublicKey::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
     DERDecoder decoder(der);
     ECDSAPublicKey decoded;
     switch (format) {
@@ -183,10 +183,10 @@ void PublicKey::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
             decoded = decoder.decodeECPublicKeyFromPKCS8();
             break;
     }
-    *this = PublicKey(decoded.getPublicKey(), decoded.getPublicKeyCurve());
+    *this = ECCPublicKey(decoded.getPublicKey(), decoded.getPublicKeyCurve());
 }
 
-std::string PublicKey::toPEM(EccKeyFormat format) const {
+std::string ECCPublicKey::toPEM(EccKeyFormat format) const {
     switch (format) {
         case EccKeyFormat::SEC1: return PEMEncoder::encodeECPublicKeyToSEC1(*this);
         case EccKeyFormat::PKCS8:
@@ -194,7 +194,7 @@ std::string PublicKey::toPEM(EccKeyFormat format) const {
     }
 }
 
-void PublicKey::fromPEM(const std::string& pem, EccKeyFormat format) {
+void ECCPublicKey::fromPEM(const std::string& pem, EccKeyFormat format) {
     ECDSAPublicKey decoded;
     switch (format) {
         case EccKeyFormat::SEC1:
@@ -205,12 +205,12 @@ void PublicKey::fromPEM(const std::string& pem, EccKeyFormat format) {
             decoded = PEMDecoder::decodeECPublicKeyFromPKCS8(pem);
             break;
     }
-    *this = PublicKey(decoded.getPublicKey(), decoded.getPublicKeyCurve());
+    *this = ECCPublicKey(decoded.getPublicKey(), decoded.getPublicKeyCurve());
 }
 
-// KeyPair DER/PEM encoding
+// ECCKeyPair DER/PEM encoding
 
-std::vector<uint8_t> KeyPair::toDER(EccKeyFormat format) const {
+std::vector<uint8_t> ECCKeyPair::toDER(EccKeyFormat format) const {
     DEREncoder encoder;
     switch (format) {
         case EccKeyFormat::SEC1: return encoder.encodeECPrivateKeyToSEC1(*this);
@@ -219,9 +219,9 @@ std::vector<uint8_t> KeyPair::toDER(EccKeyFormat format) const {
     }
 }
 
-void KeyPair::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
+void ECCKeyPair::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
     DERDecoder decoder(der);
-    KeyPair decoded;
+    ECCKeyPair decoded;
     switch (format) {
         case EccKeyFormat::SEC1:
             decoded = decoder.decodeECPrivateKeyFromSEC1();
@@ -235,7 +235,7 @@ void KeyPair::fromDER(const std::vector<uint8_t>& der, EccKeyFormat format) {
     publicKey = decoded.publicKey;
 }
 
-std::string KeyPair::toPEM(EccKeyFormat format) const {
+std::string ECCKeyPair::toPEM(EccKeyFormat format) const {
     switch (format) {
         case EccKeyFormat::SEC1: return PEMEncoder::encodeECPrivateKeyToSEC1(*this);
         case EccKeyFormat::PKCS8:
@@ -243,8 +243,8 @@ std::string KeyPair::toPEM(EccKeyFormat format) const {
     }
 }
 
-void KeyPair::fromPEM(const std::string& pem, EccKeyFormat format) {
-    KeyPair decoded;
+void ECCKeyPair::fromPEM(const std::string& pem, EccKeyFormat format) {
+    ECCKeyPair decoded;
     switch (format) {
         case EccKeyFormat::SEC1:
             decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);

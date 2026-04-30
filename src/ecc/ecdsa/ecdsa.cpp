@@ -7,7 +7,7 @@
 /*
  * ecdsa.cpp
  *
- * This file contains the implementation of the Elliptic Curve Digital Signature Algorithm (ECDSA) for Gestalt.
+ * This file contains the implementation of the Elliptic Curve Digital ECDSASignature Algorithm (ECDSA) for Gestalt.
  * ECDSA is a widely used cryptographic algorithm for generating and verifying digital signatures
  * based on elliptic curve cryptography (ECC). It provides a secure and efficient method for
  * authentication and integrity verification in various applications such as secure messaging,
@@ -19,7 +19,7 @@
  * References:
  * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
  * - "Guide to Elliptic Curve Cryptography" by Darrel Hankerson, Alfred Menezes, Scott Vanstone
- * - "FIPS 186-5 Digital Signature Standard (DSS)" by NIST
+ * - "FIPS 186-5 Digital ECDSASignature Standard (DSS)" by NIST
  *
  */
 
@@ -31,15 +31,15 @@ BigInt ECDSA::prepareMessage(const SecureBytes& messageHash) {
     return BigInt::fromBytes(messageHash.data(), useBytes);
 }
 
-bool ECDSA::isInvalidSignature(const Signature& S) {
+bool ECDSA::isInvalidSignature(const ECDSASignature& S) {
     return (S.r.isZero() || S.s.isZero());
 }
 
-Signature ECDSA::signMessage(const SecureBytes& message, HashAlgorithm hashAlg) {
+ECDSASignature ECDSA::signMessage(const SecureBytes& message, HashAlgorithm hashAlg) {
     SecureBytes messageHash = hash(hashAlg)(message);
     BigInt e = prepareMessage(messageHash);
 
-    Signature signature;
+    ECDSASignature signature;
     BigInt randomNumber;
     do {
         randomNumber = BigInt::random(BigInt(1), ellipticCurve.n - 1);
@@ -49,18 +49,18 @@ Signature ECDSA::signMessage(const SecureBytes& message, HashAlgorithm hashAlg) 
     return signature;
 }
 
-Signature ECDSA::signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg) {
+ECDSASignature ECDSA::signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg) {
     SecureBytes messageHash = hash(hashAlg)(message);
     BigInt e = prepareMessage(messageHash);
 
-    Signature signature = generateSignature(e, K);
+    ECDSASignature signature = generateSignature(e, K);
 
     if (isInvalidSignature(signature)) throw std::invalid_argument("Error: Private key derives invalid signature.");
 
     return signature;
 }
 
-Signature ECDSA::generateSignature(const BigInt& e, const BigInt& k) {
+ECDSASignature ECDSA::generateSignature(const BigInt& e, const BigInt& k) {
     // Calculate R = k*G (where G is the generator point)
     Point R = scalarMultiplyPoints(k, ellipticCurve.generator);
 
@@ -68,7 +68,7 @@ Signature ECDSA::generateSignature(const BigInt& e, const BigInt& k) {
     BigInt xCoordinateOfR = fieldElementToInteger(R.x);
 
     // Calculate r = xCoordinateOfR mod n
-    Signature signature;
+    ECDSASignature signature;
     signature.r = xCoordinateOfR % ellipticCurve.n;
 
     BigInt kInverse = k.modInverse(ellipticCurve.n);
@@ -79,7 +79,7 @@ Signature ECDSA::generateSignature(const BigInt& e, const BigInt& k) {
     return signature;
 }
 
-bool ECDSA::verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg) {
+bool ECDSA::verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const ECDSASignature& signature, HashAlgorithm hashAlg) {
     SecureBytes messageHash = hash(hashAlg)(message);
     BigInt e = prepareMessage(messageHash);
 

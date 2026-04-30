@@ -66,9 +66,9 @@ public:
     ECDSAPublicKey decodeECPublicKeyFromDER();  // Auto-detect
 
     // EC private key decoding methods
-    KeyPair decodeECPrivateKeyFromSEC1();
-    KeyPair decodeECPrivateKeyFromPKCS8();
-    KeyPair decodeECPrivateKeyFromDER();  // Auto-detect
+    ECCKeyPair decodeECPrivateKeyFromSEC1();
+    ECCKeyPair decodeECPrivateKeyFromPKCS8();
+    ECCKeyPair decodeECPrivateKeyFromDER();  // Auto-detect
 };
 
 class DEREncoder {
@@ -114,13 +114,13 @@ public:
     std::vector<uint8_t> encodeRSAPrivateKeyToDER(const RSAKeyPair& keyPair, RsaKeyFormat format = RsaKeyFormat::PKCS8);
 
     // EC public key encoding methods (accept PublicKey& so ECDSAPublicKey and ECDHPublicKey both work)
-    std::vector<uint8_t> encodeECPublicKeyToSEC1(const PublicKey& key);
-    std::vector<uint8_t> encodeECPublicKeyToPKCS8(const PublicKey& key);
-    std::vector<uint8_t> encodeECPublicKeyToDER(const PublicKey& key, EccKeyFormat format = EccKeyFormat::PKCS8);
+    std::vector<uint8_t> encodeECPublicKeyToSEC1(const ECCPublicKey& key);
+    std::vector<uint8_t> encodeECPublicKeyToPKCS8(const ECCPublicKey& key);
+    std::vector<uint8_t> encodeECPublicKeyToDER(const ECCPublicKey& key, EccKeyFormat format = EccKeyFormat::PKCS8);
 
     // EC private key encoding methods
-    std::vector<uint8_t> encodeECPrivateKeyToSEC1(const KeyPair& keyPair);
-    std::vector<uint8_t> encodeECPrivateKeyToPKCS8(const KeyPair& keyPair);
-    std::vector<uint8_t> encodeECPrivateKeyToDER(const KeyPair& keyPair, EccKeyFormat format = EccKeyFormat::PKCS8);
+    std::vector<uint8_t> encodeECPrivateKeyToSEC1(const ECCKeyPair& keyPair);
+    std::vector<uint8_t> encodeECPrivateKeyToPKCS8(const ECCKeyPair& keyPair);
+    std::vector<uint8_t> encodeECPrivateKeyToDER(const ECCKeyPair& keyPair, EccKeyFormat format = EccKeyFormat::PKCS8);
 
 };

@@ -616,7 +616,7 @@ ECDSAPublicKey DERDecoder::decodeECPublicKeyFromDER() {
 
 // SEC1 ECPrivateKey:
 // SEQUENCE { INTEGER version(1), OCTET STRING priv, [0] OID curve, [1] BIT STRING pubKey }
-KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
+ECCKeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
     size_t seqEnd = readSequence();
 
     // version must be 1
@@ -665,7 +665,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
     pubKey.setCurve(curve);
 
     // Import private key bytes into mpz_t
-    KeyPair keyPair;
+    ECCKeyPair keyPair;
     keyPair.privateKey = BigInt::fromBytes(privBytes.data(), privBytes.size());
     keyPair.publicKey = pubKey;
 
@@ -674,7 +674,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
 
 // PKCS8 PrivateKeyInfo for EC:
 // SEQUENCE { INTEGER version(0), SEQUENCE { OID id-ecPublicKey, OID curve }, OCTET STRING { SEC1 } }
-KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
+ECCKeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
     size_t outerEnd = readSequence();
 
     BigInt version = readIntegerAsBigInt();
@@ -696,7 +696,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
 
     // Parse the SEC1 structure
     DERDecoder sec1Decoder(sec1Bytes);
-    KeyPair keyPair = sec1Decoder.decodeECPrivateKeyFromSEC1();
+    ECCKeyPair keyPair = sec1Decoder.decodeECPrivateKeyFromSEC1();
 
     // The curve OID from PKCS8 is authoritative
     keyPair.publicKey.setCurve(curve);
@@ -707,7 +707,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
     return keyPair;
 }
 
-KeyPair DERDecoder::decodeECPrivateKeyFromDER() {
+ECCKeyPair DERDecoder::decodeECPrivateKeyFromDER() {
     size_t savedPos = pos;
     try {
         return decodeECPrivateKeyFromPKCS8();

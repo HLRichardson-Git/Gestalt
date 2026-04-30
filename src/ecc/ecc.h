@@ -28,7 +28,7 @@
 class ECC {
 private:
 
-    KeyPair keyPair;
+    ECCKeyPair keyPair;
     Curve ellipticCurve;
 
     Point addPoints(Point P, Point Q);
@@ -40,7 +40,7 @@ private:
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
     std::string isValidPublicKey(const ECDSAPublicKey P);
-    std::string isValidKeyPair(const KeyPair& K);
+    std::string isValidKeyPair(const ECCKeyPair& K);
 
     friend class ECDSA;
     friend class ECDH;
@@ -53,13 +53,13 @@ public:
 
     ~ECC() {}
 
-    KeyPair generateKeyPair();
+    ECCKeyPair generateKeyPair();
 
-    void setKeyPair(const KeyPair& newKeyPair);
+    void setKeyPair(const ECCKeyPair& newKeyPair);
     void setKeyPair(const BigInt& key);
     void setCurve(StandardCurve curveType) { 
         ellipticCurve = getCurveParams(curveType);
         keyPair.publicKey.setCurve(curveType); 
     }
-    KeyPair getKeyPair() const { return keyPair; }
+    ECCKeyPair getKeyPair() const { return keyPair; }
 };

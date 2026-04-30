@@ -22,11 +22,11 @@ TEST(ECDSA, keyGen) {
     ECDSA ecdsa;
 
     ecdsa.setKeyPair(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"));
-    KeyPair resultKeyPair = ecdsa.getKeyPair();
+    ECCKeyPair resultKeyPair = ecdsa.getKeyPair();
 
     ECDSAPublicKey publicKey(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                              BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair expected(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
+    ECCKeyPair expected(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
 
     EXPECT_EQ(resultKeyPair.privateKey, expected.privateKey);
     EXPECT_EQ(resultKeyPair.getPublicKey().x, expected.getPublicKey().x);
@@ -40,9 +40,9 @@ protected:
     BigInt prepareMessage(const SecureBytes& messageHash) {
         return ecdsa.prepareMessage(messageHash);
     };
-    bool isInvalidSignature(Signature S) { return ecdsa.isInvalidSignature(S); };
+    bool isInvalidSignature(ECDSASignature S) { return ecdsa.isInvalidSignature(S); };
     void setKeyPair(const BigInt& givenKey) { ecdsa.setKeyPair(givenKey); };
-    Signature generateSignature(const BigInt& e, const BigInt& k) { return ecdsa.generateSignature(e, k); };
+    ECDSASignature generateSignature(const BigInt& e, const BigInt& k) { return ecdsa.generateSignature(e, k); };
 };
 
 TEST_F(ECDSA_Test, PrepareMessage) {
@@ -66,9 +66,9 @@ TEST_F(ECDSA_Test, PrepareMessage) {
 }
 
 TEST_F(ECDSA_Test, IsValidSignature)  {
-    Signature validSig(BigInt("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC"),
+    ECDSASignature validSig(BigInt("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC"),
                        BigInt("0x8BF77819CA05A6B2786C76262BF7371CEF97B218E96F175A3CCDDA2ACC058903"));
-    Signature invalidSig;
+    ECDSASignature invalidSig;
 
     EXPECT_FALSE(isInvalidSignature(validSig));
     EXPECT_TRUE(isInvalidSignature(invalidSig));
@@ -80,9 +80,9 @@ TEST_F(ECDSA_Test, GenerateSignature)  {
     setKeyPair(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"));
     BigInt k = "0x94A1BBB14B906A61A280F245F9E93C7F3B4A6247824F5D33B9670787642A68DE";
 
-    Signature signature = generateSignature(e, k);
+    ECDSASignature signature = generateSignature(e, k);
 
-    Signature expected(BigInt("0x69979C16867D369D95E8852B4C68B323A66A7AAE0A3C112B2F426726EF93B41D"),
+    ECDSASignature expected(BigInt("0x69979C16867D369D95E8852B4C68B323A66A7AAE0A3C112B2F426726EF93B41D"),
                        BigInt("0x5D9416379D19A392740CF6EE448161D630E04CD968EC74DB3EA4C6CE67CC48F7"));
 
     EXPECT_EQ(signature.r, expected.r);

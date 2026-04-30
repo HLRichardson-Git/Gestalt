@@ -20,15 +20,15 @@ static const std::string kPriv = "0x1";
 static const std::string kPubX = "0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";
 static const std::string kPubY = "0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8";
 
-static KeyPair makeTestKeyPair() {
+static ECCKeyPair makeTestKeyPair() {
     ECDSAPublicKey pub(Point(kPubX, kPubY), StandardCurve::secp256k1);
-    return KeyPair(kPriv, pub);
+    return ECCKeyPair(kPriv, pub);
 }
 
 // EC Public Key — SEC1
 
 TEST(PEMDecoder_ECC_Test, decode_sec1_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPublicKeyToSEC1(kp.publicKey);
 
     ECDSAPublicKey decoded = PEMDecoder::decodeECPublicKeyFromSEC1(pem);
@@ -42,7 +42,7 @@ TEST(PEMDecoder_ECC_Test, decode_sec1_ec_public_key) {
 // EC Public Key — PKCS8
 
 TEST(PEMDecoder_ECC_Test, decode_pkcs8_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPublicKeyToPKCS8(kp.publicKey);
 
     ECDSAPublicKey decoded = PEMDecoder::decodeECPublicKeyFromPKCS8(pem);
@@ -57,10 +57,10 @@ TEST(PEMDecoder_ECC_Test, decode_pkcs8_ec_public_key) {
 // EC Private Key — SEC1
 
 TEST(PEMDecoder_ECC_Test, decode_sec1_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPrivateKeyToSEC1(kp);
 
-    KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);
+    ECCKeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(pem);
 
     EXPECT_EQ(kp.privateKey, decoded.privateKey);
 
@@ -74,10 +74,10 @@ TEST(PEMDecoder_ECC_Test, decode_sec1_ec_private_key) {
 // EC Private Key — PKCS8
 
 TEST(PEMDecoder_ECC_Test, decode_pkcs8_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     std::string pem = PEMEncoder::encodeECPrivateKeyToPKCS8(kp);
 
-    KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
+    ECCKeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(pem);
 
     EXPECT_EQ(kp.privateKey, decoded.privateKey);
 
@@ -92,7 +92,7 @@ TEST(PEMDecoder_ECC_Test, decode_pkcs8_ec_private_key) {
 // Invalid PEM — wrong header
 
 TEST(PEMDecoder_ECC_Test, decode_ec_private_key_wrong_header_throws) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
     // Encode as PKCS8 but try to decode as SEC1 (wrong header)
     std::string pem = PEMEncoder::encodeECPrivateKeyToPKCS8(kp);
     EXPECT_THROW(PEMDecoder::decodeECPrivateKeyFromSEC1(pem), std::runtime_error);
@@ -128,13 +128,13 @@ TEST(PEMDecoder_ECC_Test, decode_pkcs8_ec_public_key_kat) {
 }
 
 TEST(PEMDecoder_ECC_Test, decode_sec1_ec_private_key_kat) {
-    KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(testSec1EcPrivatekey);
+    ECCKeyPair decoded = PEMDecoder::decodeECPrivateKeyFromSEC1(testSec1EcPrivatekey);
     EXPECT_EQ(decoded.privateKey, 1u);
     EXPECT_EQ(decoded.publicKey.getPublicKeyCurve(), StandardCurve::secp256k1);
 }
 
 TEST(PEMDecoder_ECC_Test, decode_pkcs8_ec_private_key_kat) {
-    KeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(testPkcs8EcPrivatekey);
+    ECCKeyPair decoded = PEMDecoder::decodeECPrivateKeyFromPKCS8(testPkcs8EcPrivatekey);
     EXPECT_EQ(decoded.privateKey, 1u);
     EXPECT_EQ(decoded.publicKey.getPublicKeyCurve(), StandardCurve::secp256k1);
 }

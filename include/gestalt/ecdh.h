@@ -36,7 +36,7 @@ public:
 
     ECDH() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
     ECDH(StandardCurve curve) : ECC(curve) { keyPair = generateKeyPair(); }
-    ECDH(StandardCurve curve, const KeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
+    ECDH(StandardCurve curve, const ECCKeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
     ECDH(StandardCurve curve, const BigInt& privKey) : ECC(curve) { setKeyPair(privKey); }
     ECDH(const BigInt& privKey) : ECC(StandardCurve::secp256k1) { setKeyPair(privKey); }
 

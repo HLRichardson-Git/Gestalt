@@ -37,7 +37,7 @@ public:
 
 #include "standardCurves.h"
 
-class PublicKey {
+class ECCPublicKey {
 private:
     Point point;
     StandardCurve curve;
@@ -68,17 +68,17 @@ private:
 
 public:
     // Constructors
-    PublicKey() : curve(StandardCurve::P256) {}
-    PublicKey(const BigInt& bX, const BigInt& bY) : point(Point(bX, bY)) {
+    ECCPublicKey() : curve(StandardCurve::P256) {}
+    ECCPublicKey(const BigInt& bX, const BigInt& bY) : point(Point(bX, bY)) {
         curve = guessCurve(point);
     }
-    PublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : curve(curve) {
+    ECCPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : curve(curve) {
         importCompressed(compressedKey);
     }
-    PublicKey(const Point& publicKey) : point(publicKey) {
+    ECCPublicKey(const Point& publicKey) : point(publicKey) {
         curve = guessCurve(publicKey);
     }
-    PublicKey(const Point& publicKey, const StandardCurve& curve) : point(publicKey), curve(curve) {}
+    ECCPublicKey(const Point& publicKey, const StandardCurve& curve) : point(publicKey), curve(curve) {}
 
     // Accessors
     Point getPublicKey() const { return point; }
@@ -129,34 +129,34 @@ public:
 
 };
 
-class ECDSAPublicKey : public PublicKey{
+class ECDSAPublicKey : public ECCPublicKey{
 public:
-    ECDSAPublicKey() : PublicKey() {}
-    ECDSAPublicKey(const BigInt& bX, const BigInt& bY) : PublicKey(bX, bY) {}
-    ECDSAPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : PublicKey(compressedKey, curve) {}
-    ECDSAPublicKey(const Point& point) : PublicKey(point) {}
-    ECDSAPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
+    ECDSAPublicKey() : ECCPublicKey() {}
+    ECDSAPublicKey(const BigInt& bX, const BigInt& bY) : ECCPublicKey(bX, bY) {}
+    ECDSAPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : ECCPublicKey(compressedKey, curve) {}
+    ECDSAPublicKey(const Point& point) : ECCPublicKey(point) {}
+    ECDSAPublicKey(const Point& point, const StandardCurve& curve) : ECCPublicKey(point, curve) {}
 };
 
-class ECDHPublicKey : public PublicKey{
+class ECDHPublicKey : public ECCPublicKey{
 public:
-    ECDHPublicKey() : PublicKey() {}
-    ECDHPublicKey(const BigInt& bX, const BigInt& bY) : PublicKey(bX, bY) {}
-    ECDHPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : PublicKey(compressedKey, curve) {}
-    ECDHPublicKey(const Point& point) : PublicKey(point) {}
-    ECDHPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
+    ECDHPublicKey() : ECCPublicKey() {}
+    ECDHPublicKey(const BigInt& bX, const BigInt& bY) : ECCPublicKey(bX, bY) {}
+    ECDHPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : ECCPublicKey(compressedKey, curve) {}
+    ECDHPublicKey(const Point& point) : ECCPublicKey(point) {}
+    ECDHPublicKey(const Point& point, const StandardCurve& curve) : ECCPublicKey(point, curve) {}
 };
 
-class KeyPair {
+class ECCKeyPair {
 public:
     BigInt privateKey;
     ECDSAPublicKey publicKey;
 
-    KeyPair() = default;
-    KeyPair(const BigInt& priv, const ECDSAPublicKey& pub) : privateKey(priv), publicKey(pub) {}
-    KeyPair(const KeyPair& other) = default;
-    KeyPair& operator=(const KeyPair& other) = default;
-    ~KeyPair() = default;
+    ECCKeyPair() = default;
+    ECCKeyPair(const BigInt& priv, const ECDSAPublicKey& pub) : privateKey(priv), publicKey(pub) {}
+    ECCKeyPair(const ECCKeyPair& other) = default;
+    ECCKeyPair& operator=(const ECCKeyPair& other) = default;
+    ~ECCKeyPair() = default;
 
     Point getPublicKey() const { return publicKey.getPublicKey(); };
 
@@ -166,13 +166,13 @@ public:
     void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
 };
 
-class Signature {
+class ECDSASignature {
 public:
     BigInt r, s;
 
-    Signature() = default;
-    Signature(const BigInt& bR, const BigInt& bS) : r(bR), s(bS) {}
-    Signature(const Signature& other) = default;
-    Signature& operator=(const Signature& other) = default;
-    ~Signature() = default;
+    ECDSASignature() = default;
+    ECDSASignature(const BigInt& bR, const BigInt& bS) : r(bR), s(bS) {}
+    ECDSASignature(const ECDSASignature& other) = default;
+    ECDSASignature& operator=(const ECDSASignature& other) = default;
+    ~ECDSASignature() = default;
 };

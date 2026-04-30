@@ -34,16 +34,16 @@ class ECDSA : public ECC {
 private:
 
     BigInt prepareMessage(const SecureBytes& messageHash);
-    bool isInvalidSignature(const Signature& S);
+    bool isInvalidSignature(const ECDSASignature& S);
 
-    Signature generateSignature(const BigInt& e, const BigInt& k);
+    ECDSASignature generateSignature(const BigInt& e, const BigInt& k);
 
     friend class ECDSA_Test;
 public:
 
     ECDSA() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
     ECDSA(StandardCurve curve) : ECC(curve) { keyPair = generateKeyPair(); }
-    ECDSA(StandardCurve curve, const KeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
+    ECDSA(StandardCurve curve, const ECCKeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
     ECDSA(StandardCurve curve, const BigInt& privKey) : ECC(curve) { setKeyPair(privKey); }
     ECDSA(const BigInt& privKey) : ECC(StandardCurve::secp256k1) { setKeyPair(privKey); }
 
@@ -51,7 +51,7 @@ public:
 
     ECDSAPublicKey getPublicKey() const { return keyPair.publicKey; };
 
-    Signature signMessage(const SecureBytes& message, HashAlgorithm hashAlg = HashAlgorithm::None);
-    Signature signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
-    bool verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
+    ECDSASignature signMessage(const SecureBytes& message, HashAlgorithm hashAlg = HashAlgorithm::None);
+    ECDSASignature signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const ECDSASignature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

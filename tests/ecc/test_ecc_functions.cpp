@@ -30,7 +30,7 @@ protected:
     bool isIdentityPoint(const Point& P) { return ecc.isIdentityPoint(P); };
     bool isPointOnCurve(const Point& P) { return ecc.isPointOnCurve(P); };
     std::string isValidPublicKey(const ECDSAPublicKey& P) { return ecc.isValidPublicKey(P); };
-    std::string isValidKeyPair(const KeyPair& K) { return ecc.isValidKeyPair(K); };
+    std::string isValidKeyPair(const ECCKeyPair& K) { return ecc.isValidKeyPair(K); };
 };
 
 TEST_F(ECC_Test, testPointAddition) {
@@ -146,31 +146,31 @@ TEST_F(ECC_Test, isValidPublicKey) {
 TEST_F(ECC_Test, isValidKeyPair) {
     ECDSAPublicKey publicKey(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                     BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair validKeyPair(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
+    ECCKeyPair validKeyPair(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
     EXPECT_TRUE(isValidKeyPair(validKeyPair).empty());
 
-    KeyPair invalidPrivateKey(BigInt("-1000"), publicKey);
+    ECCKeyPair invalidPrivateKey(BigInt("-1000"), publicKey);
     EXPECT_TRUE(isValidKeyPair(invalidPrivateKey) == "Error: Given Private Key is not in range [1, n - 1].");
 
     ECDSAPublicKey pubKeyIsNotPair(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                           BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair mismatchKeyPair(BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"), pubKeyIsNotPair);
+    ECCKeyPair mismatchKeyPair(BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"), pubKeyIsNotPair);
     EXPECT_TRUE(isValidKeyPair(mismatchKeyPair) == "Error: Pair-wise consistency check failed.");
 }
 
 TEST_F(ECC_Test, setKeyPair) {
     // Uninitated is set to 0
-    KeyPair uninitializedKeyPair;
+    ECCKeyPair uninitializedKeyPair;
     EXPECT_TRUE(isValidKeyPair(uninitializedKeyPair) == "Error: Given Public Key is the Identity element.");
 
     ECDSAPublicKey publicKey(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                     BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair validKeyPair(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
+    ECCKeyPair validKeyPair(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
 
     ECC eccObject;
     eccObject.setKeyPair(validKeyPair);
 
-    KeyPair result = eccObject.getKeyPair();
+    ECCKeyPair result = eccObject.getKeyPair();
 
     EXPECT_EQ(validKeyPair.privateKey, result.privateKey);
     EXPECT_EQ(validKeyPair.getPublicKey().x, result.getPublicKey().x);
@@ -178,7 +178,7 @@ TEST_F(ECC_Test, setKeyPair) {
 
     ECDSAPublicKey pubKeyIsNotPair(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                           BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair mismatchKeyPair(BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"), pubKeyIsNotPair);
+    ECCKeyPair mismatchKeyPair(BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"), pubKeyIsNotPair);
 
     EXPECT_THROW(eccObject.setKeyPair(mismatchKeyPair), std::invalid_argument);
 
@@ -268,7 +268,7 @@ TEST(ECC_Objects, KeyPairInitialization) {
     // Check Hexidecimal value initialization
     ECDSAPublicKey publicKey1(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                     BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair P(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey1);
+    ECCKeyPair P(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey1);
 
     EXPECT_EQ(P.privateKey, BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"));
     EXPECT_EQ(P.getPublicKey().x, BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"));
@@ -277,7 +277,7 @@ TEST(ECC_Objects, KeyPairInitialization) {
     // Check decimal value initialization
     ECDSAPublicKey publicKey2(BigInt("41508913618560943505682868066484155222795806420711968987006339848963526306366"),
                     BigInt("47779048823291371033741797327759287667537405354646831765410899091079836405219"));
-    KeyPair Q(BigInt("10528738585638442885886470026673783468944086105714080698941011408558582127129"), publicKey2);
+    ECCKeyPair Q(BigInt("10528738585638442885886470026673783468944086105714080698941011408558582127129"), publicKey2);
 
     EXPECT_EQ(Q.privateKey, BigInt("10528738585638442885886470026673783468944086105714080698941011408558582127129"));
     EXPECT_EQ(Q.getPublicKey().x, BigInt("41508913618560943505682868066484155222795806420711968987006339848963526306366"));
@@ -288,7 +288,7 @@ TEST(ECC_Objects, KeyPairInitialization) {
     EXPECT_NE(P.getPublicKey().y, Q.getPublicKey().y);
 
     // Check proper NULL initialization
-    KeyPair T;
+    ECCKeyPair T;
     EXPECT_TRUE(T.privateKey.isZero());
     EXPECT_TRUE(T.getPublicKey().x.isZero());
     EXPECT_TRUE(T.getPublicKey().y.isZero());
@@ -297,9 +297,9 @@ TEST(ECC_Objects, KeyPairInitialization) {
 TEST(ECC_Objects, KeyPairAssignmentOperator) {
     ECDSAPublicKey publicKey(BigInt("0xCEC028EE08D09E02672A68310814354F9EABFFF0DE6DACC1CD3A774496076AE"),
                     BigInt("0xEFF471FBA0409897B6A48E8801AD12F95D0009B753CF8F51C128BF6B0BD27FBD"));
-    KeyPair P(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
+    ECCKeyPair P(BigInt("0x519B423D715F8B581F4FA8EE59F4771A5B44C8130B4E3EACCA54A56DDA72B464"), publicKey);
 
-    KeyPair Q = P;
+    ECCKeyPair Q = P;
 
     EXPECT_EQ(P.privateKey, Q.privateKey);
     EXPECT_EQ(P.getPublicKey().x, Q.getPublicKey().x);
@@ -308,14 +308,14 @@ TEST(ECC_Objects, KeyPairAssignmentOperator) {
 
 TEST(ECC_Objects, SignatureInitialization) {
     // Check Hexidecimal value initialization
-    Signature P(BigInt("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577"),
+    ECDSASignature P(BigInt("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577"),
                 BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"));
 
     EXPECT_EQ(P.r, BigInt("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577"));
     EXPECT_EQ(P.s, BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"));
 
     // Check decimal value initialization
-    Signature Q(BigInt("82423284279682547824030103895721849412830885604189378105816723310541529430329"),
+    ECDSASignature Q(BigInt("82423284279682547824030103895721849412830885604189378105816723310541529430329"),
                 BigInt("35263610418498196156348668935316331728327496388338009892027000938310937883631"));
 
     EXPECT_EQ(Q.r, BigInt("82423284279682547824030103895721849412830885604189378105816723310541529430329"));
@@ -326,16 +326,16 @@ TEST(ECC_Objects, SignatureInitialization) {
     EXPECT_NE(P.s, Q.s);
 
     // Check proper NULL initialization
-    Signature T;
+    ECDSASignature T;
     EXPECT_TRUE(T.r.isZero());
     EXPECT_TRUE(T.s.isZero());
 }
 
 TEST(ECC_Objects, SignatureAssignmentOperator) {
-    Signature P(BigInt("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577"),
+    ECDSASignature P(BigInt("0x9f43093f2741d67bae528e5ee34de5175a0fdc9bd95945423980c07edab9a577"),
                 BigInt("0xed9bfdb22f5c2d9dbd47e420948e55e0a23412479f56492afd194f3b648ae9b2"));
 
-    Signature Q = P;
+    ECDSASignature Q = P;
 
     EXPECT_EQ(P.r, Q.r);
     EXPECT_EQ(P.s, Q.s);

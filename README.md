@@ -145,7 +145,7 @@ int main() {
 
     const SecureBytes message = SecureBytes::fromAscii("Hello, Gestalt!");
 
-    Signature signature = ecdsa.signMessage(message, HashAlgorithm::SHA256);
+    ECDSASignature signature = ecdsa.signMessage(message, HashAlgorithm::SHA256);
 
     ECDSAPublicKey peerPublicKey(BigInt("0x60fed4ba255a9d31c961eb74c6356d68c049b8923b61fa6ce669622e60f29fb6"),
                                  BigInt("0x7903fe1008b8bc99a41ae9e95628bc64f2f1b20c2d7e9f5177a3c294d4462299"));

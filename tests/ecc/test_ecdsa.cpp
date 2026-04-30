@@ -26,9 +26,9 @@ TEST_P(ECDSASignatureGenTest, sigGen) {
 
     BigInt k_value = test.k;
 
-    Signature signature = ecdsa.signMessage(SecureBytes::fromHex(test.msg), k_value);
+    ECDSASignature signature = ecdsa.signMessage(SecureBytes::fromHex(test.msg), k_value);
 
-    Signature expected(BigInt(test.expected_r), BigInt(test.expected_s));
+    ECDSASignature expected(BigInt(test.expected_r), BigInt(test.expected_s));
 
     EXPECT_EQ(signature.r, expected.r);
     EXPECT_EQ(signature.s, expected.s);
@@ -40,7 +40,7 @@ TEST_P(ECDSASignatureVerTest, sigVer) {
     
     ECDSA ecdsa(test.curve, BigInt(test.privateKey));
 
-    Signature signature(BigInt(test.expected_r), BigInt(test.expected_s));
+    ECDSASignature signature(BigInt(test.expected_r), BigInt(test.expected_s));
 
     ECDSAPublicKey peerPublicKey(ecdsa.getPublicKey().getPublicKey(), test.curve);
 
@@ -56,9 +56,9 @@ TEST(ECDSA, PWCT)  {
 
     SecureBytes digest = SecureBytes::fromHex("44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56");
 
-    Signature signature = ecdsa.signMessage(digest, k);
+    ECDSASignature signature = ecdsa.signMessage(digest, k);
 
-    Signature expected(BigInt("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC"),
+    ECDSASignature expected(BigInt("0xF3AC8061B514795B8843E3D6629527ED2AFD6B1F6A555A7ACABB5E6F79C8C2AC"),
                        BigInt("0x8BF77819CA05A6B2786C76262BF7371CEF97B218E96F175A3CCDDA2ACC058903"));
 
     EXPECT_EQ(signature.r, expected.r);
@@ -72,7 +72,7 @@ TEST(ECDSA, PWCT)  {
 TEST(ECDSA, inducedFailureVerification) {
     ECDSA ecdsa;
 
-    Signature signature = ecdsa.signMessage(SecureBytes::fromHex("1AC5"));
+    ECDSASignature signature = ecdsa.signMessage(SecureBytes::fromHex("1AC5"));
 
     bool verify = ecdsa.verifySignature(SecureBytes::fromHex("1AC6"), ecdsa.getPublicKey(), signature);
 

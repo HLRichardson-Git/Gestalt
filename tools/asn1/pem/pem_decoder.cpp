@@ -65,13 +65,13 @@ ECDSAPublicKey PEMDecoder::decodeECPublicKeyFromPKCS8(const std::string& pem) {
     return decoder.decodeECPublicKeyFromPKCS8();
 }
 
-KeyPair PEMDecoder::decodeECPrivateKeyFromSEC1(const std::string& pem) {
+ECCKeyPair PEMDecoder::decodeECPrivateKeyFromSEC1(const std::string& pem) {
     auto der = extractDER(pem, "EC PRIVATE KEY");
     DERDecoder decoder(der);
     return decoder.decodeECPrivateKeyFromSEC1();
 }
 
-KeyPair PEMDecoder::decodeECPrivateKeyFromPKCS8(const std::string& pem) {
+ECCKeyPair PEMDecoder::decodeECPrivateKeyFromPKCS8(const std::string& pem) {
     auto der = extractDER(pem, "PRIVATE KEY");
     DERDecoder decoder(der);
     return decoder.decodeECPrivateKeyFromPKCS8();
