@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -13,7 +13,7 @@
  * while providing a high level of security, making it suitable for a wide range of applications
  * such as secure communication protocols and digital authentication systems.
  *
- * This class provides functionality for signature generation, signature verification, and other 
+ * This class provides functionality for signature generation, signature verification, and other
  * operations necessary for implementing ECDSA-based security protocols.
  *
  * References:
@@ -27,30 +27,31 @@
 #pragma once
 
 #include "../src/ecc/ecc.h"
+#include <gestalt/secure_bytes.h>
 #include "hash_utils/hash_utils.h"
 
 class ECDSA : public ECC {
 private:
 
-    void prepareMessage(const std::string& messageHash, mpz_t& result);
-    bool isInvalidSignature(Signature S);
+    BigInt prepareMessage(const SecureBytes& messageHash);
+    bool isInvalidSignature(const ECDSASignature& S);
 
-    Signature generateSignature(const mpz_t& e, mpz_t& k);
+    ECDSASignature generateSignature(const BigInt& e, const BigInt& k);
 
     friend class ECDSA_Test;
 public:
 
     ECDSA() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
     ECDSA(StandardCurve curve) : ECC(curve) { keyPair = generateKeyPair(); }
-    ECDSA(StandardCurve curve, const KeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
-    ECDSA(StandardCurve curve, const std::string& strKeyPair) : ECC(curve) { setKeyPair(strKeyPair); }
-    ECDSA(const std::string& strKeyPair) : ECC(StandardCurve::secp256k1) { setKeyPair(strKeyPair); }
+    ECDSA(StandardCurve curve, const ECCKeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
+    ECDSA(StandardCurve curve, const BigInt& privKey) : ECC(curve) { setKeyPair(privKey); }
+    ECDSA(const BigInt& privKey) : ECC(StandardCurve::secp256k1) { setKeyPair(privKey); }
 
-	~ECDSA() {}
+    ~ECDSA() {}
 
     ECDSAPublicKey getPublicKey() const { return keyPair.publicKey; };
 
-    Signature signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
-    Signature signMessage(const std::string& message, BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
-    bool verifySignature(const std::string& message, const ECDSAPublicKey& peerPublicKey, const Signature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
+    ECDSASignature signMessage(const SecureBytes& message, HashAlgorithm hashAlg = HashAlgorithm::None);
+    ECDSASignature signMessage(const SecureBytes& message, const BigInt& K, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const SecureBytes& message, const ECDSAPublicKey& peerPublicKey, const ECDSASignature& signature, HashAlgorithm hashAlg = HashAlgorithm::None);
 };

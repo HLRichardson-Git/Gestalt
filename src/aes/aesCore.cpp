@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -44,7 +44,6 @@
  */
 
 #include <algorithm>
-#include <sstream>
 #include <cstring>
 #include <cstdint>
 
@@ -64,12 +63,12 @@ enum class AESKeySize : int {
  * Sets the number of words in the key schedule (Nw) and the number of rounds (Nr) based on the key size.
  * Performs key expansion to generate the round keys.
  *
- * @param key A string representing the encryption key in hexadecimal format.
+ * @param key The 128, 192, or 256 bit key as raw bytes.
  * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
  */
-AES::AES(const std::string& key) {
+AES::AES(const SecureBytes& key) {
     // // Determine key size and set Nw (number of words in key) and Nr (number of rounds)
-    switch (key.size() * 4) {
+    switch (key.size() * 8) {
     case static_cast<int>(AESKeySize::AES_128):
         Nw = 4;
         Nr = 10;
@@ -212,7 +211,7 @@ void AES::shiftRows(unsigned char* state) {
 	tmp[14] = state[6];
 	tmp[15] = state[11];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -243,7 +242,7 @@ void AES::mixColumns(unsigned char* state) {
     tmp[14] = state[12] ^ state[13] ^ GF_MUL_TABLE[2][state[14]] ^ GF_MUL_TABLE[3][state[15]];
     tmp[15] = GF_MUL_TABLE[3][state[12]] ^ state[13] ^ state[14] ^ GF_MUL_TABLE[2][state[15]];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -327,7 +326,7 @@ void AES::invShiftRows(unsigned char state[AES_BLOCK_SIZE]) {
 	tmp[14] = state[6];
 	tmp[15] = state[3];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -358,7 +357,7 @@ void AES::invMixColumns(unsigned char state[AES_BLOCK_SIZE]) {
     tmp[14] = GF_MUL_TABLE[13][state[12]] ^ GF_MUL_TABLE[9][state[13]] ^ GF_MUL_TABLE[14][state[14]] ^ GF_MUL_TABLE[11][state[15]];
     tmp[15] = GF_MUL_TABLE[11][state[12]] ^ GF_MUL_TABLE[13][state[13]] ^ GF_MUL_TABLE[9][state[14]] ^ GF_MUL_TABLE[14][state[15]];
 
-    memcpy(state, tmp, AES_BLOCK_SIZE);
+    std::memcpy(state, tmp, AES_BLOCK_SIZE);
 }
 
 /*
@@ -367,20 +366,15 @@ void AES::invMixColumns(unsigned char state[AES_BLOCK_SIZE]) {
  * Expands the original key into a key schedule for encryption and decryption.
  * The key schedule is stored in the roundKey array.
  *
- * @param key The original encryption key.
+ * @param key The 128, 192, or 256 bit key as raw bytes.
  * @param roundKey Pointer to the array where the round keys will be stored.
  */
-void AES::keyExpansion(const std::string& key, unsigned char* roundKey) {
+void AES::keyExpansion(const SecureBytes& key, unsigned char* roundKey) {
     unsigned char temp[4] = { 0x00, 0x00, 0x00, 0x00 };
 
     unsigned int i = 0;
     for (i = 0; i < 4 * Nw; i++) {
-        int index = i * 2;
-        // Extract two hexadecimal characters
-        std::string hexByte = key.substr(index, 2);
-
-        // Convert the hexadecimal string to an unsigned char
-        roundKey[i] = static_cast<unsigned char>(std::stoi(hexByte, nullptr, 16));
+        roundKey[i] = key[i];
     }
 
     i = 4 * Nw;
@@ -446,14 +440,14 @@ void AES::rcon(unsigned char temp[4], int round) {
  * PKCS7 padding is a method used to pad messages to a multiple of the block size.
  * The padding value is the number of bytes added, each byte being equal to the number of bytes added.
  *
- * @param data String which padding should be applied too.
+ * @param data The data which padding should be applied too.
  */
-std::string applyPKCS7Padding(const std::string& data) {
-    size_t blockSize = 16;
-    size_t paddingLength = blockSize - (data.size() % blockSize);
-    std::string paddedData = data;
-    paddedData.append(paddingLength, static_cast<char>(paddingLength));
-    return paddedData;
+SecureBytes applyPKCS7Padding(const SecureBytes& data) {
+    size_t paddingLength = AES_BLOCK_SIZE - (data.size() % AES_BLOCK_SIZE);
+    SecureBytes result(data.size() + paddingLength);
+    std::memcpy(result.data(), data.data(), data.size());
+    std::memset(result.data() + data.size(), static_cast<int>(paddingLength), paddingLength);
+    return result;
 }
 
 /*
@@ -462,15 +456,17 @@ std::string applyPKCS7Padding(const std::string& data) {
  * which indicates the number of bytes added as padding. This value is used
  * to determine how many bytes to remove from the end of the message.
  *
- * @param data String which padding should be removed from.
+ * @param data Data from which padding should be removed.
  */
-std::string removePKCS7Padding(const std::string& data) {
+SecureBytes removePKCS7Padding(const SecureBytes& data) {
     if (data.empty()) {
         throw std::runtime_error("Data is empty, cannot remove padding.");
     }
-    size_t paddingLength = static_cast<uint8_t>(data.back());
+    size_t paddingLength = data[data.size() - 1];
     if (paddingLength > data.size() || paddingLength > AES_BLOCK_SIZE) {
         throw std::runtime_error("Invalid padding length.");
     }
-    return data.substr(0, data.size() - paddingLength);
+    SecureBytes result(data.size() - paddingLength);
+    std::memcpy(result.data(), data.data(), result.size());
+    return result;
 }

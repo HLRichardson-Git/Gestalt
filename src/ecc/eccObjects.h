@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -17,54 +17,33 @@
 #include "bigInt/bigInt.h"
 #include "asn1/object_identifiers.h"
 #include "utils.h"
+#include <gestalt/secure_bytes.h>
 
 class DEREncoder;
 class DERDecoder;
 
 class Point {
 public:
-    mpz_t x, y;
+    BigInt x, y;
 
-    Point() { mpz_inits(x, y, NULL); }
-    Point(const std::string& strX, const std::string& strY) {
-        mpz_inits(x, y, NULL);
-        stringToGMP(strX, x);
-        stringToGMP(strY, y);
-    }
+    Point() = default;
+    Point(const BigInt& bX, const BigInt& bY) : x(bX), y(bY) {}
+    Point(const Point& other) = default;
+    Point& operator=(const Point& other) = default;
+    ~Point() = default;
 
-    Point(const Point& other) {
-        mpz_init_set(x, other.x);
-        mpz_init_set(y, other.y);
-    }
-
-    Point(const mpz_t xVal, const mpz_t yVal) {
-        mpz_inits(x, y, NULL);
-        mpz_set(x, xVal);
-        mpz_set(y, yVal);
-    }
-
-    void operator =(const Point& other) {
-        mpz_set(this->x, other.x);
-        mpz_set(this->y, other.y);
-    }
-
-    ~Point() {
-        mpz_clear(x);
-        mpz_clear(y);
-    }
-
-    Point setPoint(const std::string& strX, const std::string& strY) { return Point(strX, strY); };
+    Point setPoint(const BigInt& bX, const BigInt& bY) { return Point(bX, bY); }
 };
 
 #include "standardCurves.h"
 
-class PublicKey {
+class ECCPublicKey {
 private:
     Point point;
     StandardCurve curve;
 
     StandardCurve guessCurve(const Point& point) {
-        size_t sizeInBytes = (mpz_sizeinbase(point.x, 2) + 7) / 8;
+        size_t sizeInBytes = point.x.byteLength();
         if (sizeInBytes == 32) {
             return StandardCurve::P256;
         } else if (sizeInBytes == 48) {
@@ -76,40 +55,30 @@ private:
         }
     }
 
-    bool modular_sqrt(const mpz_t n, const mpz_t p, mpz_t result) {
+    bool modular_sqrt(const BigInt& n, const BigInt& p, BigInt& result) {
         // Only works if p ≡ 3 mod 4
-        if (mpz_congruent_ui_p(p, 3, 4)) {
-            mpz_t exp;
-            mpz_init(exp);
-            mpz_add_ui(exp, p, 1);
-            mpz_fdiv_q_ui(exp, exp, 4);
-            mpz_powm(result, n, exp, p);
-            mpz_clear(exp);
-
-            // Check if result^2 ≡ n mod p
-            mpz_t check;
-            mpz_init(check);
-            mpz_powm_ui(check, result, 2, p);
-            bool isValid = (mpz_cmp(check, n) == 0);
-            mpz_clear(check);
-            return isValid;
+        if (p.isCongruent(3, 4)) {
+            BigInt exp = (p + 1).floorDiv(4);
+            result = n.modPow(exp, p);
+            BigInt check = result.modPow(2UL, p);
+            return check == n;
         }
         return false;  // For full generality, implement Tonelli-Shanks
     }
 
 public:
     // Constructors
-    PublicKey() : curve(StandardCurve::P256) {}
-    PublicKey(const std::string& strX, const std::string& strY) : point(Point(strX, strY)) {
+    ECCPublicKey() : curve(StandardCurve::P256) {}
+    ECCPublicKey(const BigInt& bX, const BigInt& bY) : point(Point(bX, bY)) {
         curve = guessCurve(point);
     }
-    PublicKey(const std::string& compressedPublicKey, const StandardCurve& curve) : curve(curve) {
-        importCompressed(compressedPublicKey);
+    ECCPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : curve(curve) {
+        importCompressed(compressedKey);
     }
-    PublicKey(const Point& publicKey) : point(publicKey) {
+    ECCPublicKey(const Point& publicKey) : point(publicKey) {
         curve = guessCurve(publicKey);
     }
-    PublicKey(const Point& publicKey, const StandardCurve& curve) : point(publicKey), curve(curve) {}
+    ECCPublicKey(const Point& publicKey, const StandardCurve& curve) : point(publicKey), curve(curve) {}
 
     // Accessors
     Point getPublicKey() const { return point; }
@@ -122,108 +91,72 @@ public:
     std::string toPEM(EccKeyFormat format = EccKeyFormat::PKCS8) const;
     void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
   
-    std::string exportCompressed() const {
-        std::string result;
-        mpz_t yMod2;
-        mpz_init(yMod2);
-        mpz_mod_ui(yMod2, point.y, 2);
-        result += (mpz_cmp_ui(yMod2, 0) == 0) ? '\x02' : '\x03';
-
-        // Serialize x
-        size_t count = (mpz_sizeinbase(point.x, 2) + 7) / 8;
-        result.resize(1 + count);
-        mpz_export(&result[1], nullptr, 1, 1, 1, 0, point.x);
-        mpz_clear(yMod2);
-        return bytesToHex(result);
+    SecureBytes exportCompressed() const {
+        auto xBytes = point.x.toBytes();
+        SecureBytes result(1 + xBytes.size());
+        result[0] = point.y.isOdd() ? 0x03 : 0x02;
+        std::copy(xBytes.begin(), xBytes.end(), result.begin() + 1);
+        return result;
     }
 
-    void importCompressed(const std::string& compressedHexKey) {
-        if (compressedHexKey.length() < 4 || compressedHexKey.length() % 2 != 0) {
-            throw std::invalid_argument("Invalid hex-encoded compressed key");
+    void importCompressed(const SecureBytes& compressedKey) {
+        if (compressedKey.size() < 2) {
+            throw std::invalid_argument("Invalid compressed key");
         }
 
-        // Check the compression byte (first 2 hex characters)
-        std::string compressionByte = compressedHexKey.substr(0, 2);
-        if (compressionByte != "02" && compressionByte != "03") {
+        uint8_t prefix = compressedKey[0];
+        if (prefix != 0x02 && prefix != 0x03) {
             throw std::invalid_argument("Invalid compressed ECC key format");
         }
 
         Curve curve = getCurveParams(this->curve);
-        mpz_t x, y, rhs;
-        mpz_inits(x, y, rhs, nullptr);
-
-        // Extract x coordinate (skip first 2 hex characters)
-        std::string xCoordHex = compressedHexKey.substr(2);
-        mpz_set_str(x, xCoordHex.c_str(), 16);
+        BigInt x = BigInt::fromBytes(compressedKey.data() + 1, compressedKey.size() - 1);
 
         // Calculate y^2 = x^3 + ax + b mod p
-        mpz_powm_ui(rhs, x, 3, curve.p);
-        mpz_addmul(rhs, curve.a, x);
-        mpz_add(rhs, rhs, curve.b);
-        mpz_mod(rhs, rhs, curve.p);
+        BigInt rhs = (x.modPow(3UL, curve.p) + curve.a * x + curve.b) % curve.p;
 
+        BigInt y;
         bool found = modular_sqrt(rhs, curve.p, y);
         if (!found) throw std::runtime_error("Failed to compute sqrt for compressed key");
 
-        // Check compression byte to determine which y to use
-        bool isOddCompression = (compressionByte == "03");
-        if ((isOddCompression && mpz_even_p(y)) || (!isOddCompression && mpz_odd_p(y))) {
-            mpz_sub(y, curve.p, y);
+        bool isOddCompression = (prefix == 0x03);
+        if ((isOddCompression && y.isEven()) || (!isOddCompression && y.isOdd())) {
+            y = curve.p - y;
         }
 
         point = Point(x, y);
-        mpz_clears(x, y, rhs, nullptr);
     }
 
 };
 
-class ECDSAPublicKey : public PublicKey{
+class ECDSAPublicKey : public ECCPublicKey{
 public:
-    ECDSAPublicKey() : PublicKey() {}
-    ECDSAPublicKey(const std::string& strX, const std::string& strY) : PublicKey(strX, strY) {}
-    ECDSAPublicKey(const std::string& compressedPublicKey, const StandardCurve& curve) : PublicKey(compressedPublicKey, curve) {}
-    ECDSAPublicKey(const Point& point) : PublicKey(point) {}
-    ECDSAPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
+    ECDSAPublicKey() : ECCPublicKey() {}
+    ECDSAPublicKey(const BigInt& bX, const BigInt& bY) : ECCPublicKey(bX, bY) {}
+    ECDSAPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : ECCPublicKey(compressedKey, curve) {}
+    ECDSAPublicKey(const Point& point) : ECCPublicKey(point) {}
+    ECDSAPublicKey(const Point& point, const StandardCurve& curve) : ECCPublicKey(point, curve) {}
 };
 
-class ECDHPublicKey : public PublicKey{
+class ECDHPublicKey : public ECCPublicKey{
 public:
-    ECDHPublicKey() : PublicKey() {}
-    ECDHPublicKey(const std::string& strX, const std::string& strY) : PublicKey(strX, strY) {}
-    ECDHPublicKey(const std::string& compressedPublicKey, const StandardCurve& curve) : PublicKey(compressedPublicKey, curve) {}
-    ECDHPublicKey(const Point& point) : PublicKey(point) {}
-    ECDHPublicKey(const Point& point, const StandardCurve& curve) : PublicKey(point, curve) {}
+    ECDHPublicKey() : ECCPublicKey() {}
+    ECDHPublicKey(const BigInt& bX, const BigInt& bY) : ECCPublicKey(bX, bY) {}
+    ECDHPublicKey(const SecureBytes& compressedKey, const StandardCurve& curve) : ECCPublicKey(compressedKey, curve) {}
+    ECDHPublicKey(const Point& point) : ECCPublicKey(point) {}
+    ECDHPublicKey(const Point& point, const StandardCurve& curve) : ECCPublicKey(point, curve) {}
 };
 
-class KeyPair {
+class ECCKeyPair {
 public:
-    mpz_t privateKey;
+    BigInt privateKey;
     ECDSAPublicKey publicKey;
 
-    KeyPair() { mpz_init(privateKey); }
-    KeyPair(const mpz_t& gmpPriv, const ECDSAPublicKey& strPub) {
-        mpz_init(privateKey);
-        mpz_set(privateKey, gmpPriv);
-        publicKey = strPub;
-    }
-
-    KeyPair(const std::string& strPriv, const ECDSAPublicKey& strPub) {
-        mpz_init(privateKey);
-        stringToGMP(strPriv, privateKey);
-        publicKey = strPub;
-    }
-
-    KeyPair(const KeyPair& other) {
-        mpz_init_set(privateKey, other.privateKey);
-        publicKey = other.publicKey;
-    }
-
-    void operator =(const KeyPair& R) {
-        mpz_set(this->privateKey, R.privateKey);
-        this->publicKey = R.publicKey;
-    } 
-
-    ~KeyPair() { mpz_clear(privateKey); }
+    ECCKeyPair() = default;
+    ECCKeyPair(const BigInt& priv, const ECDSAPublicKey& pub) : privateKey(priv), publicKey(pub) {}
+    ECCKeyPair(const ECCKeyPair& other) = default;
+    ECCKeyPair& operator=(const ECCKeyPair& other) = default;
+    ~ECCKeyPair() = default;
 
     Point getPublicKey() const { return publicKey.getPublicKey(); };
 
@@ -233,29 +166,13 @@ public:
     void fromPEM(const std::string& pem, EccKeyFormat format = EccKeyFormat::PKCS8);
 };
 
-class Signature {
+class ECDSASignature {
 public:
-    mpz_t r, s;
+    BigInt r, s;
 
-    Signature() { mpz_inits(r, s, NULL); }
-    Signature(const std::string& strR, const std::string& strS) {
-        mpz_inits(r, s, NULL);
-        stringToGMP(strR, r);
-        stringToGMP(strS, s);
-    }
-
-    Signature(const Signature& other) {
-        mpz_init_set(r, other.r);
-        mpz_init_set(s, other.s);
-    }
-    
-    void operator =(const Signature& other) {
-        mpz_set(this->r, other.r);
-        mpz_set(this->s, other.s);
-    }
-
-    ~Signature() {
-        mpz_clear(r);
-        mpz_clear(s);
-    }
+    ECDSASignature() = default;
+    ECDSASignature(const BigInt& bR, const BigInt& bS) : r(bR), s(bS) {}
+    ECDSASignature(const ECDSASignature& other) = default;
+    ECDSASignature& operator=(const ECDSASignature& other) = default;
+    ~ECDSASignature() = default;
 };

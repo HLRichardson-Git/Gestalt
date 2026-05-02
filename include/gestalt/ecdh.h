@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -25,22 +25,23 @@
 #pragma once
 
 #include "../src/ecc/ecc.h"
+#include <gestalt/secure_bytes.h>
 
 class ECDH : public ECC {
 private:
-    std::string keyToString(const Point& point) const;
+    SecureBytes pointToSecureBytes(const Point& point) const;
 
     friend class ECDH_Test;
 public:
 
     ECDH() : ECC(StandardCurve::secp256k1) { keyPair = generateKeyPair(); }
     ECDH(StandardCurve curve) : ECC(curve) { keyPair = generateKeyPair(); }
-    ECDH(StandardCurve curve, const KeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
-    ECDH(StandardCurve curve, const std::string& strKeyPair) : ECC(curve) { setKeyPair(strKeyPair); }
-    ECDH(const std::string& strKeyPair) : ECC(StandardCurve::secp256k1) { setKeyPair(strKeyPair); }
+    ECDH(StandardCurve curve, const ECCKeyPair& givenKeyPair) : ECC(curve) { setKeyPair(givenKeyPair); }
+    ECDH(StandardCurve curve, const BigInt& privKey) : ECC(curve) { setKeyPair(privKey); }
+    ECDH(const BigInt& privKey) : ECC(StandardCurve::secp256k1) { setKeyPair(privKey); }
 
 	~ECDH() {}
 
     ECDHPublicKey getPublicKey() const { return keyPair.getPublicKey(); };
-    std::string computeSharedSecret(const ECDHPublicKey& peerPublicKey);
+    SecureBytes computeSharedSecret(const ECDHPublicKey& peerPublicKey);
 };

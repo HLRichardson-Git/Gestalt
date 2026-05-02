@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -12,11 +12,10 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include <gestalt/secure_bytes.h>
 #include <cstdint>
 
-typedef std::string (*hash_f)(const std::string& in);
+typedef SecureBytes (*hash_f)(const SecureBytes& in);
 
 enum HASH_ALGORITHM { SHA1, SHA224, SHA256, SHA384, SHA512, SHA512_224, SHA512_256 };
 
@@ -24,24 +23,24 @@ class HMAC {
 private:
     uint64_t B;
     uint64_t L;
-    
-    std::vector<unsigned char> ipad;
-    std::vector<unsigned char> opad;
-    std::vector<unsigned char> K;     
-    
+
+    SecureBytes ipad;
+    SecureBytes opad;
+    SecureBytes K;
+
     static std::pair<unsigned int, unsigned int> getHashParameters(const HASH_ALGORITHM HASH);
     void hmacManager(const HASH_ALGORITHM HASH);
-    void processKey(const std::string& key, hash_f hash);
-    std::string xorVectors(const std::vector<unsigned char>& a, const std::vector<unsigned char>& b);
+    void processKey(const SecureBytes& key, hash_f hash);
+    SecureBytes xorVectors(const SecureBytes& a, const SecureBytes& b);
 
 public:
 
-    explicit HMAC (HASH_ALGORITHM HASH) { 
-        hmacManager(HASH); 
-        ipad = std::vector<unsigned char>(B, 0x36);
-        opad = std::vector<unsigned char>(B, 0x5c);
-        K    = std::vector<unsigned char>(B, 0x00);
+    explicit HMAC (HASH_ALGORITHM HASH) {
+        hmacManager(HASH);
+        ipad = SecureBytes(B, 0x36);
+        opad = SecureBytes(B, 0x5c);
+        K    = SecureBytes(B, 0x00);
     }
 
-    std::string keyedHash(const std::string& key, const std::string& input, hash_f hash);
+    SecureBytes keyedHash(const SecureBytes& key, const SecureBytes& input, hash_f hash);
 };

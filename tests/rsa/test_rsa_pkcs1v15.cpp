@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #include <gestalt/rsa.h>
-#include "utils.h"
 #include "rsa/padding_schemes/rsa_padding.h"
 #include "rsa/padding_schemes/pkcs1v15/pkcs1v15.h"
 #include "vectors/vectors_rsa_pkcs1v15.h"
@@ -29,37 +28,36 @@ const std::string expectedSignature =
 
 TEST(RSA_PKCS1v15, KAT_Sign) {
     RSA rsa(RSASecurityStrength::RSA_1024, privateKeyVector, publicKeyVector);
-    std::string computedSignature = rsa.signMessage(hexToBytes(inputMsg), PKCS1v15Params(HashAlgorithm::SHA1));
-    EXPECT_EQ(computedSignature, expectedSignature);
+    SecureBytes computedSignature = rsa.signMessage(SecureBytes::fromHex(inputMsg), PKCS1v15Params(HashAlgorithm::SHA1));
+    EXPECT_EQ(computedSignature, SecureBytes::fromHex(expectedSignature));
 }
 
 TEST(RSA_PKCS1v15, KAT_Verify) {
     RSA rsa(RSASecurityStrength::RSA_1024, privateKeyVector, publicKeyVector);
-    bool valid = rsa.verifySignature(hexToBytes(inputMsg), expectedSignature, publicKeyVector, PKCS1v15Params(HashAlgorithm::SHA1));
+    bool valid = rsa.verifySignature(SecureBytes::fromHex(inputMsg), SecureBytes::fromHex(expectedSignature), publicKeyVector, PKCS1v15Params(HashAlgorithm::SHA1));
     EXPECT_TRUE(valid);
 }
 
 TEST(RSA_PKCS1v15, RoundTrip_Sign_Verify) {
     RSA rsa(RSASecurityStrength::RSA_1024, privateKeyVector, publicKeyVector);
-    const std::string message = "Hello, PKCS#1 v1.5!";
-    std::string sig = rsa.signMessage(message, PKCS1v15Params(HashAlgorithm::SHA256));
+    const SecureBytes message = SecureBytes::fromAscii("Hello, PKCS#1 v1.5!");
+    SecureBytes sig = rsa.signMessage(message, PKCS1v15Params(HashAlgorithm::SHA256));
     EXPECT_TRUE(rsa.verifySignature(message, sig, publicKeyVector, PKCS1v15Params(HashAlgorithm::SHA256)));
 }
 
 TEST(RSA_PKCS1v15, RoundTrip_Encrypt_Decrypt) {
     RSA rsa(RSASecurityStrength::RSA_1024, privateKeyVector, publicKeyVector);
-    const std::string plaintext = "Hello, PKCS#1 v1.5 encryption!";
-    std::string ciphertext = rsa.encrypt(plaintext, publicKeyVector, PKCS1v15Params());
-    std::string recovered = rsa.decrypt(ciphertext, PKCS1v15Params());
+    const SecureBytes plaintext = SecureBytes::fromAscii("Hello, PKCS#1 v1.5 encryption!");
+    SecureBytes ciphertext = rsa.encrypt(plaintext, publicKeyVector, PKCS1v15Params());
+    SecureBytes recovered = rsa.decrypt(ciphertext, PKCS1v15Params());
     EXPECT_EQ(recovered, plaintext);
 }
 
 TEST(RSA_PKCS1v15, VerifySignature_Tampered_Fails) {
     RSA rsa(RSASecurityStrength::RSA_1024, privateKeyVector, publicKeyVector);
-    const std::string message = "Hello, PKCS#1 v1.5!";
-    std::string sig = rsa.signMessage(message, PKCS1v15Params(HashAlgorithm::SHA256));
-    // Flip a byte in the signature
-    std::string tampered = sig;
+    const SecureBytes message = SecureBytes::fromAscii("Hello, PKCS#1 v1.5!");
+    SecureBytes sig = rsa.signMessage(message, PKCS1v15Params(HashAlgorithm::SHA256));
+    SecureBytes tampered = sig;
     tampered[0] ^= 0xff;
     EXPECT_FALSE(rsa.verifySignature(message, tampered, publicKeyVector, PKCS1v15Params(HashAlgorithm::SHA256)));
 }

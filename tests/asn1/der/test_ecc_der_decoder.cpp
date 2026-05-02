@@ -20,15 +20,15 @@ static const std::string kPriv = "0x1";
 static const std::string kPubX = "0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798";
 static const std::string kPubY = "0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8";
 
-static KeyPair makeTestKeyPair() {
+static ECCKeyPair makeTestKeyPair() {
     ECDSAPublicKey pub(Point(kPubX, kPubY), StandardCurve::secp256k1);
-    return KeyPair(kPriv, pub);
+    return ECCKeyPair(kPriv, pub);
 }
 
 // EC Public Key — SEC1
 
 TEST(DERDecoder_ECC_Test, decode_sec1_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     // Produce known-good DER bytes via the encoder
     DEREncoder encoder;
@@ -40,14 +40,14 @@ TEST(DERDecoder_ECC_Test, decode_sec1_ec_public_key) {
     Point expected = kp.publicKey.getPublicKey();
     Point actual   = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(expected.x, actual.x) == 0);
-    EXPECT_TRUE(mpz_cmp(expected.y, actual.y) == 0);
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
 }
 
 // EC Public Key — PKCS8
 
 TEST(DERDecoder_ECC_Test, decode_pkcs8_ec_public_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> der = encoder.encodeECPublicKeyToPKCS8(kp.publicKey);
@@ -58,15 +58,15 @@ TEST(DERDecoder_ECC_Test, decode_pkcs8_ec_public_key) {
     Point expected = kp.publicKey.getPublicKey();
     Point actual   = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(expected.x, actual.x) == 0);
-    EXPECT_TRUE(mpz_cmp(expected.y, actual.y) == 0);
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
     EXPECT_EQ(kp.publicKey.getPublicKeyCurve(), decoded.getPublicKeyCurve());
 }
 
 // EC Public Key — auto-detect
 
 TEST(DERDecoder_ECC_Test, decode_ec_public_key_auto_detect_pkcs8) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> der = encoder.encodeECPublicKeyToPKCS8(kp.publicKey);
@@ -77,61 +77,61 @@ TEST(DERDecoder_ECC_Test, decode_ec_public_key_auto_detect_pkcs8) {
     Point expected = kp.publicKey.getPublicKey();
     Point actual   = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(expected.x, actual.x) == 0);
-    EXPECT_TRUE(mpz_cmp(expected.y, actual.y) == 0);
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
 }
 
 // EC Private Key — SEC1
 
 TEST(DERDecoder_ECC_Test, decode_sec1_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> der = encoder.encodeECPrivateKeyToSEC1(kp);
 
     DERDecoder decoder(der);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromSEC1();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromSEC1();
 
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.x, decPub.x) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.y, decPub.y) == 0);
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
+    EXPECT_EQ(origPub.x, decPub.x);
+    EXPECT_EQ(origPub.y, decPub.y);
 }
 
 // EC Private Key — PKCS8
 
 TEST(DERDecoder_ECC_Test, decode_pkcs8_ec_private_key) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> der = encoder.encodeECPrivateKeyToPKCS8(kp);
 
     DERDecoder decoder(der);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromPKCS8();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromPKCS8();
 
     Point origPub = kp.getPublicKey();
     Point decPub  = decoded.getPublicKey();
 
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.x, decPub.x) == 0);
-    EXPECT_TRUE(mpz_cmp(origPub.y, decPub.y) == 0);
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
+    EXPECT_EQ(origPub.x, decPub.x);
+    EXPECT_EQ(origPub.y, decPub.y);
     EXPECT_EQ(kp.publicKey.getPublicKeyCurve(), decoded.publicKey.getPublicKeyCurve());
 }
 
 // EC Private Key — auto-detect
 
 TEST(DERDecoder_ECC_Test, decode_ec_private_key_auto_detect_pkcs8) {
-    KeyPair kp = makeTestKeyPair();
+    ECCKeyPair kp = makeTestKeyPair();
 
     DEREncoder encoder;
     std::vector<uint8_t> der = encoder.encodeECPrivateKeyToPKCS8(kp);
 
     DERDecoder decoder(der);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromDER();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromDER();
 
-    EXPECT_TRUE(mpz_cmp(kp.privateKey, decoded.privateKey) == 0);
+    EXPECT_EQ(kp.privateKey, decoded.privateKey);
 }
 
 // Known Answer Tests
@@ -172,25 +172,23 @@ TEST(DERDecoder_ECC_Test, decode_pkcs8_ec_public_key_kat) {
     ECDSAPublicKey decoded = decoder.decodeECPublicKeyFromPKCS8();
 
     Point pt = decoded.getPublicKey();
-    EXPECT_STREQ(mpz_get_str(nullptr, 16, pt.x),
-        "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
-    EXPECT_STREQ(mpz_get_str(nullptr, 16, pt.y),
-        "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8");
+    EXPECT_EQ(pt.x, BigInt("0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"));
+    EXPECT_EQ(pt.y, BigInt("0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"));
     EXPECT_EQ(decoded.getPublicKeyCurve(), StandardCurve::secp256k1);
 }
 
 TEST(DERDecoder_ECC_Test, decode_sec1_ec_private_key_kat) {
     DERDecoder decoder(testSec1EcPrivateKey);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromSEC1();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromSEC1();
 
-    EXPECT_EQ(mpz_get_ui(decoded.privateKey), 1u);
+    EXPECT_EQ(decoded.privateKey, 1u);
     EXPECT_EQ(decoded.publicKey.getPublicKeyCurve(), StandardCurve::secp256k1);
 }
 
 TEST(DERDecoder_ECC_Test, decode_pkcs8_ec_private_key_kat) {
     DERDecoder decoder(testPkcs8EcPrivateKey);
-    KeyPair decoded = decoder.decodeECPrivateKeyFromPKCS8();
+    ECCKeyPair decoded = decoder.decodeECPrivateKeyFromPKCS8();
 
-    EXPECT_EQ(mpz_get_ui(decoded.privateKey), 1u);
+    EXPECT_EQ(decoded.privateKey, 1u);
     EXPECT_EQ(decoded.publicKey.getPublicKeyCurve(), StandardCurve::secp256k1);
 }

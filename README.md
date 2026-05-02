@@ -106,12 +106,12 @@ Using Gestalt is meant to be as simple as possible for developers to quickly use
 #include <iostream>
 
 int main() {
-    std::string key = "10a58869d74be5a374cf867cfb473859"; // 128-bit key
-    std::string iv  = "123456789abcdef123456789abcdef12";
-    std::string message = "Hello, Gestalt!";
-    std::string ciphertext = encryptAESCBC(message, iv, key);
+    const SecureBytes key     = SecureBytes::fromHex("10a58869d74be5a374cf867cfb473859"); // 128-bit key
+    const SecureBytes iv      = SecureBytes::fromHex("123456789abcdef123456789abcdef12");
+    const SecureBytes message = SecureBytes::fromAscii("Hello, Gestalt!");
+    SecureBytes ciphertext = encryptAESCBC(message, iv, key);
 
-    std::cout << "AES-CBC-128: " << ciphertext << std::endl;
+    std::cout << "AES-CBC-128: " << ciphertext.toHex() << std::endl;
 
     return 0;
 }
@@ -124,10 +124,10 @@ int main() {
 #include <iostream>
 
 int main() {
-    std::string message = "Hello, Gestalt!";
-    std::string hash = hashSHA256(message);
+    const SecureBytes message = SecureBytes::fromAscii("Hello, Gestalt!");
+    SecureBytes hash = hashSHA256(message);
 
-    std::cout << "SHA2-256: " << hash << std::endl;
+    std::cout << "SHA2-256: " << hash.toHex() << std::endl;
 
     return 0;
 }
@@ -140,15 +140,15 @@ int main() {
 #include <iostream>
 
 int main() {
-    std::string privateKey = "0xC9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
+    BigInt privateKey = "0xC9AFA9D845BA75166B5C215767B1D6934E50C3DB36E89B127B8A622B120F6721";
     ECDSA ecdsa(StandardCurve::P256, privateKey);
 
-    std::string message = "Hello, Gestalt!";
+    const SecureBytes message = SecureBytes::fromAscii("Hello, Gestalt!");
 
-    Signature signature = ecdsa.signMessage(message, HashAlgorithm::SHA256);
+    ECDSASignature signature = ecdsa.signMessage(message, HashAlgorithm::SHA256);
 
-    ECDSAPublicKey peerPublicKey("0x60fed4ba255a9d31c961eb74c6356d68c049b8923b61fa6ce669622e60f29fb6",
-                                 "0x7903fe1008b8bc99a41ae9e95628bc64f2f1b20c2d7e9f5177a3c294d4462299");
+    ECDSAPublicKey peerPublicKey(BigInt("0x60fed4ba255a9d31c961eb74c6356d68c049b8923b61fa6ce669622e60f29fb6"),
+                                 BigInt("0x7903fe1008b8bc99a41ae9e95628bc64f2f1b20c2d7e9f5177a3c294d4462299"));
     bool signatureStatus = ecdsa.verifySignature(message, peerPublicKey, signature, HashAlgorithm::SHA256);
 
     if (signatureStatus) std::cout << "Valid!" << std::endl;

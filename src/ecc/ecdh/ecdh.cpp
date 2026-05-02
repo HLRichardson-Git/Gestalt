@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -17,29 +17,25 @@
  *
  * References:
  * - "Understanding Cryptography" by Christof Paar and Jan Pelzl
- * - "FIPS SP800-56Ar3 Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm 
+ * - "NIST SP800-56Ar3 Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm
  *    Cryptography" by NIST
  *
  */
 
-#include <gmp.h>
-
 #include <gestalt/ecdh.h>
 
-std::string ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
+SecureBytes ECDH::computeSharedSecret(const ECDHPublicKey& givenPeerPublicKey) {
     std::string validationError = isValidPublicKey(givenPeerPublicKey.getPublicKey());
     if (!validationError.empty()) {
         throw std::invalid_argument(validationError);
     }
 
     Point sharedPoint = scalarMultiplyPoints(keyPair.privateKey, givenPeerPublicKey.getPublicKey());
-    if(isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
-    fieldElementToInteger(sharedPoint.x, sharedPoint.x);
-    return keyToString(sharedPoint);
+    if (isIdentityPoint(sharedPoint)) throw std::invalid_argument("Error: Computed shared value is Identity element.");
+    sharedPoint.x = fieldElementToInteger(sharedPoint.x);
+    return pointToSecureBytes(sharedPoint);
 }
 
-std::string ECDH::keyToString(const Point& point) const {
-    char *cStr = mpz_get_str(NULL, 16, point.x);
-    std::string str = cStr;
-    return str;
+SecureBytes ECDH::pointToSecureBytes(const Point& point) const {
+    return SecureBytes::fromVector(point.x.toBytes());
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -11,11 +11,9 @@
  */
 
 #include "gtest/gtest.h"
-#include <string>
 
 #include <gestalt/sha1.h>
 #include "sha1/sha1Core.h"
-#include "utils.h"
 
 const bool skipLargeHash = true; // This test can take a bit, so set to false if you'd like to test.
 
@@ -24,38 +22,22 @@ const bool skipLargeHash = true; // This test can take a bit, so set to false if
 // [2] - https://www.di-mgt.com.au/sha_testvectors.html
 TEST(SHA1, hashKatSHA1) {
     // See [1] pg.12 for test vector.
-    std::string shortKAT = "abc";
-    const std::string expectedShortKAT = "a9993e364706816aba3e25717850c26c9cd0d89d";
-
-    std::string shortDigest = hashSHA1(shortKAT);
-
-    EXPECT_EQ(shortDigest, expectedShortKAT);
+    SecureBytes shortDigest = hashSHA1(SecureBytes::fromAscii("abc"));
+    EXPECT_EQ(shortDigest, SecureBytes::fromHex("a9993e364706816aba3e25717850c26c9cd0d89d"));
 
     // See [1] pg.15 for test vector.
-    std::string longKAT = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
-    const std::string expectedLongKAT = "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
-
-    std::string longDigest = hashSHA1(longKAT);
-
-    EXPECT_EQ(longDigest, expectedLongKAT);
+    SecureBytes longDigest = hashSHA1(SecureBytes::fromAscii("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"));
+    EXPECT_EQ(longDigest, SecureBytes::fromHex("84983e441c3bd26ebaae4aa1f95129e5e54670f1"));
 
     // See [2] test vector 4.
-    std::string longLongKAT = 
+    SecureBytes longLongDigest = hashSHA1(SecureBytes::fromAscii(
         "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmn"
-        "hijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
-    const std::string expectedLongLongKAT = "a49b2446a02c645bf419f995b67091253a04a259";
-
-    std::string longLongDigest = hashSHA1(longLongKAT);
-
-    EXPECT_EQ(longLongDigest, expectedLongLongKAT);
+        "hijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu"));
+    EXPECT_EQ(longLongDigest, SecureBytes::fromHex("a49b2446a02c645bf419f995b67091253a04a259"));
 
     // See [2] test vector 2.
-    std::string emptyStringKAT = "";
-    const std::string expectedEmptyStringKAT = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
-
-    std::string emptyStringDigest = hashSHA1(emptyStringKAT);
-
-    EXPECT_EQ(emptyStringDigest, expectedEmptyStringKAT);
+    SecureBytes emptyStringDigest = hashSHA1(SecureBytes());
+    EXPECT_EQ(emptyStringDigest, SecureBytes::fromHex("da39a3ee5e6b4b0d3255bfef95601890afd80709"));
 }
 
 // Large Known Answer Test(KAT) for SHA1 from:
@@ -63,27 +45,21 @@ TEST(SHA1, hashKatSHA1) {
 TEST(SHA1, hashLargeKatSHA1) {
     if(skipLargeHash) GTEST_SKIP();
     // See [2] test vector 5.
-    std::string largeSeed = "a"; // repeated 1,000,000 times.
-    std::string largeKAT = "";
+    SecureBytes largeKAT;
+    SecureBytes largeSeed = SecureBytes::fromAscii("a");
     const size_t largeRepetitions = 1000000;
     for (size_t i = 0; i < largeRepetitions; i++) {
-        largeKAT += largeSeed;
+        largeKAT.append(largeSeed);
     }
-    const std::string expectedLargeKAT = "34aa973cd4c4daa4f61eeb2bdbad27316534016f";
-    std::string largeDigest = hashSHA1(largeKAT);
+    EXPECT_EQ(hashSHA1(largeKAT), SecureBytes::fromHex("34aa973cd4c4daa4f61eeb2bdbad27316534016f"));
 
-    EXPECT_EQ(largeDigest, expectedLargeKAT);
-
-    // See [2] test vector 6. 
+    // See [2] test vector 6.
     // repeated 16,777,216 times
-    std::string extremelyLongSeed = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno";
-    std::string extremelyLongKAT = "";
+    SecureBytes extremelyLongKAT;
+    SecureBytes extremelyLongSeed = SecureBytes::fromAscii("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
     const size_t extremelyLongRepetitions = 16777216;
     for (size_t i = 0; i < extremelyLongRepetitions; i++) {
-        extremelyLongKAT += extremelyLongSeed;
+        extremelyLongKAT.append(extremelyLongSeed);
     }
-    const std::string expectedExtremelyLongKAT = "7789f0c9ef7bfc40d93311143dfbe69e2017f592";
-    std::string expectedExtremelyLongDigest = hashSHA1(extremelyLongKAT);
-
-    EXPECT_EQ(expectedExtremelyLongDigest, expectedExtremelyLongKAT);
+    EXPECT_EQ(hashSHA1(extremelyLongKAT), SecureBytes::fromHex("7789f0c9ef7bfc40d93311143dfbe69e2017f592"));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -10,8 +10,6 @@
  * This file contains the implementation of Gestalts SHA2 security functions.
  */
 
-#include <sstream>
-#include <iomanip>
 #include <climits>
 #include <cstdint>
 
@@ -39,10 +37,10 @@ bool isValidSHA2Length(uint64_t length) {
     return length >= 0 && length < ULLONG_MAX - 1;
 }
 
-std::string applyPadding(const std::string& in, size_t wordSize) {
-    std::string out = in;
-    uint64_t bitLengthLow = static_cast<uint64_t>(in.length()) * 8;
-    uint64_t bitLengthHigh = (wordSize == 4) ? 0 : (static_cast<uint64_t>(in.length()) >> 61);
+SecureBytes applyPadding(const SecureBytes& in, size_t wordSize) {
+    SecureBytes out = in;
+    uint64_t bitLengthLow = static_cast<uint64_t>(in.size()) * 8;
+    uint64_t bitLengthHigh = (wordSize == 4) ? 0 : (static_cast<uint64_t>(in.size()) >> 61);
 
     // Validate input length against SHA-2 bounds
     if (wordSize == 4 && !isValidSHA2Length(bitLengthLow))
@@ -50,24 +48,26 @@ std::string applyPadding(const std::string& in, size_t wordSize) {
     if (wordSize == 8 && !isValidSHA2Length(bitLengthHigh))
         throw std::invalid_argument("Error: Given input for SHA512 family is out of bounds 0 <= length < 2^128.");
 
-    out += (char)0x80; // apend that character '1'
+    out.append(SecureBytes(1, 0x80)); // append the '1' bit
 
     // Append zeros until reaching the message length boundary
-    while ((out.length() % (wordSize * 16)) != 14 * wordSize) { // 14 * wordsize = wordSize * 16 - (wordSize * 2)
-        out += (char)0x00;
+    while ((out.size() % (wordSize * 16)) != 14 * wordSize) { // 14 * wordsize = wordSize * 16 - (wordSize * 2)
+        out.append(SecureBytes(1, 0x00));
     }
 
     // Append message length
     if (wordSize == 8) { // Append high 64 bits if using SHA-512
-        for (int i = 7; i >= 0; --i) {
-            out += (char)((bitLengthHigh >> (i * 8)) & 0xFF);
-        }
+        SecureBytes highLen(8);
+        for (int i = 0; i < 8; ++i)
+            highLen[i] = static_cast<uint8_t>((bitLengthHigh >> ((7 - i) * 8)) & 0xFF);
+        out.append(highLen);
     }
     // Append low 64 bits in any case
-    for (int i = 7; i >= 0; --i) {
-        out += (char)((bitLengthLow >> (i * 8)) & 0xFF);
-    }
-    
+    SecureBytes lowLen(8);
+    for (int i = 0; i < 8; ++i)
+        lowLen[i] = static_cast<uint8_t>((bitLengthLow >> ((7 - i) * 8)) & 0xFF);
+    out.append(lowLen);
+
     return out;
 }
 
@@ -75,15 +75,18 @@ std::string applyPadding(const std::string& in, size_t wordSize) {
  * Fills block to be hashed by SHA2 function.
  * @tparam T Type of the word (uint32_t or uint64_t).
  * @tparam NumOfWords Number of words in the W array (64 for SHA-256, 80 for SHA-512).
+ * @param in The padded input message.
+ * @param offset The byte offset into the input at which the current block starts.
+ * @param W The output word array to fill.
  */
 template<typename T, int NumOfWords>
-void fillBlock(const std::string& in, T W[NumOfWords]) {
+void fillBlock(const SecureBytes& in, std::size_t offset, T W[NumOfWords]) {
     size_t wordSize = sizeof(T);
-    
+
     for (int i = 0; i < 16; ++i) {
         W[i] = 0;
         for (size_t j = 0; j < wordSize; j++) {
-            W[i] |= ((static_cast<T>(in[i * wordSize + j] & 0xFF)) << ((wordSize - 1 - j) * 8));
+            W[i] |= ((static_cast<T>(in[offset + i * wordSize + j] & 0xFF)) << ((wordSize - 1 - j) * 8));
         }
     }
 
@@ -100,17 +103,17 @@ void fillBlock(const std::string& in, T W[NumOfWords]) {
  * @tparam HashSize Size of the hash output in bytes.
  * @param in The input message.
  * @param H Initial hash values.
- * @return The computed hash as a hex string.
+ * @return The computed hash as a SecureBytes object.
  */
 template<typename T, size_t NumOfWords, const std::array<T, NumOfWords>& K, size_t HashSize>
-std::string sha2(const std::string& in, std::array<T, 8> H) {
+SecureBytes sha2(const SecureBytes& in, std::array<T, 8> H) {
     size_t wordSize = sizeof(T);
-    std::string msg = applyPadding(in, wordSize);
+    size_t blockSize = (wordSize == 4 ? 64 : 128);
+    SecureBytes msg = applyPadding(in, wordSize);
 
-    for (size_t i = 0; i < msg.length(); i += (wordSize == 4 ? 64 : 128)) {
+    for (size_t i = 0; i < msg.size(); i += blockSize) {
         T W[NumOfWords] = {0};
-        std::string chunk = msg.substr(i, (wordSize == 4 ? 64 : 128));
-        fillBlock<T, NumOfWords>(chunk, W);
+        fillBlock<T, NumOfWords>(msg, i, W);
 
         // Initialize hash value for this chunk
         T a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
@@ -138,11 +141,10 @@ std::string sha2(const std::string& in, std::array<T, 8> H) {
         H[7] += h;
     }
 
-    std::ostringstream oss;
-    uint8_t hashValue[HashSize] = {0};
+    SecureBytes result(HashSize);
     for (size_t i = 0; i < HashSize / wordSize; i++) {
         for (size_t j = 0; j < wordSize; j++) {
-            hashValue[i * wordSize + j] = (H[i] >> ((wordSize - 1 - j) * 8)) & 0xFF;
+            result[i * wordSize + j] = (H[i] >> ((wordSize - 1 - j) * 8)) & 0xFF;
         }
     }
 
@@ -150,19 +152,16 @@ std::string sha2(const std::string& in, std::array<T, 8> H) {
     // I agree its ugly
     if (wordSize == 8 && HashSize == 28) {
         for (int i = 0; i < 4; ++i) {
-            hashValue[24 + i] = static_cast<uint8_t>((H[3] >> (56 - i * 8)) & 0xFF);
+            result[24 + i] = static_cast<uint8_t>((H[3] >> (56 - i * 8)) & 0xFF);
         }
     }
 
-    for (size_t i = 0; i < HashSize; i++) {
-        oss << std::hex << std::setw(2) << std::setfill('0') << (int)hashValue[i];
-    }
-    return oss.str();
+    return result;
 }
 
-std::string hashSHA224    (const std::string& in) { return sha2<uint32_t, 64, K256, 28>(in, SHA_224_H); }
-std::string hashSHA256    (const std::string& in) { return sha2<uint32_t, 64, K256, 32>(in, SHA_256_H); }
-std::string hashSHA384    (const std::string& in) { return sha2<uint64_t, 80, K512, 48>(in, SHA_384_H); }
-std::string hashSHA512    (const std::string& in) { return sha2<uint64_t, 80, K512, 64>(in, SHA_512_H); }
-std::string hashSHA512_224(const std::string& in) { return sha2<uint64_t, 80, K512, 28>(in, SHA_512_224_H); }
-std::string hashSHA512_256(const std::string& in) { return sha2<uint64_t, 80, K512, 32>(in, SHA_512_256_H); }
+SecureBytes hashSHA224    (const SecureBytes& in) { return sha2<uint32_t, 64, K256, 28>(in, SHA_224_H); }
+SecureBytes hashSHA256    (const SecureBytes& in) { return sha2<uint32_t, 64, K256, 32>(in, SHA_256_H); }
+SecureBytes hashSHA384    (const SecureBytes& in) { return sha2<uint64_t, 80, K512, 48>(in, SHA_384_H); }
+SecureBytes hashSHA512    (const SecureBytes& in) { return sha2<uint64_t, 80, K512, 64>(in, SHA_512_H); }
+SecureBytes hashSHA512_224(const SecureBytes& in) { return sha2<uint64_t, 80, K512, 28>(in, SHA_512_224_H); }
+SecureBytes hashSHA512_256(const SecureBytes& in) { return sha2<uint64_t, 80, K512, 32>(in, SHA_512_256_H); }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -13,18 +13,17 @@
 
 #include "gtest/gtest.h"
 
+#include <gestalt/secure_bytes.h>
 #include "aes/aesCore.h"
-#include "utils.h"
 
-//AES_Functions testFunctions;
 class AES_Functions : public ::testing::Test {
 private:
 	AES aesObject;
 	unsigned char roundKey[AES_BLOCK_SIZE * 15]; // Array to hold round key
 public:
 
-	AES_Functions() : aesObject("10a58869d74be5a374cf867cfb473859") {
-        aesObject.keyExpansion("10a58869d74be5a374cf867cfb473859", roundKey);
+	AES_Functions() : aesObject(SecureBytes::fromHex("10a58869d74be5a374cf867cfb473859")) {
+        aesObject.keyExpansion(SecureBytes::fromHex("10a58869d74be5a374cf867cfb473859"), roundKey);
     }
 	
 	const unsigned char* testKeyExpansion() { return this->roundKey; }
@@ -42,16 +41,13 @@ public:
 TEST_F(AES_Functions, KeyExpansion) {
 	const unsigned char* roundKey = testKeyExpansion();
 
-	const std::string expectedStr = 
+	const SecureBytes expected = SecureBytes::fromHex(
 		"10a58869d74be5a374cf867cfb473859b1a2436666e9a6c5122620b9e96118e05c0fa2783ae604bd28c02404c1a13ce46ae4cb005002c"
 		"fbd78c2ebb9b963d75d99ea8756c9e848ebb12aa3520849740fb278f1667b90b98dcaba1adfc2f36ed09fe78143e47738ce2ecd2211ec"
 		"3e4cc16dcef98d89b9c143a774e3524b4aaf933bb7253eb20ee47d157a072f5e30a8bc24754066967ba41b8301a334dd310b88d55e84a"
-		"7432520bcc02483881d158800";
-	size_t arraySize = expectedStr.length() / 2;
-    unsigned char* expectedByteArray = new unsigned char[arraySize];
-    hexStringToBytes(expectedStr, expectedByteArray);
+		"7432520bcc02483881d158800");
 
-	EXPECT_EQ(0, std::memcmp(roundKey, expectedByteArray, AES_BLOCK_SIZE));
+	EXPECT_EQ(0, std::memcmp(roundKey, expected.data(), AES_BLOCK_SIZE));
 }
 
 TEST_F(AES_Functions, SubByte) {
