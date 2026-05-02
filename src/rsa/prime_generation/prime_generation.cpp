@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -15,34 +15,26 @@
 
 #include "prime_generation.h"
 
-void generateLargePrime(mpz_t prime, unsigned int bits, RandomPrimeMethod method, gmp_randstate_t& state) {
-    mpz_t lower_bound, upper_bound;
-    mpz_inits(lower_bound, upper_bound, NULL);
+BigInt generateLargePrime(unsigned int bits, RandomPrimeMethod method) {
+    BigInt lower, upper;
+    mpz_ui_pow_ui(lower.n, 2, bits - 1); // 2^(bits-1)
+    mpz_ui_pow_ui(upper.n, 2, bits);     // 2^bits
 
-    mpz_ui_pow_ui(upper_bound, 2, bits); // 2^bits
-    mpz_ui_pow_ui(lower_bound, 2, bits - 1); // 2^(bits - 1)
-    
-    mpz_urandomb(prime, state, bits);
-    mpz_setbit(prime, bits - 1); // Ensure the number has the correct bit length
-
-    while (true) {
-        if (mpz_cmp(prime, lower_bound) >= 0 && mpz_cmp(prime, upper_bound) < 0) {
-            /*
-             * returns 2 if prime is definitely prime, but takes significantly longer
-             * returns 1 if prime is probably prime and is a lot faster
-             * returns 0 if prime is definitely not prime
-             */
-            unsigned int is_prime = mpz_probab_prime_p(prime, 25); 
-
-            if ((method == RandomPrimeMethod::provable && is_prime == 2) ||
-                (method == RandomPrimeMethod::probable && (is_prime == 1 || is_prime == 2))) {
-            //if (is_prime > 0) {
-                break; // Prime number found
-            }
+    BigInt candidate;
+    do {
+        candidate = BigInt::random(lower, upper);
+        /*
+         * mpz_probab_prime_p returns:
+         *   2 if definitely prime (takes longer)
+         *   1 if probably prime (faster)
+         *   0 if definitely not prime
+         */
+        int is_prime = mpz_probab_prime_p(candidate.n, 25);
+        if ((method == RandomPrimeMethod::provable  && is_prime == 2) ||
+            (method == RandomPrimeMethod::probable  && is_prime  > 0)) {
+            break;
         }
-        mpz_urandomb(prime, state, bits);
-        mpz_setbit(prime, bits - 1);
-    }
+    } while (true);
 
-    mpz_clears(lower_bound, upper_bound, NULL);
+    return candidate;
 }

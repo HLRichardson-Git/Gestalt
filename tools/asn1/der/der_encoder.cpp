@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -401,10 +401,10 @@ size_t DEREncoder::getFieldByteSize(StandardCurve curve) {
 // Encode an EC field element as a fixed-width unsigned big-endian byte vector.
 // Unlike DER INTEGER encoding, field elements are NOT prefixed with a zero pad byte
 // for high-bit values — they are always exactly byteLen bytes, left-padded with zeros.
-std::vector<uint8_t> DEREncoder::encodeFieldElement(const mpz_t& val, size_t byteLen) {
+std::vector<uint8_t> DEREncoder::encodeFieldElement(const BigInt& val, size_t byteLen) {
     std::vector<uint8_t> bytes(byteLen, 0x00);
     size_t count = 0;
-    mpz_export(bytes.data(), &count, 1, 1, 1, 0, val);
+    mpz_export(bytes.data(), &count, 1, 1, 1, 0, val.n);
     // mpz_export writes 'count' bytes big-endian at the front of the buffer.
     // Right-justify them so the result is exactly byteLen bytes with zero padding on the left.
     if (count < byteLen) {
@@ -421,7 +421,7 @@ std::vector<uint8_t> DEREncoder::encodeFieldElement(const mpz_t& val, size_t byt
 // SEC1 "public key" encoding: uncompressed point bytes 0x04 || X || Y.
 // This is the raw content placed inside a BIT STRING for PKCS8, or returned
 // standalone for SEC1 format.
-std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const PublicKey& key) {
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const ECCPublicKey& key) {
     clear();
     StandardCurve curve = key.getPublicKeyCurve();
     size_t fieldLen = getFieldByteSize(curve);
@@ -443,7 +443,7 @@ std::vector<uint8_t> DEREncoder::encodeECPublicKeyToSEC1(const PublicKey& key) {
 //   SEQUENCE { OID id-ecPublicKey, OID curve }
 //   BIT STRING { 0x00, 0x04, X, Y }
 // }
-std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const PublicKey& key) {
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const ECCPublicKey& key) {
     clear();
     StandardCurve curve = key.getPublicKeyCurve();
 
@@ -479,7 +479,7 @@ std::vector<uint8_t> DEREncoder::encodeECPublicKeyToPKCS8(const PublicKey& key) 
     return buffer;
 }
 
-std::vector<uint8_t> DEREncoder::encodeECPublicKeyToDER(const PublicKey& key, EccKeyFormat format) {
+std::vector<uint8_t> DEREncoder::encodeECPublicKeyToDER(const ECCPublicKey& key, EccKeyFormat format) {
     if (format == EccKeyFormat::SEC1) {
         return encodeECPublicKeyToSEC1(key);
     } else {
@@ -498,7 +498,7 @@ std::vector<uint8_t> DEREncoder::encodeECPublicKeyToDER(const PublicKey& key, Ec
 //   [0] EXPLICIT OID curve
 //   [1] EXPLICIT BIT STRING { 0x00, 0x04, X, Y }
 // }
-std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToSEC1(const KeyPair& keyPair) {
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToSEC1(const ECCKeyPair& keyPair) {
     clear();
     StandardCurve curve = keyPair.publicKey.getPublicKeyCurve();
     size_t fieldLen = getFieldByteSize(curve);
@@ -560,7 +560,7 @@ std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToSEC1(const KeyPair& keyPair
 //   SEQUENCE { OID id-ecPublicKey, OID curve }
 //   OCTET STRING { SEC1 ECPrivateKey DER }
 // }
-std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToPKCS8(const KeyPair& keyPair) {
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToPKCS8(const ECCKeyPair& keyPair) {
     clear();
     StandardCurve curve = keyPair.publicKey.getPublicKeyCurve();
 
@@ -596,7 +596,7 @@ std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToPKCS8(const KeyPair& keyPai
     return buffer;
 }
 
-std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToDER(const KeyPair& keyPair, EccKeyFormat format) {
+std::vector<uint8_t> DEREncoder::encodeECPrivateKeyToDER(const ECCKeyPair& keyPair, EccKeyFormat format) {
     if (format == EccKeyFormat::SEC1) {
         return encodeECPrivateKeyToSEC1(keyPair);
     } else {

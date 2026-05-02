@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -12,6 +12,6 @@
 
 #pragma once
 
-#include <string>
+#include <gestalt/secure_bytes.h>
 
-std::string hashSHA1(const std::string& in);
+SecureBytes hashSHA1(const SecureBytes& in);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -28,20 +28,19 @@
 class ECC {
 private:
 
-    KeyPair keyPair;
+    ECCKeyPair keyPair;
     Curve ellipticCurve;
 
     Point addPoints(Point P, Point Q);
     Point doublePoint(Point P);
-    Point scalarMultiplyPoints(const mpz_t& k, Point P);
+    Point scalarMultiplyPoints(const BigInt& k, Point P);
 
-    void getRandomNumber(const mpz_t min, const mpz_t max, mpz_t& result);
-    void fieldElementToInteger(const mpz_t& fieldElement, mpz_t result);
-    bool isInDomainRange(const mpz_t k);
+    BigInt fieldElementToInteger(const BigInt& fieldElement);
+    bool isInDomainRange(const BigInt& k);
     bool isIdentityPoint(Point P);
     bool isPointOnCurve(Point P);
     std::string isValidPublicKey(const ECDSAPublicKey P);
-    std::string isValidKeyPair(const KeyPair& K);
+    std::string isValidKeyPair(const ECCKeyPair& K);
 
     friend class ECDSA;
     friend class ECDH;
@@ -54,13 +53,13 @@ public:
 
     ~ECC() {}
 
-    KeyPair generateKeyPair();
+    ECCKeyPair generateKeyPair();
 
-    void setKeyPair(const KeyPair& newKeyPair);
-    void setKeyPair(const std::string& strKey);
+    void setKeyPair(const ECCKeyPair& newKeyPair);
+    void setKeyPair(const BigInt& key);
     void setCurve(StandardCurve curveType) { 
         ellipticCurve = getCurveParams(curveType);
         keyPair.publicKey.setCurve(curveType); 
     }
-    KeyPair getKeyPair() const { return keyPair; }
+    ECCKeyPair getKeyPair() const { return keyPair; }
 };

@@ -78,12 +78,9 @@ struct RSAPrivateKey {
     void calculateCRTComponents() {
         BigInt pMinus1 = p - 1;
         BigInt qMinus1 = q - 1;
-        dP = d % pMinus1;
-        dQ = d % qMinus1;
-        if (mpz_invert(qInv.n, q.n, p.n) == 0) {
-            // If the return value is 0, it means the inverse doesn't exist (q and p are not coprime)
-            throw std::runtime_error("q and p are not coprime, modular inverse does not exist.");
-        }
+        dP   = d % pMinus1;
+        dQ   = d % qMinus1;
+        qInv = q.modInverse(p);
     }
 
     void debugCRTComponents() const {
@@ -111,7 +108,6 @@ private:
     bool isPrime(const BigInt& number);
     bool validatePrivateKey(RSAPrivateKey privateKeyCandidate);
     bool validatePublicKey(RSAPublicKey publicKeyCandidate);
-    void computePrivateExponent(mpz_t d, const mpz_t e, const mpz_t phi_n);
     void generateKeyPair(RSAKeyGenOptions options);
 
     friend class RSA;

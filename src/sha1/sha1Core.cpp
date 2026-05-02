@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -21,9 +21,6 @@
 #include "sha1Core.h"
 #include "../tools/utils.h"
 
-#include <iomanip>
-#include <sstream>
-
 
 SHA1::SHA1() {
     // Constructor implementation, if needed
@@ -32,20 +29,19 @@ SHA1::SHA1() {
 /*
  * Generates the SHA-1 hash value for the input string.
  *
- * @param in The input string to be hashed.
- * @return The SHA-1 hash value as a hexadecimal string.
+ * @param in The input to be hashed.
+ * @return The SHA-1 hash value as a SecureBytes object.
  */
-std::string SHA1::hash(std::string in) {
+SecureBytes SHA1::hash(const SecureBytes& in) {
     reset();
-    applySha1Padding(in);
+    SecureBytes padded = in;
+    applySha1Padding(padded);
 
-    for (size_t i = 0; i < in.length(); i += 64) {
+    for (size_t i = 0; i < padded.size(); i += 64) {
         uint32_t w[BLOCK_SIZE];
-        
-        // Break the input into chunks of 64 bytes
-        std::string chunk = in.substr(i, 64);
-        // Fill SHA-1 block
-        fillBlock(chunk, w);
+
+        // Fill SHA-1 block from the current 64-byte chunk
+        fillBlock(padded, i, w);
         
         // Initialize hash value for this chunk
         uint32_t a = h0;
@@ -92,36 +88,18 @@ std::string SHA1::hash(std::string in) {
 /*
  * Calculates the SHA-1 hash digest from the accumulated hash values.
  *
- * @return The SHA-1 hash digest as a hexadecimal string.
+ * @return The SHA-1 hash digest as a SecureBytes object.
  */
-std::string SHA1::digest() {
-    uint8_t hashValue[20];
-    hashValue[0] = (h0 >> 24) & 0xFF;
-    hashValue[1] = (h0 >> 16) & 0xFF;
-    hashValue[2] = (h0 >> 8) & 0xFF;
-    hashValue[3] = h0 & 0xFF;
-    hashValue[4] = (h1 >> 24) & 0xFF;
-    hashValue[5] = (h1 >> 16) & 0xFF;
-    hashValue[6] = (h1 >> 8) & 0xFF;
-    hashValue[7] = h1 & 0xFF;
-    hashValue[8] = (h2 >> 24) & 0xFF;
-    hashValue[9] = (h2 >> 16) & 0xFF;
-    hashValue[10] = (h2 >> 8) & 0xFF;
-    hashValue[11] = h2 & 0xFF;
-    hashValue[12] = (h3 >> 24) & 0xFF;
-    hashValue[13] = (h3 >> 16) & 0xFF;
-    hashValue[14] = (h3 >> 8) & 0xFF;
-    hashValue[15] = h3 & 0xFF;
-    hashValue[16] = (h4 >> 24) & 0xFF;
-    hashValue[17] = (h4 >> 16) & 0xFF;
-    hashValue[18] = (h4 >> 8) & 0xFF;
-    hashValue[19] = h4 & 0xFF;
-
-    std::ostringstream oss;
-    for (int i = 0; i < 20; ++i) {
-        oss << std::hex << std::setw(2) << std::setfill('0') << (int)hashValue[i];
+SecureBytes SHA1::digest() {
+    SecureBytes result(20);
+    uint32_t vals[5] = { h0, h1, h2, h3, h4 };
+    for (int i = 0; i < 5; ++i) {
+        result[i * 4 + 0] = (vals[i] >> 24) & 0xFF;
+        result[i * 4 + 1] = (vals[i] >> 16) & 0xFF;
+        result[i * 4 + 2] = (vals[i] >>  8) & 0xFF;
+        result[i * 4 + 3] = (vals[i]       ) & 0xFF;
     }
-    return oss.str();
+    return result;
 }
 
 /*
@@ -140,16 +118,16 @@ void SHA1::reset() {
 /*
  * Fills a 512-bit block with the input message data.
  *
- * @param in The input string from which data is filled into the block.
+ * @param in The input from which data is filled into the block.
+ * @param offset The byte offset into the input at which the current block starts.
  * @param w The output block array.
- * @param index The starting index in the input string from which data is read.
  */
-void SHA1::fillBlock(std::string in, uint32_t w[BLOCK_SIZE]) {
+void SHA1::fillBlock(const SecureBytes& in, std::size_t offset, uint32_t w[BLOCK_SIZE]) {
     for (int j = 0; j < 16; ++j) {
-        w[j] = ((in[j * 4 + 3] & 0xff)) |
-               ((in[j * 4 + 2] & 0xff) << 8) |
-               ((in[j * 4 + 1] & 0xff) << 16) |
-               ((in[j * 4 + 0] & 0xff) << 24);
+        w[j] = ((in[offset + j * 4 + 3] & 0xff)) |
+               ((in[offset + j * 4 + 2] & 0xff) << 8) |
+               ((in[offset + j * 4 + 1] & 0xff) << 16) |
+               ((in[offset + j * 4 + 0] & 0xff) << 24);
     }
     for (int j = 16; j < 80; ++j) {
         uint32_t temp = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
@@ -158,25 +136,26 @@ void SHA1::fillBlock(std::string in, uint32_t w[BLOCK_SIZE]) {
 }
 
 /*
- * Applies SHA-1 padding to the input string.
+ * Applies SHA-1 padding to the input.
  *
- * @param in The input string to which padding is applied.
+ * @param in The input to which padding is applied.
  */
-void SHA1::applySha1Padding(std::string& in) {
-    size_t messageLength = in.length() * 8;
+void SHA1::applySha1Padding(SecureBytes& in) {
+    uint64_t messageLength = static_cast<uint64_t>(in.size()) * 8;
 
     // Add the '1' bit
-    in += (char)0x80;
+    in.append(SecureBytes(1, 0x80));
 
-    // Append '0' bits until the padded message length is 64 bits less than 
+    // Append '0' bits until the padded message length is 64 bits less than
     // a multiple of 512
-    while ((in.length() % 64) != 56) {
-        in += (char)0x00;
+    while ((in.size() % 64) != 56) {
+        in.append(SecureBytes(1, 0x00));
     }
 
-    // Append the length of the original message in bits as a 64-bit big-endian
-    // integer
-    for (int i = 7; i >= 0; --i) {
-        in += (char)((messageLength >> (i * 8)) & 0xFF);
+    // Append the length of the original message in bits as a 64-bit big-endian integer
+    SecureBytes lenBytes(8);
+    for (int i = 0; i < 8; ++i) {
+        lenBytes[i] = static_cast<uint8_t>((messageLength >> ((7 - i) * 8)) & 0xFF);
     }
+    in.append(lenBytes);
 }

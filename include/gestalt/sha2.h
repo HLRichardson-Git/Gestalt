@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -12,11 +12,11 @@
 
 #pragma once
 
-#include <string>
+#include <gestalt/secure_bytes.h>
 
-std::string hashSHA224(const std::string& in);
-std::string hashSHA256(const std::string& in);
-std::string hashSHA384(const std::string& in);
-std::string hashSHA512(const std::string& in);
-std::string hashSHA512_224(const std::string& in);
-std::string hashSHA512_256(const std::string& in);
+SecureBytes hashSHA224(const SecureBytes& in);
+SecureBytes hashSHA256(const SecureBytes& in);
+SecureBytes hashSHA384(const SecureBytes& in);
+SecureBytes hashSHA512(const SecureBytes& in);
+SecureBytes hashSHA512_224(const SecureBytes& in);
+SecureBytes hashSHA512_256(const SecureBytes& in);

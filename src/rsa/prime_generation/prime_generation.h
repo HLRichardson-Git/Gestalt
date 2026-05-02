@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -27,4 +27,4 @@ enum class RandomPrimeMethod {
     //probableWithProbableAux
 };
 
-void generateLargePrime(mpz_t prime, unsigned int bits, RandomPrimeMethod method, gmp_randstate_t& state);
+BigInt generateLargePrime(unsigned int bits, RandomPrimeMethod method);

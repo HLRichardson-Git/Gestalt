@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -28,12 +28,12 @@ public:
     RSA_MGFFunctions mgfFunc;   // Mask generation function
     HashAlgorithm mgfHashFunc;  // Hash used inside MGF1 (None = use hashFunc)
     size_t sLen;
-    std::string salt;           // Should only be set for testing purposes
+    SecureBytes salt;           // Should only be set for testing purposes
 
     PSSParams(HashAlgorithm hash = HashAlgorithm::SHA256,
               RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1,
               size_t sLen = 0,
-              const std::string& salt = "")
+              const SecureBytes& salt = SecureBytes{})
         : hashFunc(hash), mgfFunc(mgf), mgfHashFunc(HashAlgorithm::None),
           sLen(sLen), salt(salt) {}
 
@@ -41,10 +41,10 @@ public:
               RSA_MGFFunctions mgf,
               HashAlgorithm mgfHash,
               size_t sLen = 0,
-              const std::string& salt = "")
+              const SecureBytes& salt = SecureBytes{})
         : hashFunc(hash), mgfFunc(mgf), mgfHashFunc(mgfHash),
           sLen(sLen), salt(salt) {}
 };
 
-std::string encodePSS_Padding(const std::string& input, const PSSParams& params, unsigned int modulusSizeBytes);
-bool verifyPSS_Padding(const std::string& EM, const std::string& message, const PSSParams& params, unsigned int modulusSizeBytes);
+SecureBytes encodePSS_Padding(const SecureBytes& message, const PSSParams& params, unsigned int modulusSizeBytes);
+bool verifyPSS_Padding(const SecureBytes& EM, const SecureBytes& message, const PSSParams& params, unsigned int modulusSizeBytes);

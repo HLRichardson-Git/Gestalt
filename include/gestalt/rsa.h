@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -19,6 +19,7 @@
 
 # pragma once
 
+#include <gestalt/secure_bytes.h>
 #include "rsa/rsa_key_generation/rsaKeyGen.h"
 #include "rsa/padding_schemes/rsa_padding.h"
 
@@ -42,19 +43,19 @@ public:
     RSAPrivateKey getPrivateKey() const { return keyPair.getPrivateKey(); };
     RSAPublicKey getPublicKey() const { return keyPair.getPublicKey(); };
 
-    std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey);
-    std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters);
-    std::string encrypt(const std::string& plaintext, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters);
+    SecureBytes encrypt(const SecureBytes& plaintext, const RSAPublicKey& recipientPublicKey);
+    SecureBytes encrypt(const SecureBytes& plaintext, const RSAPublicKey& recipientPublicKey, const OAEPParams& parameters);
+    SecureBytes encrypt(const SecureBytes& plaintext, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters);
 
-    std::string decrypt(const std::string& ciphertext);
-    std::string decrypt(const std::string& ciphertext, const OAEPParams& parameters);
-    std::string decrypt(const std::string& ciphertext, const PKCS1v15Params& parameters);
+    SecureBytes decrypt(const SecureBytes& ciphertext);
+    SecureBytes decrypt(const SecureBytes& ciphertext, const OAEPParams& parameters);
+    SecureBytes decrypt(const SecureBytes& ciphertext, const PKCS1v15Params& parameters);
 
-    std::string signMessage(const std::string& message, HashAlgorithm hashAlg = HashAlgorithm::None);
-    std::string signMessage(const std::string& message, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
-    std::string signMessage(const std::string& message, const PKCS1v15Params& parameters);
+    SecureBytes signMessage(const SecureBytes& message, HashAlgorithm hashAlg = HashAlgorithm::None);
+    SecureBytes signMessage(const SecureBytes& message, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
+    SecureBytes signMessage(const SecureBytes& message, const PKCS1v15Params& parameters);
 
-    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg = HashAlgorithm::None);
-    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
-    bool verifySignature(const std::string& message, const std::string& signature, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters);
+    bool verifySignature(const SecureBytes& message, const SecureBytes& signature, const RSAPublicKey& recipientPublicKey, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const SecureBytes& message, const SecureBytes& signature, const RSAPublicKey& recipientPublicKey, const PSSParams& parameters, HashAlgorithm hashAlg = HashAlgorithm::None);
+    bool verifySignature(const SecureBytes& message, const SecureBytes& signature, const RSAPublicKey& recipientPublicKey, const PKCS1v15Params& parameters);
 };

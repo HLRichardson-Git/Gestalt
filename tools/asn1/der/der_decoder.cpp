@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 The Gestalt Project Authors. All Rights Reserved.
+ * Copyright 2023-2026 The Gestalt Project Authors. All Rights Reserved.
  *
  * Licensed under the MIT License. See the file LICENSE for the full text.
  */
@@ -526,8 +526,8 @@ static ECDSAPublicKey parseUncompressedPoint(const std::vector<uint8_t>& pointBy
     }
 
     Point pt;
-    mpz_import(pt.x, coordLen, 1, 1, 1, 0, pointBytes.data() + 1);
-    mpz_import(pt.y, coordLen, 1, 1, 1, 0, pointBytes.data() + 1 + coordLen);
+    pt.x = BigInt::fromBytes(pointBytes.data() + 1, coordLen);
+    pt.y = BigInt::fromBytes(pointBytes.data() + 1 + coordLen, coordLen);
     return ECDSAPublicKey(pt);
 }
 
@@ -616,7 +616,7 @@ ECDSAPublicKey DERDecoder::decodeECPublicKeyFromDER() {
 
 // SEC1 ECPrivateKey:
 // SEQUENCE { INTEGER version(1), OCTET STRING priv, [0] OID curve, [1] BIT STRING pubKey }
-KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
+ECCKeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
     size_t seqEnd = readSequence();
 
     // version must be 1
@@ -665,8 +665,8 @@ KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
     pubKey.setCurve(curve);
 
     // Import private key bytes into mpz_t
-    KeyPair keyPair;
-    mpz_import(keyPair.privateKey, privBytes.size(), 1, 1, 1, 0, privBytes.data());
+    ECCKeyPair keyPair;
+    keyPair.privateKey = BigInt::fromBytes(privBytes.data(), privBytes.size());
     keyPair.publicKey = pubKey;
 
     return keyPair;
@@ -674,7 +674,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromSEC1() {
 
 // PKCS8 PrivateKeyInfo for EC:
 // SEQUENCE { INTEGER version(0), SEQUENCE { OID id-ecPublicKey, OID curve }, OCTET STRING { SEC1 } }
-KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
+ECCKeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
     size_t outerEnd = readSequence();
 
     BigInt version = readIntegerAsBigInt();
@@ -696,7 +696,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
 
     // Parse the SEC1 structure
     DERDecoder sec1Decoder(sec1Bytes);
-    KeyPair keyPair = sec1Decoder.decodeECPrivateKeyFromSEC1();
+    ECCKeyPair keyPair = sec1Decoder.decodeECPrivateKeyFromSEC1();
 
     // The curve OID from PKCS8 is authoritative
     keyPair.publicKey.setCurve(curve);
@@ -707,7 +707,7 @@ KeyPair DERDecoder::decodeECPrivateKeyFromPKCS8() {
     return keyPair;
 }
 
-KeyPair DERDecoder::decodeECPrivateKeyFromDER() {
+ECCKeyPair DERDecoder::decodeECPrivateKeyFromDER() {
     size_t savedPos = pos;
     try {
         return decodeECPrivateKeyFromPKCS8();
