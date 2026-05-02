@@ -124,27 +124,6 @@ void DES::decryptBlock(std::array<uint8_t, 8>& block) {
     for (int i = 7; i >= 0; i--) { block[i] = val & 0xFF; val >>= 8; }
 }
 
-SecureBytes applyPKCS5Padding(const SecureBytes& data) {
-    size_t paddingLength = 8 - (data.size() % 8);
-    SecureBytes result(data.size() + paddingLength);
-    std::memcpy(result.data(), data.data(), data.size());
-    std::memset(result.data() + data.size(), static_cast<int>(paddingLength), paddingLength);
-    return result;
-}
-
-SecureBytes removePKCS5Padding(const SecureBytes& data) {
-    if (data.empty()) {
-        throw std::runtime_error("Data is empty, cannot remove padding.");
-    }
-    size_t paddingLength = data[data.size() - 1];
-    if (paddingLength > data.size() || paddingLength > 8) {
-        throw std::runtime_error("Invalid padding length.");
-    }
-    SecureBytes result(data.size() - paddingLength);
-    std::memcpy(result.data(), data.data(), result.size());
-    return result;
-}
-
 uint64_t bytesToUint64(const SecureBytes& bytes) {
     if (bytes.size() != 8) {
         throw std::invalid_argument("Must be 8 bytes");

@@ -65,6 +65,3 @@ public:
 	void encryptBlock(std::array<uint8_t, 16>& block);
 	void decryptBlock(std::array<uint8_t, 16>& block);
 };
-
-SecureBytes applyPKCS7Padding(const SecureBytes& data);
-SecureBytes removePKCS7Padding(const SecureBytes& data);

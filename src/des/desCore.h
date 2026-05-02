@@ -53,8 +53,6 @@ public:
     void decryptBlock(std::array<uint8_t, 8>& block);
 };
 
-SecureBytes applyPKCS5Padding(const SecureBytes& data);
-SecureBytes removePKCS5Padding(const SecureBytes& data);
 uint64_t bytesToUint64(const SecureBytes& bytes);
 std::vector<uint64_t> bytesToBlocks(const SecureBytes& bytes);
 SecureBytes blocksToBytes(const std::vector<uint64_t>& blocks);

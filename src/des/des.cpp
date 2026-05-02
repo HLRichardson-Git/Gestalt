@@ -63,7 +63,7 @@ SecureBytes encrypt3DESECB(
     DES des2(key2);
     DES des3(key3);
 
-    SecureBytes padded = applyPKCS5Padding(plaintext);
+    SecureBytes padded = applyPKCSPadding(plaintext, DES::block_size);
     SecureBytes result(padded.size());
 
     for (size_t i = 0; i < padded.size(); i += DES::block_size) {
@@ -108,7 +108,7 @@ SecureBytes decrypt3DESECB(
         des1.decryptBlock(block);
         std::memcpy(result.data() + i, block.data(), DES::block_size);
     }
-    return removePKCS5Padding(result);
+    return removePKCSPadding(result, DES::block_size);
 }
 
 /*
@@ -167,7 +167,7 @@ SecureBytes encrypt3DESCBC(
     if (iv.size() != DES::block_size)
         throw std::invalid_argument("IV size must be 8 bytes for DES");
 
-    SecureBytes padded = applyPKCS5Padding(plaintext);
+    SecureBytes padded = applyPKCSPadding(plaintext, DES::block_size);
     SecureBytes result(padded.size());
 
     std::array<uint8_t, DES::block_size> currentIV;
@@ -235,5 +235,5 @@ SecureBytes decrypt3DESCBC(
         std::memcpy(result.data() + i, block.data(), DES::block_size);
         currentIV = nextIV;
     }
-    return removePKCS5Padding(result);
+    return removePKCSPadding(result, DES::block_size);
 }

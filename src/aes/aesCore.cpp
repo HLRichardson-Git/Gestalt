@@ -437,39 +437,3 @@ void AES::subWord(unsigned char temp[4]) {
 void AES::rcon(unsigned char temp[4], int round) {
     temp[0] ^= RCON[round];
 }
-
-/*
- * Applies PKCS7 padding to the input message.
- * PKCS7 padding is a method used to pad messages to a multiple of the block size.
- * The padding value is the number of bytes added, each byte being equal to the number of bytes added.
- *
- * @param data The data which padding should be applied too.
- */
-SecureBytes applyPKCS7Padding(const SecureBytes& data) {
-    size_t paddingLength = AES_BLOCK_SIZE - (data.size() % AES_BLOCK_SIZE);
-    SecureBytes result(data.size() + paddingLength);
-    std::memcpy(result.data(), data.data(), data.size());
-    std::memset(result.data() + data.size(), static_cast<int>(paddingLength), paddingLength);
-    return result;
-}
-
-/*
- * Removes PKCS7 padding from the input message.
- * PKCS7 padding is removed by examining the last byte of the padded message,
- * which indicates the number of bytes added as padding. This value is used
- * to determine how many bytes to remove from the end of the message.
- *
- * @param data Data from which padding should be removed.
- */
-SecureBytes removePKCS7Padding(const SecureBytes& data) {
-    if (data.empty()) {
-        throw std::runtime_error("Data is empty, cannot remove padding.");
-    }
-    size_t paddingLength = data[data.size() - 1];
-    if (paddingLength > data.size() || paddingLength > AES_BLOCK_SIZE) {
-        throw std::runtime_error("Invalid padding length.");
-    }
-    SecureBytes result(data.size() - paddingLength);
-    std::memcpy(result.data(), data.data(), result.size());
-    return result;
-}
