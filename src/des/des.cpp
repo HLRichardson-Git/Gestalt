@@ -12,7 +12,7 @@
 
 #include <gestalt/des.h>
 #include "des/desCore.h"
-#include "modes.h"
+#include "modes/modes.h"
 
 /*
  * Encrypts an arbitrarily sized input with DES_ECB.

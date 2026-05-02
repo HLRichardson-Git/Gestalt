@@ -23,6 +23,8 @@ set (Sources
     src/aes/aesCore.cpp
     src/des/des.cpp
     src/des/desCore.cpp
+    src/modes/ecb.cpp
+    src/modes/cbc.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
     src/sha2/sha2.cpp

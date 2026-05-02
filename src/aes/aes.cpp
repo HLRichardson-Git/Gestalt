@@ -12,7 +12,7 @@
 
 #include <gestalt/aes.h>
 #include "aesCore.h"
-#include "modes.h"
+#include "modes/modes.h"
 
 /*
  * Encrypts an arbitrarily sized input with AES_ECB.
