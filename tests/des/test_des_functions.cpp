@@ -70,20 +70,20 @@ TEST(DES_Functions, keyExpansion) {
 
 TEST(DES_Functions, encryptBlock) {
     DES tester(SecureBytes::fromHex("752878397493CB70"));
-    uint64_t plaintext = 0x1122334455667788;
-    uint64_t ciphertext = tester.encryptBlock(plaintext);
-    uint64_t expected = 0xB5219EE81AA7499D;
+    std::array<uint8_t, 8> block = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    tester.encryptBlock(block);
+    std::array<uint8_t, 8> expected = {0xB5, 0x21, 0x9E, 0xE8, 0x1A, 0xA7, 0x49, 0x9D};
 
-    EXPECT_EQ(ciphertext, expected);
+    EXPECT_EQ(block, expected);
 }
 
 TEST(DES_Functions, decryptBlock) {
     DES tester(SecureBytes::fromHex("752878397493CB70"));
-    uint64_t ciphertext = 0xB5219EE81AA7499D;
-    uint64_t plaintext = tester.decryptBlock(ciphertext);
-    uint64_t expected = 0x1122334455667788;
+    std::array<uint8_t, 8> block = {0xB5, 0x21, 0x9E, 0xE8, 0x1A, 0xA7, 0x49, 0x9D};
+    tester.decryptBlock(block);
+    std::array<uint8_t, 8> expected = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
 
-    EXPECT_EQ(plaintext, expected);
+    EXPECT_EQ(block, expected);
 }
 
 TEST(DES_Functions, initialPermutation) {

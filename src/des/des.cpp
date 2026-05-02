@@ -12,6 +12,7 @@
 
 #include <gestalt/des.h>
 #include "des/desCore.h"
+#include "modes.h"
 
 /*
  * Encrypts an arbitrarily sized input with DES_ECB.
@@ -24,15 +25,7 @@
 SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
-
-    SecureBytes padded = applyPKCS5Padding(plaintext);
-    std::vector<uint64_t> blocks = bytesToBlocks(padded);
-
-    std::vector<uint64_t> encryptedBlocks;
-    for (uint64_t block : blocks)
-        encryptedBlocks.push_back(des.encryptBlock(block));
-
-    return blocksToBytes(encryptedBlocks);
+    return encryptECB(plaintext, des);
 }
 
 /*
@@ -46,14 +39,7 @@ SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key) 
 SecureBytes decryptDESECB(const SecureBytes& ciphertext, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
-
-    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
-
-    std::vector<uint64_t> decryptedBlocks;
-    for (uint64_t block : blocks)
-        decryptedBlocks.push_back(des.decryptBlock(block));
-
-    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
+    return decryptECB(ciphertext, des);
 }
 
 /*
@@ -78,17 +64,17 @@ SecureBytes encrypt3DESECB(
     DES des3(key3);
 
     SecureBytes padded = applyPKCS5Padding(plaintext);
-    std::vector<uint64_t> blocks = bytesToBlocks(padded);
+    SecureBytes result(padded.size());
 
-    std::vector<uint64_t> encryptedBlocks;
-    for (uint64_t block : blocks) {
-        uint64_t encryptedBlock = des1.encryptBlock(block);
-        encryptedBlock = des2.decryptBlock(encryptedBlock);
-        encryptedBlock = des3.encryptBlock(encryptedBlock);
-        encryptedBlocks.push_back(encryptedBlock);
+    for (size_t i = 0; i < padded.size(); i += DES::block_size) {
+        std::array<uint8_t, DES::block_size> block;
+        std::memcpy(block.data(), padded.data() + i, DES::block_size);
+        des1.encryptBlock(block);
+        des2.decryptBlock(block);
+        des3.encryptBlock(block);
+        std::memcpy(result.data() + i, block.data(), DES::block_size);
     }
-
-    return blocksToBytes(encryptedBlocks);
+    return result;
 }
 
 /*
@@ -112,17 +98,17 @@ SecureBytes decrypt3DESECB(
     DES des2(key2);
     DES des3(key3);
 
-    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
+    SecureBytes result(ciphertext.size());
 
-    std::vector<uint64_t> decryptedBlocks;
-    for (uint64_t block : blocks) {
-        uint64_t decryptedBlock = des3.decryptBlock(block);
-        decryptedBlock = des2.encryptBlock(decryptedBlock);
-        decryptedBlock = des1.decryptBlock(decryptedBlock);
-        decryptedBlocks.push_back(decryptedBlock);
+    for (size_t i = 0; i < ciphertext.size(); i += DES::block_size) {
+        std::array<uint8_t, DES::block_size> block;
+        std::memcpy(block.data(), ciphertext.data() + i, DES::block_size);
+        des3.decryptBlock(block);
+        des2.encryptBlock(block);
+        des1.decryptBlock(block);
+        std::memcpy(result.data() + i, block.data(), DES::block_size);
     }
-
-    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
+    return removePKCS5Padding(result);
 }
 
 /*
@@ -137,20 +123,7 @@ SecureBytes decrypt3DESECB(
 SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
-
-    SecureBytes padded = applyPKCS5Padding(plaintext);
-    std::vector<uint64_t> blocks = bytesToBlocks(padded);
-
-    std::vector<uint64_t> encryptedBlocks;
-    uint64_t currentIV = bytesToUint64(iv);
-    for (uint64_t block : blocks) {
-        block ^= currentIV;
-        uint64_t encryptedBlock = des.encryptBlock(block);
-        encryptedBlocks.push_back(encryptedBlock);
-        currentIV = encryptedBlock;
-    }
-
-    return blocksToBytes(encryptedBlocks);
+    return encryptCBC(plaintext, iv, des);
 }
 
 /*
@@ -165,19 +138,7 @@ SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, c
 SecureBytes decryptDESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     validateKey(key);
     DES des(key);
-
-    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
-
-    std::vector<uint64_t> decryptedBlocks;
-    uint64_t currentIV = bytesToUint64(iv);
-    for (uint64_t block : blocks) {
-        uint64_t decryptedBlock = des.decryptBlock(block);
-        decryptedBlock ^= currentIV;
-        decryptedBlocks.push_back(decryptedBlock);
-        currentIV = block;
-    }
-
-    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
+    return decryptCBC(ciphertext, iv, des);
 }
 
 /*
@@ -203,23 +164,29 @@ SecureBytes encrypt3DESCBC(
     DES des2(key2);
     DES des3(key3);
 
+    if (iv.size() != DES::block_size)
+        throw std::invalid_argument("IV size must be 8 bytes for DES");
+
     SecureBytes padded = applyPKCS5Padding(plaintext);
-    std::vector<uint64_t> blocks = bytesToBlocks(padded);
+    SecureBytes result(padded.size());
 
-    std::vector<uint64_t> encryptedBlocks;
-    uint64_t currentIV = bytesToUint64(iv);
-    for (uint64_t block : blocks) {
-        block ^= currentIV;
+    std::array<uint8_t, DES::block_size> currentIV;
+    std::memcpy(currentIV.data(), iv.data(), DES::block_size);
 
-        uint64_t encryptedBlock = des1.encryptBlock(block);
-        encryptedBlock = des2.decryptBlock(encryptedBlock);
-        encryptedBlock = des3.encryptBlock(encryptedBlock);
-        encryptedBlocks.push_back(encryptedBlock);
+    for (size_t i = 0; i < padded.size(); i += DES::block_size) {
+        std::array<uint8_t, DES::block_size> block;
+        std::memcpy(block.data(), padded.data() + i, DES::block_size);
 
-        currentIV = encryptedBlock;
+        for (size_t j = 0; j < DES::block_size; j++)
+            block[j] ^= currentIV[j];
+
+        des1.encryptBlock(block);
+        des2.decryptBlock(block);
+        des3.encryptBlock(block);
+        std::memcpy(result.data() + i, block.data(), DES::block_size);
+        currentIV = block;
     }
-
-    return blocksToBytes(encryptedBlocks);
+    return result;
 }
 
 /*
@@ -245,19 +212,28 @@ SecureBytes decrypt3DESCBC(
     DES des2(key2);
     DES des3(key3);
 
-    std::vector<uint64_t> blocks = bytesToBlocks(ciphertext);
+    if (iv.size() != DES::block_size)
+        throw std::invalid_argument("IV size must be 8 bytes for DES");
 
-    std::vector<uint64_t> decryptedBlocks;
-    uint64_t currentIV = bytesToUint64(iv);
-    for (uint64_t block : blocks) {
-        uint64_t decryptedBlock = des3.decryptBlock(block);
-        decryptedBlock = des2.encryptBlock(decryptedBlock);
-        decryptedBlock = des1.decryptBlock(decryptedBlock);
+    SecureBytes result(ciphertext.size());
 
-        decryptedBlock ^= currentIV;
-        decryptedBlocks.push_back(decryptedBlock);
-        currentIV = block;
+    std::array<uint8_t, DES::block_size> currentIV;
+    std::memcpy(currentIV.data(), iv.data(), DES::block_size);
+
+    for (size_t i = 0; i < ciphertext.size(); i += DES::block_size) {
+        std::array<uint8_t, DES::block_size> block;
+        std::memcpy(block.data(), ciphertext.data() + i, DES::block_size);
+
+        std::array<uint8_t, DES::block_size> nextIV = block;
+        des3.decryptBlock(block);
+        des2.encryptBlock(block);
+        des1.decryptBlock(block);
+
+        for (size_t j = 0; j < DES::block_size; j++)
+            block[j] ^= currentIV[j];
+
+        std::memcpy(result.data() + i, block.data(), DES::block_size);
+        currentIV = nextIV;
     }
-
-    return removePKCS5Padding(blocksToBytes(decryptedBlocks));
+    return removePKCS5Padding(result);
 }

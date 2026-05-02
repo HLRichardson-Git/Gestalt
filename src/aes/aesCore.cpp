@@ -44,6 +44,7 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <cstdint>
 
@@ -120,7 +121,8 @@ AES& AES::operator=(const AES& other) {
  *
  * @param state A pointer to the input block to be encrypted.
  */
-void AES::encryptBlock(unsigned char* state) {
+void AES::encryptBlock(std::array<uint8_t, 16>& block) {
+    unsigned char* state = block.data();
     addRoundKey(state, roundKey);
     size_t round = 1;
     while (round < Nr) {
@@ -140,7 +142,8 @@ void AES::encryptBlock(unsigned char* state) {
  *
  * @param state A pointer to the input block to be decrypted.
  */
-void AES::decryptBlock(unsigned char* state) {
+void AES::decryptBlock(std::array<uint8_t, 16>& block) {
+    unsigned char* state = block.data();
     addRoundKey(state, roundKey + Nr * AES_BLOCK_SIZE);
     size_t round = Nr - 1;
     while (round > 0) {
