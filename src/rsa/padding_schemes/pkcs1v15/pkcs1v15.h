@@ -30,7 +30,7 @@ public:
     PKCS1v15Params(HashAlgorithm hash = HashAlgorithm::SHA256) : hashAlg(hash) {}
 };
 
-std::string getAlgorithmIdentifier(const HashAlgorithm& hashAlg);
+SecureBytes getAlgorithmIdentifier(const HashAlgorithm& hashAlg);
 
 SecureBytes encodeForEncryptionPKCS1v15(const SecureBytes& input, size_t modulusSizeBytes);
 SecureBytes decodeForEncryptionPKCS1v15(const SecureBytes& em, size_t modulusSizeBytes);

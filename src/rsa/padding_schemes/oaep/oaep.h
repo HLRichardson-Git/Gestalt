@@ -25,7 +25,7 @@
 
 class OAEPParams {
 public:
-    std::string label;
+    SecureBytes label;
     HashAlgorithm hashFunc;     // Hash used for label hashing
     RSA_MGFFunctions mgfFunc;   // Mask generation function
     HashAlgorithm mgfHashFunc;  // Hash used inside MGF1 (None = use hashFunc)
@@ -33,7 +33,7 @@ public:
 
     OAEPParams(HashAlgorithm hash = HashAlgorithm::SHA256,
                RSA_MGFFunctions mgf = RSA_MGFFunctions::MGF1,
-               const std::string& label = "",
+               const SecureBytes& label = SecureBytes{},
                const SecureBytes& seed = SecureBytes{})
         : label(label), hashFunc(hash), mgfFunc(mgf),
           mgfHashFunc(HashAlgorithm::None), seed(seed) {}
@@ -41,7 +41,7 @@ public:
     OAEPParams(HashAlgorithm hash,
                RSA_MGFFunctions mgf,
                HashAlgorithm mgfHash,
-               const std::string& label = "",
+               const SecureBytes& label = SecureBytes{},
                const SecureBytes& seed = SecureBytes{})
         : label(label), hashFunc(hash), mgfFunc(mgf),
           mgfHashFunc(mgfHash), seed(seed) {}

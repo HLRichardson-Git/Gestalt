@@ -23,16 +23,16 @@
 
 #include "pkcs1v15.h"
 
-std::string getAlgorithmIdentifier(const HashAlgorithm& hashAlg) {
+SecureBytes getAlgorithmIdentifier(const HashAlgorithm& hashAlg) {
     switch (hashAlg) {
         case HashAlgorithm::SHA1:
-            return "3021300906052b0e03021a05000414";
+            return SecureBytes::fromHex("3021300906052b0e03021a05000414");
         case HashAlgorithm::SHA256:
-            return "3031300d060960864801650304020105000420";
+            return SecureBytes::fromHex("3031300d060960864801650304020105000420");
         case HashAlgorithm::SHA384:
-            return "3041300d060960864801650304020205000430";
+            return SecureBytes::fromHex("3041300d060960864801650304020205000430");
         case HashAlgorithm::SHA512:
-            return "3051300d060960864801650304020305000440";
+            return SecureBytes::fromHex("3051300d060960864801650304020305000440");
         default:
             throw std::invalid_argument("Unsupported hash function");
     }
@@ -88,7 +88,7 @@ SecureBytes decodeForEncryptionPKCS1v15(const SecureBytes& em, size_t modulusSiz
 // RFC 8017 §9.2
 SecureBytes encodeForSigningPKCS1v15(const SecureBytes& input, const HashAlgorithm& hashAlg, size_t modulusSizeBytes) {
     SecureBytes H = hash(hashAlg)(input);
-    SecureBytes T = SecureBytes::fromHex(getAlgorithmIdentifier(hashAlg));
+    SecureBytes T = getAlgorithmIdentifier(hashAlg);
     T.append(H);
 
     size_t tLen = T.size();

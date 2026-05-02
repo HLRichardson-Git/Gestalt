@@ -32,7 +32,7 @@ SecureBytes applyOAEP_Padding(const SecureBytes& input, const OAEPParams& params
         throw std::invalid_argument("Message too long for RSA modulus");
     }
 
-    SecureBytes lhash = hash(params.hashFunc)(SecureBytes::fromAscii(params.label));
+    SecureBytes lhash = hash(params.hashFunc)(params.label);
     SecureBytes PS(psLen, 0x00);
 
     // DB = lhash || PS || 0x01 || input
@@ -88,7 +88,7 @@ SecureBytes removeOAEP_Padding(const SecureBytes& input, const OAEPParams& param
         DB[i] = maskedDB[i] ^ dbMask[i];
     }
 
-    SecureBytes lhash = hash(params.hashFunc)(SecureBytes::fromAscii(params.label));
+    SecureBytes lhash = hash(params.hashFunc)(params.label);
     SecureBytes dbLhash = SecureBytes::fromVector(std::vector<uint8_t>(DB.begin(), DB.begin() + hashLength));
     if (dbLhash != lhash) {
         throw std::invalid_argument("OAEP Decode Error: The encoded lhash and computed lhash are not the same.");
