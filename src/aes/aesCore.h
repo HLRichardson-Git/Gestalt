@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <gestalt/secure_bytes.h>
 
 const size_t AES_BLOCK_SIZE = 16;
@@ -52,6 +54,7 @@ private:
 
 	friend class AES_Functions;
 public:
+	static constexpr size_t block_size = 16;
 
 	explicit AES(const SecureBytes& key);
 	~AES();
@@ -59,9 +62,6 @@ public:
     AES(AES& other);
     AES& operator=(const AES& other);
 
-	void encryptBlock(unsigned char* state);
-	void decryptBlock(unsigned char* state);
+	void encryptBlock(std::array<uint8_t, 16>& block);
+	void decryptBlock(std::array<uint8_t, 16>& block);
 };
-
-SecureBytes applyPKCS7Padding(const SecureBytes& data);
-SecureBytes removePKCS7Padding(const SecureBytes& data);

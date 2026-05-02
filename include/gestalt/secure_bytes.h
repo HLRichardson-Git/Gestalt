@@ -43,19 +43,20 @@ inline void secureZero(void* ptr, std::size_t len) noexcept {
 template<typename T>
 struct ZeroingAllocator : public std::allocator<T> {
     using Base = std::allocator<T>;
-    using typename Base::value_type;
-    using typename Base::size_type;
-    using typename Base::pointer;
-
-    template<typename U>
-    struct rebind { using other = ZeroingAllocator<U>; };
+    
+    using value_type = T;
+    using size_type  = std::size_t;
+    using pointer    = T*;
 
     ZeroingAllocator() noexcept = default;
+    
     template<typename U>
-    ZeroingAllocator(const ZeroingAllocator<U>&) noexcept {}
+    ZeroingAllocator(const ZeroingAllocator<U>&) noexcept : Base() {}
 
     void deallocate(pointer p, size_type n) noexcept {
-        secureZero(p, n * sizeof(T));
+        if (p) {
+            secureZero(p, n * sizeof(T));
+        }
         Base::deallocate(p, n);
     }
 };

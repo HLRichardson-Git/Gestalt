@@ -10,10 +10,9 @@
  * This file contains the implementation of Gestalts AES security functions.
  */
 
-#include <cstring>
-
 #include <gestalt/aes.h>
 #include "aesCore.h"
+#include "modes/modes.h"
 
 /*
  * Encrypts an arbitrarily sized input with AES_ECB.
@@ -25,22 +24,7 @@
  */
 SecureBytes encryptAESECB(const SecureBytes& msg, const SecureBytes& key) {
     AES cipher(key);
-
-    SecureBytes paddedMsg = applyPKCS7Padding(msg);
-    size_t paddedMsgLen = paddedMsg.size();
-
-    unsigned char* input = new unsigned char[paddedMsgLen];
-    std::memcpy(input, paddedMsg.data(), paddedMsgLen);
-
-    for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += AES_BLOCK_SIZE) {
-        cipher.encryptBlock(input + blockIndex);
-    }
-
-    SecureBytes result(paddedMsgLen);
-    std::memcpy(result.data(), input, paddedMsgLen);
-
-    delete[] input;
-    return result;
+    return encryptECB(msg, cipher);
 }
 
 /*
@@ -53,21 +37,7 @@ SecureBytes encryptAESECB(const SecureBytes& msg, const SecureBytes& key) {
  */
 SecureBytes decryptAESECB(const SecureBytes& ciphertext, const SecureBytes& key) {
     AES cipher(key);
-
-    size_t msgLen = ciphertext.size();
-
-    unsigned char* input = new unsigned char[msgLen];
-    std::memcpy(input, ciphertext.data(), msgLen);
-
-    for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += AES_BLOCK_SIZE) {
-        cipher.decryptBlock(input + blockIndex);
-    }
-
-    SecureBytes result(msgLen);
-    std::memcpy(result.data(), input, msgLen);
-
-    delete[] input;
-    return removePKCS7Padding(result);
+    return decryptECB(ciphertext, cipher);
 }
 
 /*
@@ -81,27 +51,7 @@ SecureBytes decryptAESECB(const SecureBytes& ciphertext, const SecureBytes& key)
  */
 SecureBytes encryptAESCBC(const SecureBytes& msg, const SecureBytes& iv, const SecureBytes& key) {
     AES cipher(key);
-
-    SecureBytes paddedMsg = applyPKCS7Padding(msg);
-    size_t paddedMsgLen = paddedMsg.size();
-
-    unsigned char* input = new unsigned char[paddedMsgLen];
-    std::memcpy(input, paddedMsg.data(), paddedMsgLen);
-
-    SecureBytes currentIV = iv;
-    for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += AES_BLOCK_SIZE) {
-        for (size_t i = 0; i < AES_BLOCK_SIZE; i++) {
-            input[blockIndex + i] ^= currentIV[i];
-        }
-        cipher.encryptBlock(input + blockIndex);
-        std::memcpy(currentIV.data(), input + blockIndex, AES_BLOCK_SIZE);
-    }
-
-    SecureBytes result(paddedMsgLen);
-    std::memcpy(result.data(), input, paddedMsgLen);
-
-    delete[] input;
-    return result;
+    return encryptCBC(msg, iv, cipher);
 }
 
 /*
@@ -115,26 +65,5 @@ SecureBytes encryptAESCBC(const SecureBytes& msg, const SecureBytes& iv, const S
  */
 SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     AES cipher(key);
-
-    size_t msgLen = ciphertext.size();
-
-    unsigned char* input = new unsigned char[msgLen];
-    std::memcpy(input, ciphertext.data(), msgLen);
-
-    SecureBytes currentIV = iv;
-    SecureBytes nextIV(AES_BLOCK_SIZE);
-    for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += AES_BLOCK_SIZE) {
-        std::memcpy(nextIV.data(), input + blockIndex, AES_BLOCK_SIZE);
-        cipher.decryptBlock(input + blockIndex);
-        for (size_t i = 0; i < AES_BLOCK_SIZE; i++) {
-            input[blockIndex + i] ^= currentIV[i];
-        }
-        currentIV = nextIV;
-    }
-
-    SecureBytes result(msgLen);
-    std::memcpy(result.data(), input, msgLen);
-
-    delete[] input;
-    return removePKCS7Padding(result);
+    return decryptCBC(ciphertext, iv, cipher);
 }

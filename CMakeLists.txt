@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.3)
 # Project setup
 project (Gestalt VERSION 0.8 LANGUAGES C CXX)
 set (CMAKE_C_STANDARD 99)
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Options for toggling features
@@ -23,6 +23,8 @@ set (Sources
     src/aes/aesCore.cpp
     src/des/des.cpp
     src/des/desCore.cpp
+    src/modes/ecb.cpp
+    src/modes/cbc.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
     src/sha2/sha2.cpp
