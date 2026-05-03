@@ -50,5 +50,5 @@ SecureBytes decryptCTR(const SecureBytes& ciphertext, const SecureBytes& iv, C& 
 
 template SecureBytes encryptCTR<AES>(const SecureBytes&, const SecureBytes&, AES&);
 template SecureBytes decryptCTR<AES>(const SecureBytes&, const SecureBytes&, AES&);
-//template SecureBytes encryptCBC<DES>(const SecureBytes&, const SecureBytes&, DES&);
-//template SecureBytes decryptCBC<DES>(const SecureBytes&, const SecureBytes&, DES&);
+template SecureBytes encryptCTR<DES>(const SecureBytes&, const SecureBytes&, DES&);
+template SecureBytes decryptCTR<DES>(const SecureBytes&, const SecureBytes&, DES&);

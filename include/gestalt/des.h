@@ -45,3 +45,6 @@ SecureBytes decrypt3DESCBC(
     const SecureBytes& key2,
     const SecureBytes& key3
 );
+
+SecureBytes encryptDESCTR(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptDESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);

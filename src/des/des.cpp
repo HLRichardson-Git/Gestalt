@@ -237,3 +237,33 @@ SecureBytes decrypt3DESCBC(
     }
     return removePKCSPadding(result, DES::block_size);
 }
+
+/*
+ * Encrypts an arbitrarily sized input with DES_CTR.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv         The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key        The 64-bit (8 byte) DES key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if the key size is not 8 bytes.
+ */
+SecureBytes encryptDESCTR(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
+    validateKey(key);
+    DES des(key);
+    return encryptCTR(plaintext, iv, des);
+}
+
+/*
+ * Decrypts an arbitrarily sized input with DES_CTR.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key         The 64-bit (8 byte) DES key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if the key size is not 8 bytes.
+ */
+SecureBytes decryptDESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
+    validateKey(key);
+    DES des(key);
+    return decryptCTR(ciphertext, iv, des);
+}
