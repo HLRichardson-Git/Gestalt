@@ -14,8 +14,11 @@
 
 #include <gestalt/secure_bytes.h>
 
-SecureBytes encryptAESECB(const SecureBytes& msg, const SecureBytes& key);
+SecureBytes encryptAESECB(const SecureBytes& plaintext, const SecureBytes& key);
 SecureBytes decryptAESECB(const SecureBytes& ciphertext, const SecureBytes& key);
 
-SecureBytes encryptAESCBC(const SecureBytes& msg, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes encryptAESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
 SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
+
+SecureBytes encryptAESCTR(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptAESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
