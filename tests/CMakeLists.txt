@@ -15,6 +15,7 @@ set (Sources
     des/test_des_cbc.cpp
     des/test_tdes_cbc.cpp
     des/test_des_ctr.cpp
+    des/test_tdes_ctr.cpp
     des/test_des_functions.cpp
     ecc/test_ecc_functions.cpp
     ecc/test_ecdsa.cpp

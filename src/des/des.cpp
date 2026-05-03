@@ -267,3 +267,72 @@ SecureBytes decryptDESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, 
     DES des(key);
     return decryptCTR(ciphertext, iv, des);
 }
+
+/*
+ * Encrypts an arbitrarily sized input with 3DES_CTR using an encrypt-decrypt-encrypt (EDE) scheme.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv         The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key1       The first 64-bit (8 byte) DES key as raw bytes.
+ * @param key2       The second 64-bit (8 byte) DES key as raw bytes.
+ * @param key3       The third 64-bit (8 byte) DES key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if any key is not 8 bytes or the key arrangement is invalid.
+ */
+SecureBytes encrypt3DESCTR(
+    const SecureBytes& plaintext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
+) {
+    validateKeys(key1, key2, key3);
+    if (iv.size() != DES::block_size)
+        throw std::invalid_argument("IV size must be 8 bytes for DES");
+
+    DES des1(key1);
+    DES des2(key2);
+    DES des3(key3);
+
+    size_t msgLen = plaintext.size();
+    SecureBytes result(msgLen);
+
+    std::array<uint8_t, DES::block_size> counter;
+    std::memcpy(counter.data(), iv.data(), DES::block_size);
+
+    for (size_t i = 0; i < msgLen; i += DES::block_size) {
+        std::array<uint8_t, DES::block_size> keystream = counter;
+        des1.encryptBlock(keystream);
+        des2.decryptBlock(keystream);
+        des3.encryptBlock(keystream);
+
+        size_t blockLen = std::min(DES::block_size, msgLen - i);
+        for (size_t j = 0; j < blockLen; j++)
+            result[i + j] = plaintext[i + j] ^ keystream[j];
+
+        for (int k = DES::block_size - 1; k >= 0; k--)
+            if (++counter[k]) break;
+    }
+    return result;
+}
+
+/*
+ * Decrypts an arbitrarily sized input with 3DES_CTR using an encrypt-decrypt-encrypt (EDE) scheme.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The 64-bit (8 byte) initialization vector as raw bytes.
+ * @param key1        The first 64-bit (8 byte) DES key as raw bytes.
+ * @param key2        The second 64-bit (8 byte) DES key as raw bytes.
+ * @param key3        The third 64-bit (8 byte) DES key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if any key is not 8 bytes or the key arrangement is invalid.
+ */
+SecureBytes decrypt3DESCTR(
+    const SecureBytes& ciphertext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
+) {
+    return encrypt3DESCTR(ciphertext, iv, key1, key2, key3);
+}
