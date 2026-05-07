@@ -13,6 +13,7 @@
 #include <gestalt/aes.h>
 #include "aesCore.h"
 #include "modes/modes.h"
+#include "modes/gcm/gcm.h"
 
 /*
  * Encrypts an arbitrarily sized input with AES_ECB.
@@ -94,4 +95,37 @@ SecureBytes encryptAESCTR(const SecureBytes& plaintext, const SecureBytes& iv, c
 SecureBytes decryptAESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     AES cipher(key);
     return decryptCTR(ciphertext, iv, cipher);
+}
+
+/*
+ * Encrypts an arbitrarily sized input with AES_GCM, returning the ciphertext and authentication tag.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv         The initialization vector (12 bytes recommended).
+ * @param key        The 128, 192, or 256 bit key as raw bytes.
+ * @param aad        Additional authenticated data (authenticated but not encrypted).
+ * @param tagLen     Length of the authentication tag in bytes (default 16).
+ * @result GCMEncryptResult containing ciphertext and tag.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+GCMEncryptResult encryptAESGCM(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key, const SecureBytes& aad, size_t tagLen) {
+    AES cipher(key);
+    return encryptGCM(plaintext, iv, aad, tagLen, cipher);
+}
+
+/*
+ * Decrypts an arbitrarily sized input with AES_GCM, verifying the authentication tag.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The initialization vector used during encryption.
+ * @param key         The 128, 192, or 256 bit key as raw bytes.
+ * @param tag         The authentication tag to verify.
+ * @param aad         Additional authenticated data (must match what was used during encryption).
+ * @result GCMDecryptResult containing plaintext and authenticated flag.
+ *         If authentication fails, plaintext is empty and authenticated is false.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+GCMDecryptResult decryptAESGCM(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key, const SecureBytes& tag, const SecureBytes& aad) {
+    AES cipher(key);
+    return decryptGCM(ciphertext, tag, iv, aad, cipher);
 }

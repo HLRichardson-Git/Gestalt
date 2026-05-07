@@ -26,6 +26,7 @@ set (Sources
     src/modes/ecb.cpp
     src/modes/cbc.cpp
     src/modes/ctr.cpp
+    src/modes/gcm/gcm.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
     src/sha2/sha2.cpp

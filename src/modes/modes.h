@@ -21,6 +21,7 @@
 #include <stdexcept>
 
 #include <gestalt/secure_bytes.h>
+#include <gestalt/aes.h>
 
 template<typename T>
 concept BlockCipher = requires(T c, std::array<uint8_t, T::block_size>& b) {
@@ -59,3 +60,7 @@ template<BlockCipher C> SecureBytes decryptCBC(const SecureBytes& ciphertext, co
 // CTR
 template<BlockCipher C> SecureBytes encryptCTR(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
 template<BlockCipher C> SecureBytes decryptCTR(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);
+
+// GCM
+template<BlockCipher C> GCMEncryptResult encryptGCM(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& aad, size_t tagLen, C& cipher);
+template<BlockCipher C> GCMDecryptResult decryptGCM(const SecureBytes& ciphertext, const SecureBytes& tag, const SecureBytes& iv, const SecureBytes& aad, C& cipher);

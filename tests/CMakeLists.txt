@@ -9,6 +9,7 @@ set (Sources
     aes/test_aes_ecb.cpp
     aes/test_aes_cbc.cpp
     aes/test_aes_ctr.cpp
+    aes/test_aes_gcm.cpp
     aes/test_aes_functions.cpp
     des/test_des_ecb.cpp
     des/test_tdes_ecb.cpp
