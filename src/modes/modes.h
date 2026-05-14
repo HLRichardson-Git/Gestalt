@@ -57,6 +57,10 @@ template<BlockCipher C> SecureBytes decryptECB(const SecureBytes& ciphertext, C&
 template<BlockCipher C> SecureBytes encryptCBC(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
 template<BlockCipher C> SecureBytes decryptCBC(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);
 
+// CFB
+template<BlockCipher C> SecureBytes encryptCFB(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
+template<BlockCipher C> SecureBytes decryptCFB(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);
+
 // CTR
 template<BlockCipher C> SecureBytes encryptCTR(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
 template<BlockCipher C> SecureBytes decryptCTR(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);

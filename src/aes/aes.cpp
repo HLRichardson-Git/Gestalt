@@ -70,6 +70,34 @@ SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, 
 }
 
 /*
+ * Encrypts an arbitrarily sized input with AES_CBC.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv   The initialization vector as raw bytes.
+ * @param key  The 128, 192, or 256 bit key as raw bytes.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+SecureBytes encryptAESCFB(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return encryptCFB(plaintext, iv, cipher);
+}
+
+/*
+ * Decrypts an arbitrarily sized input with AES_CBC.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The initialization vector as raw bytes.
+ * @param key         The 128, 192, or 256 bit key as raw bytes.
+ * @result Decrypted plaintext bytes.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+SecureBytes decryptAESCFB(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return decryptCFB(ciphertext, iv, cipher);
+}
+
+/*
  * Encrypts an arbitrarily input with AES_CTR.
  *
  * @param plaintext The plaintext as raw bytes.
