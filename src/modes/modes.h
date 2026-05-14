@@ -61,6 +61,14 @@ template<BlockCipher C> SecureBytes decryptCBC(const SecureBytes& ciphertext, co
 template<BlockCipher C> SecureBytes encryptCFB(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
 template<BlockCipher C> SecureBytes decryptCFB(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);
 
+// CFB-s: byte-aligned sub-block variants (SegmentBits = 8, 64, etc.)
+template<BlockCipher C, size_t SegmentBits> SecureBytes encryptCFBs(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
+template<BlockCipher C, size_t SegmentBits> SecureBytes decryptCFBs(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);
+
+// CFB1: 1-bit segment CFB
+template<BlockCipher C> SecureBytes encryptCFB1(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
+template<BlockCipher C> SecureBytes decryptCFB1(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);
+
 // CTR
 template<BlockCipher C> SecureBytes encryptCTR(const SecureBytes& plaintext, const SecureBytes& iv, C& cipher);
 template<BlockCipher C> SecureBytes decryptCTR(const SecureBytes& ciphertext, const SecureBytes& iv, C& cipher);

@@ -70,7 +70,7 @@ SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, 
 }
 
 /*
- * Encrypts an arbitrarily sized input with AES_CBC.
+ * Encrypts an arbitrarily sized input with AES_CFB.
  *
  * @param plaintext  The plaintext as raw bytes.
  * @param iv   The initialization vector as raw bytes.
@@ -84,7 +84,7 @@ SecureBytes encryptAESCFB(const SecureBytes& plaintext, const SecureBytes& iv, c
 }
 
 /*
- * Decrypts an arbitrarily sized input with AES_CBC.
+ * Decrypts an arbitrarily sized input with AES_CFB.
  *
  * @param ciphertext  The encrypted bytes.
  * @param iv          The initialization vector as raw bytes.
@@ -95,6 +95,36 @@ SecureBytes encryptAESCFB(const SecureBytes& plaintext, const SecureBytes& iv, c
 SecureBytes decryptAESCFB(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     AES cipher(key);
     return decryptCFB(ciphertext, iv, cipher);
+}
+
+SecureBytes encryptAESCFB1(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return encryptCFB1(plaintext, iv, cipher);
+}
+
+SecureBytes decryptAESCFB1(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return decryptCFB1(ciphertext, iv, cipher);
+}
+
+SecureBytes encryptAESCFB8(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return encryptCFBs<AES, 8>(plaintext, iv, cipher);
+}
+
+SecureBytes decryptAESCFB8(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return decryptCFBs<AES, 8>(ciphertext, iv, cipher);
+}
+
+SecureBytes encryptAESCFB64(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return encryptCFBs<AES, 64>(plaintext, iv, cipher);
+}
+
+SecureBytes decryptAESCFB64(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return decryptCFBs<AES, 64>(ciphertext, iv, cipher);
 }
 
 /*

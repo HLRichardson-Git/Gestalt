@@ -24,6 +24,15 @@ SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, 
 SecureBytes encryptAESCFB(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
 SecureBytes decryptAESCFB(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
 
+SecureBytes encryptAESCFB1(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptAESCFB1(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
+
+SecureBytes encryptAESCFB8(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptAESCFB8(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
+
+SecureBytes encryptAESCFB64(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+SecureBytes decryptAESCFB64(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
+
 SecureBytes encryptAESCTR(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
 SecureBytes decryptAESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
 

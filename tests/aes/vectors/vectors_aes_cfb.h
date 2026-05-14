@@ -81,3 +81,46 @@
  
  #include <algorithm>
 INSTANTIATE_TEST_SUITE_P(AES_CFB_Encryption, AES_CFB_Test, testing::ValuesIn(kAES_CFB_TestVectors), CustomNameGenerator);
+
+/*
+ * CFB8 test vectors from NIST SP 800-38A, sections F.3.7, F.3.9, F.3.11.
+ * Plaintext is 18 bytes (same for all key sizes).
+ */
+static const struct AES_CFB8_TestVectors {
+    std::string name;
+    std::string key;
+    std::string pt;
+    std::string iv;
+    std::string ct;
+} kAES_CFB8_TestVectors[] = {
+    {  // Source [1] F.3.7
+        /* test */ "128",
+        /* key  */ "2b7e151628aed2a6abf7158809cf4f3c",
+        /* pt   */ "6bc1bee22e409f96e93d7e117393172aae2d",
+        /* iv   */ "000102030405060708090a0b0c0d0e0f",
+        /* ct   */ "3b79424c9c0dd436bace9e0ed4586a4f32b9"
+    },
+    {  // Source [1] F.3.9
+        /* test */ "192",
+        /* key  */ "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
+        /* pt   */ "6bc1bee22e409f96e93d7e117393172aae2d",
+        /* iv   */ "000102030405060708090a0b0c0d0e0f",
+        /* ct   */ "cda2521ef0a905ca44cd057cbf0d47a0678a"
+    },
+    {  // Source [1] F.3.11
+        /* test */ "256",
+        /* key  */ "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+        /* pt   */ "6bc1bee22e409f96e93d7e117393172aae2d",
+        /* iv   */ "000102030405060708090a0b0c0d0e0f",
+        /* ct   */ "dc1f1a8520a64db55fcc8ac554844e889700"
+    }
+};
+
+std::ostream& operator<<(std::ostream& os, const AES_CFB8_TestVectors& test) {
+    return os << "Test: " << test.name;
+}
+
+class AES_CFB8_Test : public testing::TestWithParam<AES_CFB8_TestVectors> {};
+
+INSTANTIATE_TEST_SUITE_P(AES_CFB8_Encryption, AES_CFB8_Test, testing::ValuesIn(kAES_CFB8_TestVectors),
+    [](const testing::TestParamInfo<AES_CFB8_TestVectors>& info) { return info.param.name; });
