@@ -13,7 +13,19 @@
 #include "gtest/gtest.h"
 #include <bitset>
 
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4996)
+#else
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #include <gestalt/des.h>
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#else
+#  pragma GCC diagnostic pop
+#endif
 #include "des/desCore.h"
 #include "des/desConstants.h"
 #include "utils.h"
@@ -138,14 +150,6 @@ TEST(DES_Functions, finalPermutation) {
     std::string expected = "1011010100100001100111101110100000011010101001110100100110011101";
 
     EXPECT_EQ(output, expected);
-}
-
-TEST(DES_Errors, singleKeyInvalidSize) {
-    SecureBytes smallKey(3, 0x00);   // 3 bytes — too small for DES
-    EXPECT_THROW(encryptDESECB(plaintext, smallKey), std::invalid_argument);
-
-    SecureBytes largeKey(16, 0x00);  // 16 bytes — too large for DES
-    EXPECT_THROW(encryptDESECB(plaintext, largeKey), std::invalid_argument);
 }
 
 TEST(TDES_Errors, invalidKeyArrangement) {

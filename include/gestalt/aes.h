@@ -15,23 +15,15 @@
 #include <gestalt/secure_bytes.h>
 #include "modes/gcm/gcm.h"
 
+[[deprecated("AES-ECB does not hide data patterns; identical plaintext blocks produce identical ciphertext. Use AES-GCM instead.")]]
 SecureBytes encryptAESECB(const SecureBytes& plaintext, const SecureBytes& key);
+[[deprecated("AES-ECB does not hide data patterns; identical plaintext blocks produce identical ciphertext. Use AES-GCM instead.")]]
 SecureBytes decryptAESECB(const SecureBytes& ciphertext, const SecureBytes& key);
 
+[[deprecated("AES-CBC lacks authentication and is susceptible to padding oracle attacks; prefer AES-GCM.")]]
 SecureBytes encryptAESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
+[[deprecated("AES-CBC lacks authentication and is susceptible to padding oracle attacks; prefer AES-GCM.")]]
 SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
-
-SecureBytes encryptAESCFB(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
-SecureBytes decryptAESCFB(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
-
-SecureBytes encryptAESCFB1(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
-SecureBytes decryptAESCFB1(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
-
-SecureBytes encryptAESCFB8(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
-SecureBytes decryptAESCFB8(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
-
-SecureBytes encryptAESCFB64(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
-SecureBytes decryptAESCFB64(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
 
 SecureBytes encryptAESCTR(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
 SecureBytes decryptAESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);

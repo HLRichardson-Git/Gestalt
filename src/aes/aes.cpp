@@ -70,64 +70,6 @@ SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, 
 }
 
 /*
- * Encrypts an arbitrarily sized input with AES_CFB.
- *
- * @param plaintext  The plaintext as raw bytes.
- * @param iv   The initialization vector as raw bytes.
- * @param key  The 128, 192, or 256 bit key as raw bytes.
- * @result Encrypted bytes.
- * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
- */
-SecureBytes encryptAESCFB(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return encryptCFB(plaintext, iv, cipher);
-}
-
-/*
- * Decrypts an arbitrarily sized input with AES_CFB.
- *
- * @param ciphertext  The encrypted bytes.
- * @param iv          The initialization vector as raw bytes.
- * @param key         The 128, 192, or 256 bit key as raw bytes.
- * @result Decrypted plaintext bytes.
- * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
- */
-SecureBytes decryptAESCFB(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return decryptCFB(ciphertext, iv, cipher);
-}
-
-SecureBytes encryptAESCFB1(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return encryptCFB1(plaintext, iv, cipher);
-}
-
-SecureBytes decryptAESCFB1(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return decryptCFB1(ciphertext, iv, cipher);
-}
-
-SecureBytes encryptAESCFB8(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return encryptCFBs<AES, 8>(plaintext, iv, cipher);
-}
-
-SecureBytes decryptAESCFB8(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return decryptCFBs<AES, 8>(ciphertext, iv, cipher);
-}
-
-SecureBytes encryptAESCFB64(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return encryptCFBs<AES, 64>(plaintext, iv, cipher);
-}
-
-SecureBytes decryptAESCFB64(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
-    AES cipher(key);
-    return decryptCFBs<AES, 64>(ciphertext, iv, cipher);
-}
-
-/*
  * Encrypts an arbitrarily input with AES_CTR.
  *
  * @param plaintext The plaintext as raw bytes.

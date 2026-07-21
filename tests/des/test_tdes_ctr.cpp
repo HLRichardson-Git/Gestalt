@@ -12,7 +12,19 @@
 #include "gtest/gtest.h"
 
 #include "utils.h"
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4996)
+#else
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #include <gestalt/des.h>
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#else
+#  pragma GCC diagnostic pop
+#endif
 #include "vectors/vectors_tdes_ctr.h"
 
 TEST_P(TDES_CTR_Test, encrypt) {

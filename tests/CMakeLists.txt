@@ -8,15 +8,11 @@ set (Sources
     secure_bytes/test_secure_bytes.cpp
     aes/test_aes_ecb.cpp
     aes/test_aes_cbc.cpp
-    aes/test_aes_cfb.cpp
     aes/test_aes_ctr.cpp
     aes/test_aes_gcm.cpp
     aes/test_aes_functions.cpp
-    des/test_des_ecb.cpp
     des/test_tdes_ecb.cpp
-    des/test_des_cbc.cpp
     des/test_tdes_cbc.cpp
-    des/test_des_ctr.cpp
     des/test_tdes_ctr.cpp
     des/test_des_functions.cpp
     ecc/test_ecc_functions.cpp
