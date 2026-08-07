@@ -21,6 +21,8 @@ include(ExternalProject)
 set (Sources
     src/aes/aes.cpp
     src/aes/aesCore.cpp
+    src/chacha/chacha.cpp
+    src/chacha/chachaCore.cpp
     src/des/des.cpp
     src/des/desCore.cpp
     src/modes/ecb.cpp

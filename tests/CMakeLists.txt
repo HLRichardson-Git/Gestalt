@@ -11,6 +11,7 @@ set (Sources
     aes/test_aes_ctr.cpp
     aes/test_aes_gcm.cpp
     aes/test_aes_functions.cpp
+    chacha/test_chacha_functions.cpp
     des/test_tdes_ecb.cpp
     des/test_tdes_cbc.cpp
     des/test_tdes_ctr.cpp
