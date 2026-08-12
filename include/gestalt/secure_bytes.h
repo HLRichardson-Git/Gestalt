@@ -77,6 +77,10 @@ public:
     // Constructs a buffer of n bytes, each initialised to fill.
     explicit SecureBytes(std::size_t n, uint8_t fill = 0) : buffer_(n, fill) {}
 
+    // Constructs from an iterator range.
+    template<typename InputIt>
+    SecureBytes(InputIt first, InputIt last) : buffer_(first, last) {}
+
     // Parses a hexadecimal string (with or without a leading "0x" prefix) into bytes.
     static SecureBytes fromHex(const std::string& hex) {
         const std::string& h = (hex.size() >= 2 && hex[0] == '0' && (hex[1] == 'x' || hex[1] == 'X'))
@@ -181,6 +185,13 @@ public:
             Buffer empty;
             buffer_.swap(empty); // triggers deallocate which allocator zeroes again
         }
+    }
+
+    // Returns a new SecureBytes containing bytes [offset, offset+length).
+    SecureBytes slice(std::size_t offset, std::size_t length) const {
+        if (offset + length > size())
+            throw std::out_of_range("SecureBytes::slice: range out of bounds");
+        return SecureBytes(cbegin() + offset, cbegin() + offset + length);
     }
 
     // Returns a new SecureBytes that is the concatenation of *this and other.

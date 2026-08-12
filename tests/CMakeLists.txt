@@ -21,6 +21,7 @@ set (Sources
     ecc/test_ecdsa_functions.cpp
     ecc/test_ecdh.cpp
     ecc/test_ecdh_functions.cpp
+    poly1305/test_poly1305.cpp
     rsa/test_rsa_raw.cpp
     rsa/test_rsa_padding.cpp
     rsa/test_rsa_oaep.cpp
