@@ -23,6 +23,7 @@ set (Sources
     src/aes/aesCore.cpp
     src/chacha/chacha.cpp
     src/chacha/chachaCore.cpp
+    src/chacha/chachaPoly1305.cpp
     src/des/des.cpp
     src/des/desCore.cpp
     src/modes/ecb.cpp
