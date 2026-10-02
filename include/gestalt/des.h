@@ -14,14 +14,14 @@
 
 #include <gestalt/secure_bytes.h>
 
-SecureBytes encryptDESECB(const SecureBytes& plaintext, const SecureBytes& key);
-SecureBytes decryptDESECB(const SecureBytes& ciphertext, const SecureBytes& key);
+[[deprecated("3DES is disallowed per NIST SP 800-131A Rev. 2 (2023); use AES instead.")]]
 SecureBytes encrypt3DESECB(
     const SecureBytes& plaintext,
     const SecureBytes& key1,
     const SecureBytes& key2,
     const SecureBytes& key3
 );
+[[deprecated("3DES is disallowed per NIST SP 800-131A Rev. 2 (2023); use AES instead.")]]
 SecureBytes decrypt3DESECB(
     const SecureBytes& ciphertext,
     const SecureBytes& key1,
@@ -29,8 +29,7 @@ SecureBytes decrypt3DESECB(
     const SecureBytes& key3
 );
 
-SecureBytes encryptDESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key);
-SecureBytes decryptDESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key);
+[[deprecated("3DES is disallowed per NIST SP 800-131A Rev. 2 (2023); use AES instead.")]]
 SecureBytes encrypt3DESCBC(
     const SecureBytes& plaintext,
     const SecureBytes& iv,
@@ -38,7 +37,25 @@ SecureBytes encrypt3DESCBC(
     const SecureBytes& key2,
     const SecureBytes& key3
 );
+[[deprecated("3DES is disallowed per NIST SP 800-131A Rev. 2 (2023); use AES instead.")]]
 SecureBytes decrypt3DESCBC(
+    const SecureBytes& ciphertext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
+);
+
+[[deprecated("3DES is disallowed per NIST SP 800-131A Rev. 2 (2023); use AES instead.")]]
+SecureBytes encrypt3DESCTR(
+    const SecureBytes& plaintext,
+    const SecureBytes& iv,
+    const SecureBytes& key1,
+    const SecureBytes& key2,
+    const SecureBytes& key3
+);
+[[deprecated("3DES is disallowed per NIST SP 800-131A Rev. 2 (2023); use AES instead.")]]
+SecureBytes decrypt3DESCTR(
     const SecureBytes& ciphertext,
     const SecureBytes& iv,
     const SecureBytes& key1,

@@ -8,17 +8,21 @@ set (Sources
     secure_bytes/test_secure_bytes.cpp
     aes/test_aes_ecb.cpp
     aes/test_aes_cbc.cpp
+    aes/test_aes_ctr.cpp
+    aes/test_aes_gcm.cpp
     aes/test_aes_functions.cpp
-    des/test_des_ecb.cpp
+    chacha/test_chacha_functions.cpp
+    chacha/test_chacha_poly1305.cpp
     des/test_tdes_ecb.cpp
-    des/test_des_cbc.cpp
     des/test_tdes_cbc.cpp
+    des/test_tdes_ctr.cpp
     des/test_des_functions.cpp
     ecc/test_ecc_functions.cpp
     ecc/test_ecdsa.cpp
     ecc/test_ecdsa_functions.cpp
     ecc/test_ecdh.cpp
     ecc/test_ecdh_functions.cpp
+    poly1305/test_poly1305.cpp
     rsa/test_rsa_raw.cpp
     rsa/test_rsa_padding.cpp
     rsa/test_rsa_oaep.cpp
