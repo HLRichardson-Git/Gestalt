@@ -16,10 +16,10 @@
 
 #include <gestalt/secure_bytes.h>
 
-const uint32_t CONST_1 = 0x61707865;
-const uint32_t CONST_2 = 0x3320646e;
-const uint32_t CONST_3 = 0x79622d32;
-const uint32_t CONST_4 = 0x6b206574;
+constexpr uint32_t CONST_1 = 0x61707865;
+constexpr uint32_t CONST_2 = 0x3320646e;
+constexpr uint32_t CONST_3 = 0x79622d32;
+constexpr uint32_t CONST_4 = 0x6b206574;
 
 class ChaCha {
 private:
@@ -28,7 +28,7 @@ private:
     void quarter_round(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d);
     void inner_block();
 
-    void setState(SecureBytes key, SecureBytes counter, SecureBytes nonce);
+    void setState(const SecureBytes& key, const SecureBytes& counter, const SecureBytes& nonce);
 
 	friend class ChaCha_Functions;
 public:

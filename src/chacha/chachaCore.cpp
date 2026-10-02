@@ -56,7 +56,7 @@ std::array<uint32_t, 16> ChaCha::chacha20_block() {
     return output;
 }
 
-void ChaCha::setState(SecureBytes key, SecureBytes counter, SecureBytes nonce) {
+void ChaCha::setState(const SecureBytes& key, const SecureBytes& counter, const SecureBytes& nonce) {
     for (int i = 0; i < 8; ++i)
         state[4 + i] = key.readLE<uint32_t>(i * 4);
 

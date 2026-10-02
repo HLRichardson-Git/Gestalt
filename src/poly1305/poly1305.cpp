@@ -35,7 +35,7 @@ static void storeLE(uint8_t* out, size_t len, const BigInt& val) {
     std::memcpy(out, padded.data(), len);
 }
 
-void clamp_r(uint8_t r[16]) {
+static void clamp_r(uint8_t r[16]) {
     r[3]  &= 15;
     r[7]  &= 15;
     r[11] &= 15;
@@ -101,13 +101,8 @@ SecureBytes poly1305_key_gen(const SecureBytes& key, const SecureBytes& nonce) {
     ChaCha chacha(key, nonce, 0);
     auto block = chacha.chacha20_block();
 
-    SecureBytes out(32);
-    for (size_t i = 0; i < 8; ++i) {
-        uint32_t w = block[i];
-        out[i*4 + 0] = static_cast<uint8_t>(w);
-        out[i*4 + 1] = static_cast<uint8_t>(w >>  8);
-        out[i*4 + 2] = static_cast<uint8_t>(w >> 16);
-        out[i*4 + 3] = static_cast<uint8_t>(w >> 24);
-    }
+    SecureBytes out;
+    for (size_t i = 0; i < 8; ++i)
+        out.appendLE(block[i]);
     return out;
 }
