@@ -34,9 +34,14 @@ private:
     uint32_t sboxSubstitution(uint64_t input);
     uint32_t f(uint32_t rightChunk, size_t round);
 
+    uint64_t encryptBlockInternal(uint64_t block);
+    uint64_t decryptBlockInternal(uint64_t block);
+
     friend class DES_Functions;
 
 public:
+    static constexpr size_t block_size = 8;
+
     explicit DES(const SecureBytes& key) {
         uint64_t keyUint = 0;
         for (size_t i = 0; i < 8; ++i)
@@ -44,12 +49,10 @@ public:
         generateRoundKeys(keyUint);
     }
 
-    uint64_t encryptBlock(uint64_t block);
-    uint64_t decryptBlock(uint64_t block);
+    void encryptBlock(std::array<uint8_t, 8>& block);
+    void decryptBlock(std::array<uint8_t, 8>& block);
 };
 
-SecureBytes applyPKCS5Padding(const SecureBytes& data);
-SecureBytes removePKCS5Padding(const SecureBytes& data);
 uint64_t bytesToUint64(const SecureBytes& bytes);
 std::vector<uint64_t> bytesToBlocks(const SecureBytes& bytes);
 SecureBytes blocksToBytes(const std::vector<uint64_t>& blocks);

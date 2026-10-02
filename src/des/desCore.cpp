@@ -70,7 +70,7 @@ uint32_t DES::f(uint32_t rightChunk, size_t round) {
     return permute(sboxSubstitution(expandedChunk ^ roundKeys[round]), P, 32, P_SIZE);
 }  
 
-uint64_t DES::encryptBlock(uint64_t block) {
+uint64_t DES::encryptBlockInternal(uint64_t block) {
     block = permute(block, IP, DES_BLOCK_SIZE, IP_SIZE); // Initial permutation
 
     uint32_t left = (block >> 32) & 0xFFFFFFFF;
@@ -90,7 +90,7 @@ uint64_t DES::encryptBlock(uint64_t block) {
     return permute(block, FP, DES_BLOCK_SIZE, FP_SIZE); // Final permutation
 }
 
-uint64_t DES::decryptBlock(uint64_t block) {
+uint64_t DES::decryptBlockInternal(uint64_t block) {
     block = permute(block, IP, DES_BLOCK_SIZE, IP_SIZE); // Initial permutation
 
     uint32_t left = (block >> 32) & 0xFFFFFFFF;
@@ -110,25 +110,18 @@ uint64_t DES::decryptBlock(uint64_t block) {
     return permute(block, FP, DES_BLOCK_SIZE, FP_SIZE); // Final permutation
 }
 
-SecureBytes applyPKCS5Padding(const SecureBytes& data) {
-    size_t paddingLength = 8 - (data.size() % 8);
-    SecureBytes result(data.size() + paddingLength);
-    std::memcpy(result.data(), data.data(), data.size());
-    std::memset(result.data() + data.size(), static_cast<int>(paddingLength), paddingLength);
-    return result;
+void DES::encryptBlock(std::array<uint8_t, 8>& block) {
+    uint64_t val = 0;
+    for (int i = 0; i < 8; i++) val = (val << 8) | block[i];
+    val = encryptBlockInternal(val);
+    for (int i = 7; i >= 0; i--) { block[i] = val & 0xFF; val >>= 8; }
 }
 
-SecureBytes removePKCS5Padding(const SecureBytes& data) {
-    if (data.empty()) {
-        throw std::runtime_error("Data is empty, cannot remove padding.");
-    }
-    size_t paddingLength = data[data.size() - 1];
-    if (paddingLength > data.size() || paddingLength > 8) {
-        throw std::runtime_error("Invalid padding length.");
-    }
-    SecureBytes result(data.size() - paddingLength);
-    std::memcpy(result.data(), data.data(), result.size());
-    return result;
+void DES::decryptBlock(std::array<uint8_t, 8>& block) {
+    uint64_t val = 0;
+    for (int i = 0; i < 8; i++) val = (val << 8) | block[i];
+    val = decryptBlockInternal(val);
+    for (int i = 7; i >= 0; i--) { block[i] = val & 0xFF; val >>= 8; }
 }
 
 uint64_t bytesToUint64(const SecureBytes& bytes) {

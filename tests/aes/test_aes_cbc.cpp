@@ -11,7 +11,19 @@
 
 #include "gtest/gtest.h"
 
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4996)
+#else
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #include <gestalt/aes.h>
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#else
+#  pragma GCC diagnostic pop
+#endif
 #include "vectors/vectors_aes.h"
 
 TEST(AES_CBC, encrypt128) {

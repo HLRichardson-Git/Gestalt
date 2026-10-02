@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 # Project setup
-project (Gestalt VERSION 0.8 LANGUAGES C CXX)
+project (Gestalt VERSION 0.9 LANGUAGES C CXX)
 set (CMAKE_C_STANDARD 99)
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Options for toggling features
@@ -21,8 +21,15 @@ include(ExternalProject)
 set (Sources
     src/aes/aes.cpp
     src/aes/aesCore.cpp
+    src/chacha/chacha.cpp
+    src/chacha/chachaCore.cpp
+    src/chacha/chachaPoly1305.cpp
     src/des/des.cpp
     src/des/desCore.cpp
+    src/modes/ecb.cpp
+    src/modes/cbc.cpp
+    src/modes/ctr.cpp
+    src/modes/gcm/gcm.cpp
     src/sha1/sha1.cpp
     src/sha1/sha1Core.cpp
     src/sha2/sha2.cpp
@@ -30,6 +37,7 @@ set (Sources
     src/ecc/ecc.cpp
     src/ecc/ecdsa/ecdsa.cpp
     src/ecc/ecdh/ecdh.cpp
+    src/poly1305/poly1305.cpp
     src/rsa/rsa.cpp
     src/rsa/padding_schemes/oaep/oaep.cpp
     src/rsa/padding_schemes/pss/pss.cpp

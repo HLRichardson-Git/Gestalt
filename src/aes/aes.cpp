@@ -10,37 +10,22 @@
  * This file contains the implementation of Gestalts AES security functions.
  */
 
-#include <cstring>
-
 #include <gestalt/aes.h>
 #include "aesCore.h"
+#include "modes/modes.h"
+#include "modes/gcm/gcm.h"
 
 /*
  * Encrypts an arbitrarily sized input with AES_ECB.
  *
- * @param msg  The plaintext as raw bytes.
+ * @param plaintext  The plaintext as raw bytes.
  * @param key  The 128, 192, or 256 bit key as raw bytes.
  * @result Encrypted bytes.
  * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
  */
-SecureBytes encryptAESECB(const SecureBytes& msg, const SecureBytes& key) {
+SecureBytes encryptAESECB(const SecureBytes& plaintext, const SecureBytes& key) {
     AES cipher(key);
-
-    SecureBytes paddedMsg = applyPKCS7Padding(msg);
-    size_t paddedMsgLen = paddedMsg.size();
-
-    unsigned char* input = new unsigned char[paddedMsgLen];
-    std::memcpy(input, paddedMsg.data(), paddedMsgLen);
-
-    for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += AES_BLOCK_SIZE) {
-        cipher.encryptBlock(input + blockIndex);
-    }
-
-    SecureBytes result(paddedMsgLen);
-    std::memcpy(result.data(), input, paddedMsgLen);
-
-    delete[] input;
-    return result;
+    return encryptECB(plaintext, cipher);
 }
 
 /*
@@ -53,55 +38,21 @@ SecureBytes encryptAESECB(const SecureBytes& msg, const SecureBytes& key) {
  */
 SecureBytes decryptAESECB(const SecureBytes& ciphertext, const SecureBytes& key) {
     AES cipher(key);
-
-    size_t msgLen = ciphertext.size();
-
-    unsigned char* input = new unsigned char[msgLen];
-    std::memcpy(input, ciphertext.data(), msgLen);
-
-    for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += AES_BLOCK_SIZE) {
-        cipher.decryptBlock(input + blockIndex);
-    }
-
-    SecureBytes result(msgLen);
-    std::memcpy(result.data(), input, msgLen);
-
-    delete[] input;
-    return removePKCS7Padding(result);
+    return decryptECB(ciphertext, cipher);
 }
 
 /*
  * Encrypts an arbitrarily sized input with AES_CBC.
  *
- * @param msg  The plaintext as raw bytes.
+ * @param plaintext  The plaintext as raw bytes.
  * @param iv   The initialization vector as raw bytes.
  * @param key  The 128, 192, or 256 bit key as raw bytes.
  * @result Encrypted bytes.
  * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
  */
-SecureBytes encryptAESCBC(const SecureBytes& msg, const SecureBytes& iv, const SecureBytes& key) {
+SecureBytes encryptAESCBC(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
     AES cipher(key);
-
-    SecureBytes paddedMsg = applyPKCS7Padding(msg);
-    size_t paddedMsgLen = paddedMsg.size();
-
-    unsigned char* input = new unsigned char[paddedMsgLen];
-    std::memcpy(input, paddedMsg.data(), paddedMsgLen);
-
-    SecureBytes currentIV = iv;
-    for (size_t blockIndex = 0; blockIndex < paddedMsgLen; blockIndex += AES_BLOCK_SIZE) {
-        for (size_t i = 0; i < AES_BLOCK_SIZE; i++) {
-            input[blockIndex + i] ^= currentIV[i];
-        }
-        cipher.encryptBlock(input + blockIndex);
-        std::memcpy(currentIV.data(), input + blockIndex, AES_BLOCK_SIZE);
-    }
-
-    SecureBytes result(paddedMsgLen);
-    std::memcpy(result.data(), input, paddedMsgLen);
-
-    delete[] input;
-    return result;
+    return encryptCBC(plaintext, iv, cipher);
 }
 
 /*
@@ -115,26 +66,66 @@ SecureBytes encryptAESCBC(const SecureBytes& msg, const SecureBytes& iv, const S
  */
 SecureBytes decryptAESCBC(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
     AES cipher(key);
+    return decryptCBC(ciphertext, iv, cipher);
+}
 
-    size_t msgLen = ciphertext.size();
+/*
+ * Encrypts an arbitrarily input with AES_CTR.
+ *
+ * @param plaintext The plaintext as raw bytes.
+ * @param iv The number-used-once (nonce) in hex.
+ * @param key The 128, 192, or 256 bit key in hex.
+ * @result Encrypted bytes.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+SecureBytes encryptAESCTR(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key) {
+	AES cipher(key);
+    return encryptCTR(plaintext, iv, cipher);
+}
 
-    unsigned char* input = new unsigned char[msgLen];
-    std::memcpy(input, ciphertext.data(), msgLen);
+/*
+ * Decrypts an arbitrarily input with AES_CTR.
+ *
+ * @param ciphertext The ciphertext as raw bytes.
+ * @param iv The number-used-once (nonce) in hex.
+ * @param key The 128, 192, or 256 bit key in hex.
+ * @result Decrypted bytes.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+SecureBytes decryptAESCTR(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key) {
+    AES cipher(key);
+    return decryptCTR(ciphertext, iv, cipher);
+}
 
-    SecureBytes currentIV = iv;
-    SecureBytes nextIV(AES_BLOCK_SIZE);
-    for (size_t blockIndex = 0; blockIndex < msgLen; blockIndex += AES_BLOCK_SIZE) {
-        std::memcpy(nextIV.data(), input + blockIndex, AES_BLOCK_SIZE);
-        cipher.decryptBlock(input + blockIndex);
-        for (size_t i = 0; i < AES_BLOCK_SIZE; i++) {
-            input[blockIndex + i] ^= currentIV[i];
-        }
-        currentIV = nextIV;
-    }
+/*
+ * Encrypts an arbitrarily sized input with AES_GCM, returning the ciphertext and authentication tag.
+ *
+ * @param plaintext  The plaintext as raw bytes.
+ * @param iv         The initialization vector (12 bytes recommended).
+ * @param key        The 128, 192, or 256 bit key as raw bytes.
+ * @param aad        Additional authenticated data (authenticated but not encrypted).
+ * @param tagLen     Length of the authentication tag in bytes (default 16).
+ * @result GCMEncryptResult containing ciphertext and tag.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+GCMEncryptResult encryptAESGCM(const SecureBytes& plaintext, const SecureBytes& iv, const SecureBytes& key, const SecureBytes& aad, size_t tagLen) {
+    AES cipher(key);
+    return encryptGCM(plaintext, iv, aad, tagLen, cipher);
+}
 
-    SecureBytes result(msgLen);
-    std::memcpy(result.data(), input, msgLen);
-
-    delete[] input;
-    return removePKCS7Padding(result);
+/*
+ * Decrypts an arbitrarily sized input with AES_GCM, verifying the authentication tag.
+ *
+ * @param ciphertext  The encrypted bytes.
+ * @param iv          The initialization vector used during encryption.
+ * @param key         The 128, 192, or 256 bit key as raw bytes.
+ * @param tag         The authentication tag to verify.
+ * @param aad         Additional authenticated data (must match what was used during encryption).
+ * @result GCMDecryptResult containing plaintext and authenticated flag.
+ *         If authentication fails, plaintext is empty and authenticated is false.
+ * @throws std::invalid_argument if the key size is not 128, 192, or 256 bits.
+ */
+GCMDecryptResult decryptAESGCM(const SecureBytes& ciphertext, const SecureBytes& iv, const SecureBytes& key, const SecureBytes& tag, const SecureBytes& aad) {
+    AES cipher(key);
+    return decryptGCM(ciphertext, tag, iv, aad, cipher);
 }

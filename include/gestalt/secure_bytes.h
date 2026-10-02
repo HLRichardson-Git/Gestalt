@@ -26,6 +26,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <random>
 #include <sstream>
@@ -43,19 +44,20 @@ inline void secureZero(void* ptr, std::size_t len) noexcept {
 template<typename T>
 struct ZeroingAllocator : public std::allocator<T> {
     using Base = std::allocator<T>;
-    using typename Base::value_type;
-    using typename Base::size_type;
-    using typename Base::pointer;
-
-    template<typename U>
-    struct rebind { using other = ZeroingAllocator<U>; };
+    
+    using value_type = T;
+    using size_type  = std::size_t;
+    using pointer    = T*;
 
     ZeroingAllocator() noexcept = default;
+    
     template<typename U>
-    ZeroingAllocator(const ZeroingAllocator<U>&) noexcept {}
+    ZeroingAllocator(const ZeroingAllocator<U>&) noexcept : Base() {}
 
     void deallocate(pointer p, size_type n) noexcept {
-        secureZero(p, n * sizeof(T));
+        if (p) {
+            secureZero(p, n * sizeof(T));
+        }
         Base::deallocate(p, n);
     }
 };
@@ -75,6 +77,10 @@ public:
 
     // Constructs a buffer of n bytes, each initialised to fill.
     explicit SecureBytes(std::size_t n, uint8_t fill = 0) : buffer_(n, fill) {}
+
+    // Constructs from an iterator range.
+    template<typename InputIt>
+    SecureBytes(InputIt first, InputIt last) : buffer_(first, last) {}
 
     // Parses a hexadecimal string (with or without a leading "0x" prefix) into bytes.
     static SecureBytes fromHex(const std::string& hex) {
@@ -182,6 +188,49 @@ public:
         }
     }
 
+    // Reads sizeof(T) bytes at offset as a big-endian unsigned integer.
+    template<typename T>
+    T readBE(std::size_t offset) const {
+        static_assert(std::is_unsigned_v<T>, "readBE requires an unsigned integer type");
+        T result = 0;
+        for (std::size_t i = 0; i < sizeof(T); ++i)
+            result |= static_cast<T>(buffer_[offset + i]) << (8 * (sizeof(T) - 1 - i));
+        return result;
+    }
+
+    // Appends sizeof(T) big-endian bytes of v.
+    template<typename T>
+    void appendBE(T v) {
+        static_assert(std::is_unsigned_v<T>, "appendBE requires an unsigned integer type");
+        for (std::size_t i = sizeof(T); i-- > 0; )
+            buffer_.push_back(static_cast<uint8_t>(v >> (8 * i)));
+    }
+
+    // Reads sizeof(T) bytes at offset as a little-endian unsigned integer.
+    template<typename T>
+    T readLE(std::size_t offset) const {
+        static_assert(std::is_unsigned_v<T>, "readLE requires an unsigned integer type");
+        T result = 0;
+        for (std::size_t i = 0; i < sizeof(T); ++i)
+            result |= static_cast<T>(buffer_[offset + i]) << (8 * i);
+        return result;
+    }
+
+    // Appends sizeof(T) little-endian bytes of v.
+    template<typename T>
+    void appendLE(T v) {
+        static_assert(std::is_unsigned_v<T>, "appendLE requires an unsigned integer type");
+        for (std::size_t i = 0; i < sizeof(T); ++i)
+            buffer_.push_back(static_cast<uint8_t>(v >> (8 * i)));
+    }
+
+    // Returns a new SecureBytes containing bytes [offset, offset+length).
+    SecureBytes slice(std::size_t offset, std::size_t length) const {
+        if (offset + length > size())
+            throw std::out_of_range("SecureBytes::slice: range out of bounds");
+        return SecureBytes(cbegin() + offset, cbegin() + offset + length);
+    }
+
     // Returns a new SecureBytes that is the concatenation of *this and other.
     SecureBytes operator+(const SecureBytes& other) const {
         SecureBytes result(*this);
@@ -196,6 +245,18 @@ public:
     }
 
     bool operator!=(const SecureBytes& other) const { return !(*this == other); }
+
+    // Compares this buffer to other in constant time (no early exit on mismatch).
+    // Use this instead of operator== wherever the result must not leak via timing,
+    // e.g. MAC tag verification in AEAD decryption.
+    bool constantTimeEqual(const SecureBytes& other) const noexcept {
+        if (buffer_.size() != other.buffer_.size())
+            return false;
+        uint8_t diff = 0;
+        for (std::size_t i = 0; i < buffer_.size(); ++i)
+            diff |= buffer_[i] ^ other.buffer_[i];
+        return diff == 0;
+    }
 
     // Deep copy. The source is not erased, that is the caller's responsibility.
     SecureBytes(const SecureBytes&)            = default;
