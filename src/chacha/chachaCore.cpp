@@ -15,11 +15,8 @@
 #include "chachaCore.h"
 
 ChaCha::ChaCha(const SecureBytes& key, const SecureBytes& nonce, uint32_t counter) {
-    SecureBytes counterBytes(4);
-    counterBytes[0] = counter & 0xFF;
-    counterBytes[1] = (counter >> 8) & 0xFF;
-    counterBytes[2] = (counter >> 16) & 0xFF;
-    counterBytes[3] = (counter >> 24) & 0xFF;
+    SecureBytes counterBytes;
+    counterBytes.appendLE(counter);
     setState(key, counterBytes, nonce);
 }
 
@@ -60,18 +57,11 @@ std::array<uint32_t, 16> ChaCha::chacha20_block() {
 }
 
 void ChaCha::setState(SecureBytes key, SecureBytes counter, SecureBytes nonce) {
-    auto leLoad32 = [](const SecureBytes& src, std::size_t offset) -> uint32_t {
-        return static_cast<uint32_t>(src[offset])
-             | static_cast<uint32_t>(src[offset + 1]) << 8
-             | static_cast<uint32_t>(src[offset + 2]) << 16
-             | static_cast<uint32_t>(src[offset + 3]) << 24;
-    };
-
     for (int i = 0; i < 8; ++i)
-        state[4 + i] = leLoad32(key, i * 4);
+        state[4 + i] = key.readLE<uint32_t>(i * 4);
 
-    state[12] = leLoad32(counter, 0);
+    state[12] = counter.readLE<uint32_t>(0);
 
     for (int i = 0; i < 3; ++i)
-        state[13 + i] = leLoad32(nonce, i * 4);
+        state[13 + i] = nonce.readLE<uint32_t>(i * 4);
 }
