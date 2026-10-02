@@ -14,6 +14,5 @@
 
 #include <gestalt/secure_bytes.h>
 
-void clamp_r(uint8_t r[16]);
 SecureBytes poly1305_mac(const SecureBytes& message, const SecureBytes& key);
 SecureBytes poly1305_key_gen(const SecureBytes& key, const SecureBytes& nonce);
